@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+:root {
+  /*
+    Light Theme:
+    A very light green background with dark green text.
+  */
+  --background: #F5FBF8; /* Off-white with a hint of green */
+  --foreground: #1E3B34; /* Dark green text for readability */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /*
+      Dark Theme (Matches your app's theme):
+      The main green background with white text.
+    */
+    --background: #3A6B5D; /* Main background green */
+    --foreground: #ffffff; /* White text */
+  }
+}
+
+/* The @theme block can be kept as is, as it correctly
+  references the CSS variables defined above.
+*/
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
