@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 import useSWR from 'swr';
-import axios from 'axios';
+import apiClient from '@/lib/apiClient';
 import {
   Box, Typography, Button, CircularProgress, Alert, Paper,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
@@ -16,22 +16,15 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-// --- Reusable Fetcher ---
-const fetcher = async (url: string) => {
-    const token = localStorage.getItem('access_token');
-    if (!token) throw new Error('Not authenticated');
-    const fullUrl = `${process.env.NEXT_PUBLIC_API_URL}${url}`;
-    const res = await fetch(fullUrl, { headers: { Authorization: `Bearer ${token}` } });
-    if (!res.ok) throw new Error('Failed to fetch data');
-    return res.json();
-};
+// --- Reusable Fetcher (uses apiClient — auth headers injected automatically) ---
+const fetcher = (url: string) => apiClient.get(url).then(r => r.data);
 
 interface Topic {
     id: number;
     name: string;
 }
 
-const API_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/institute/topics/`;
+const API_URL = '/api/institute/topics/';
 
 export default function ManageTopicsPage() {
     // SWR hook to fetch topics
@@ -65,12 +58,7 @@ export default function ManageTopicsPage() {
         const method = currentTopic ? 'patch' : 'post';
 
         try {
-            await axios({
-                method,
-                url,
-                data: payload,
-                headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
-            });
+            await apiClient({ method, url, data: payload });
             mutate(); // Re-fetch the topic list
             handleCloseDialog();
         } catch (err: any) {
@@ -83,10 +71,8 @@ export default function ManageTopicsPage() {
     const handleDelete = async (topicId: number) => {
         if (window.confirm('Are you sure you want to delete this topic?')) {
             try {
-                await axios.delete(`${API_URL}${topicId}/`, {
-                    headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
-                });
-                mutate(); // Re-fetch the topic list
+                await apiClient.delete(`${API_URL}${topicId}/`);
+                mutate();
             } catch (err) {
                 alert('Failed to delete topic.');
             }

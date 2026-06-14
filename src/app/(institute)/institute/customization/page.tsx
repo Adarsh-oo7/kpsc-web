@@ -4,7 +4,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import useSWR from 'swr';
-import axios from 'axios';
+import apiClient from '@/lib/apiClient';
 import {
   Box, Typography, Button, Alert, CircularProgress, Grid, Paper, styled, IconButton
 } from '@mui/material';
@@ -12,21 +12,14 @@ import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import ClearIcon from '@mui/icons-material/Clear';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// --- Reusable Fetcher ---
-const fetcher = async (url: string) => {
-    const token = localStorage.getItem('access_token');
-    if (!token) throw new Error('Not authenticated');
-    const fullUrl = `${process.env.NEXT_PUBLIC_API_URL}${url}`;
-    const res = await fetch(fullUrl, { headers: { Authorization: `Bearer ${token}` } });
-    if (!res.ok) throw new Error('Failed to fetch data');
-    return res.json();
-};
+// --- Reusable Fetcher (uses apiClient — auth headers injected automatically) ---
+const fetcher = (url: string) => apiClient.get(url).then(r => r.data);
 
 // --- Styled component for the image upload area ---
 const ImageUploadBox = styled(Box)(({ theme }) => ({
     position: 'relative',
     aspectRatio: '16 / 9',
-    borderRadius: theme.shape.borderRadius * 2,
+    borderRadius: (theme.shape.borderRadius as number) * 2,
     border: `2px dashed ${theme.palette.divider}`,
     display: 'flex',
     alignItems: 'center',
@@ -113,11 +106,8 @@ export default function CustomizationPage() {
         }
 
         try {
-            const response = await axios.patch(`${process.env.NEXT_PUBLIC_API_URL}/api/institute/my-institute/`, data, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('access_token')}`,
-                    'Content-Type': 'multipart/form-data',
-                },
+            const response = await apiClient.patch('/institute/my-institute/', data, {
+                headers: { 'Content-Type': 'multipart/form-data' },
             });
             setSuccess('Branding images updated successfully!');
             mutate(response.data, false); // Update local SWR cache with new data
@@ -143,7 +133,7 @@ export default function CustomizationPage() {
             <Paper component="form" onSubmit={handleSubmit} sx={{ p: {xs: 2, md: 4}, borderRadius: 4, bgcolor: 'background.paper' }}>
                 <Grid container spacing={3}>
                     {imageFields.map(field => (
-                        <Grid item xs={12} sm={6} key={field.name}>
+                        <Grid size={{ xs: 12, sm: 6 }} key={field.name}>
                             <Typography variant="subtitle1" gutterBottom>{field.label}</Typography>
                             <label htmlFor={field.name}>
                                 <ImageUploadBox sx={{ backgroundImage: previews[field.name] ? `url(${previews[field.name]})` : 'none' }}>
@@ -161,7 +151,7 @@ export default function CustomizationPage() {
                             </label>
                         </Grid>
                     ))}
-                    <Grid item xs={12} sx={{ mt: 2 }}>
+                    <Grid size={{ xs: 12 }} sx={{ mt: 2 }}>
                         <AnimatePresence>
                             {error && <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Alert severity="error" sx={{ mb: 2 }}>{error}</Alert></motion.div>}
                             {success && <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Alert severity="success" sx={{ mb: 2 }}>{success}</Alert></motion.div>}

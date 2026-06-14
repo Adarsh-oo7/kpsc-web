@@ -23,4 +23,43 @@ apiClient.interceptors.request.use(
   }
 );
 
+// Response interceptor to handle token expiration and automatic refresh
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    
+    // Check if error is 401 (Unauthorized) and request has not been retried yet
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      if (typeof window !== 'undefined') {
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (refreshToken) {
+          try {
+            // Obtain a new access token using the refresh token
+            const response = await axios.post(
+              `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/auth/token/refresh/`,
+              { refresh: refreshToken }
+            );
+            
+            const newAccessToken = response.data.access;
+            localStorage.setItem('access_token', newAccessToken);
+            
+            // Retry the original request with the new access token
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+            return apiClient(originalRequest);
+          } catch (refreshError) {
+            console.error("Token refresh failed:", refreshError);
+            // Clear expired session data
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            window.location.href = '/login';
+          }
+        }
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default apiClient;

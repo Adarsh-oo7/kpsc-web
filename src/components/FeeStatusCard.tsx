@@ -4,12 +4,11 @@
 
 import useSWR from 'swr';
 import { Box, Typography, Paper, CircularProgress } from '@mui/material';
-
-const fetcher = async (url: string) => { /* ... fetcher logic ... */ };
+import { useAppContext } from '@/context/AppContext';
 
 export default function FeeStatusCard() {
-    // This assumes you have a new student-facing endpoint for fees
-    const { data: feeData, isLoading } = useSWR('/api/my-fees/', fetcher);
+    const { fetcher } = useAppContext();
+    const { data: feeData, isLoading } = useSWR<any>('/api/my-fees/', fetcher);
 
     if (isLoading || !feeData) return <Typography>Loading fee status...</Typography>;
 

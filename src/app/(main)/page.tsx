@@ -1,404 +1,505 @@
 'use client';
 
-// --- React and Next.js Imports ---
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-
-// --- Data Fetching and API Imports ---
-import useSWR from 'swr';
-
-// --- UI and Styling Imports ---
-import {
-  Box,
-  Grid,
-  Typography,
-  CircularProgress,
-  Chip,
-  useTheme,
-  Button,
-  Paper,
-  Container,
-} from '@mui/material';
-
-// --- Icon Imports ---
-import SchoolIcon from '@mui/icons-material/School';
-import CategoryIcon from '@mui/icons-material/Category';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import CorporateFareIcon from '@mui/icons-material/CorporateFare';
+import { Box, Typography, Button, Container, Grid, Chip, Stack, Avatar } from '@mui/material';
+import { motion, useInView } from 'framer-motion';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import LockIcon from '@mui/icons-material/Lock';
-
-// --- Animation Imports ---
-import { motion, Variants } from 'framer-motion';
-
-// --- App Specific Imports ---
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { useAppContext } from '@/context/AppContext';
 
-// --- Enhanced Animated Square Card Component ---
-function AnimatedSquareCard({
-  title,
-  icon,
-  badgeContent,
-  onClick,
-  variants,
-  isLocked = false,
-  iconColor = '#1976d2',
-}: {
-  title: string;
-  icon: React.ReactNode;
-  badgeContent: React.ReactNode;
-  onClick: () => void;
-  variants: Variants;
-  isLocked?: boolean;
-  iconColor?: string;
-}) {
-  const theme = useTheme();
-  
+// Ticker messages
+const tickerMessages = [
+  '🔥 Rahul from Thrissur answered 15 questions today',
+  '⚡ Streak 23 days — Nisha from Kozhikode',
+  '🏆 Amal just completed LDC Mock Test — Score 91/100',
+  '📚 Priya answered 47 questions today as a Pro user',
+  '🎯 Sanjay joined from Ernakulam — Day 1 streak started',
+  '⭐ Meera achieved Subject Master badge in Kerala History',
+  '🔥 Streak 45 days — Vishnu from Palakkad',
+];
+
+const features = [
+  { emoji: '📚', title: 'Daily Quiz', desc: 'Psychology-driven questions that keep you coming back', color: '#1B6B3A' },
+  { emoji: '📝', title: 'Mock Tests', desc: 'Full-length LDC, LGS, Degree Level exams with timer', color: '#7C3AED' },
+  { emoji: '📰', title: 'Current Affairs', desc: 'PSC-probability tagged daily news with MCQ injection', color: '#2563EB' },
+  { emoji: '🤖', title: 'AI Explanations', desc: 'Malayalam + English AI explanations for every answer', color: '#DC2626' },
+  { emoji: '🏆', title: 'Leaderboard', desc: 'District & Kerala rankings — your position always visible', color: '#D97706' },
+  { emoji: '⚡', title: 'Study Feed', desc: 'Instagram-like feed of questions, facts & current affairs', color: '#0891B2' },
+];
+
+const exams = ['LDC', 'LGS', 'Degree Level', 'VEO', 'LD Typist', 'LP/UP Teacher', 'Police Constable', 'Fire & Rescue', 'PSC Secretariat', 'KPSC Clerk', 'Company Board', 'Water Authority'];
+
+const testimonials = [
+  { name: 'Rahul Krishnan', place: 'Thrissur', rank: '#1 LDC 2025', text: 'KPSC Master\'s daily quiz kept me on track for 6 months. The streak mechanic genuinely worked — I couldn\'t let go of my 90-day streak!', avatar: 'R' },
+  { name: 'Priya Menon', place: 'Kozhikode', rank: 'Qualified LGS', text: 'The AI Malayalam explanations are a game-changer. Understood every concept without needing a tutor. Scored 87/100 in my mock test.', avatar: 'P' },
+  { name: 'Amal Thomas', place: 'Ernakulam', rank: 'District Topper', text: 'The leaderboard kept me competitive. When I saw I was #47, I studied 3 more hours to reach #40. This app understands psychology.', avatar: 'A' },
+];
+
+// GPU-accelerated CSS Marquee for high performance and smooth animation
+const tickerStyles = `
+  @keyframes tickerMarquee {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(-50%, 0, 0); }
+  }
+  .ticker-strip-container {
+    width: 100%;
+    max-width: 100vw;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 14px 0;
+    background: rgba(27, 107, 58, 0.08);
+    border-top: 1px solid rgba(27,107,58,0.15);
+    border-bottom: 1px solid rgba(27,107,58,0.15);
+  }
+  .ticker-strip-wrapper {
+    display: inline-block;
+    animation: tickerMarquee 28s linear infinite;
+    will-change: transform;
+  }
+  .ticker-strip-item {
+    display: inline-block;
+    padding: 0 32px;
+    font-size: 0.825rem;
+    font-family: 'Satoshi', sans-serif;
+    font-weight: 600;
+    color: #8892A4;
+  }
+`;
+
+function TickerStrip() {
   return (
-    <motion.div
-      variants={variants}
-      whileHover={{ scale: 1.02, y: -5 }}
-      whileTap={{ scale: 0.98 }}
-      style={{ height: '100%' }}
-    >
-      <Paper
-        elevation={0}
-        onClick={onClick}
-        sx={{
-          height: 200, // Fixed height for equal sizing
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          p: 3,
-          background: isLocked 
-            ? `linear-gradient(135deg, #2a2a2a, #1a1a1a)` 
-            : `linear-gradient(135deg, #ffffff, #f8fdff)`,
-          borderRadius: 3,
-          cursor: 'pointer',
-          position: 'relative',
-          overflow: 'hidden',
-          border: `2px solid ${isLocked ? '#404040' : 'rgba(25, 118, 210, 0.2)'}`,
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '4px',
-            background: isLocked 
-              ? '#505050'
-              : `linear-gradient(90deg, #1976d2, #42a5f5)`,
-            opacity: 0,
-            transition: 'opacity 0.3s ease',
-          },
-          '&:hover': {
-            transform: 'translateY(-8px)',
-            boxShadow: `0 12px 32px rgba(25, 118, 210, 0.2)`,
-            border: `2px solid ${isLocked ? '#606060' : '#1976d2'}`,
-            '&::before': {
-              opacity: 1,
-            },
-          },
-        }}
-      >
-        {/* Badge */}
-        <Chip
-          label={badgeContent}
-          size="small"
-          icon={isLocked ? <LockIcon sx={{ fontSize: '12px !important' }} /> : undefined}
-          sx={{
-            position: 'absolute',
-            top: { xs: 8, sm: 12 }, // Responsive positioning
-            right: { xs: 8, sm: 12 },
-            bgcolor: isLocked ? '#505050' : '#1976d2',
-            color: 'white',
-            fontWeight: 600,
-            fontSize: { xs: '0.7rem', sm: '0.75rem' }, // Responsive font size
-            height: { xs: 20, sm: 24 }, // Responsive height
-            '& .MuiChip-label': {
-              px: { xs: 0.5, sm: 1 }, // Responsive padding
-            },
-          }}
-        />
-
-        {/* Icon Container - Square Shape */}
-        <Box
-          sx={{
-            mb: { xs: 1.5, sm: 2 }, // Responsive margin
-            width: { xs: 60, sm: 70, md: 80 }, // Responsive size
-            height: { xs: 60, sm: 70, md: 80 },
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: 2,
-            background: isLocked 
-              ? `linear-gradient(135deg, #505050, #404040)`
-              : `linear-gradient(135deg, ${iconColor}, ${iconColor}dd)`,
-            boxShadow: isLocked 
-              ? '0 4px 12px rgba(0,0,0,0.3)'
-              : `0 4px 12px ${iconColor}40`,
-            transition: 'all 0.3s ease',
-            '& .MuiSvgIcon-root': {
-              fontSize: { xs: '2rem', sm: '2.2rem', md: '2.5rem' }, // Responsive icon size
-              color: 'white',
-              transition: 'all 0.3s ease',
-            },
-            '&:hover': {
-              transform: 'scale(1.1) rotate(5deg)',
-              boxShadow: isLocked 
-                ? '0 6px 20px rgba(0,0,0,0.4)'
-                : `0 6px 20px ${iconColor}60`,
-            },
-          }}
-        >
-          {icon}
-        </Box>
-
-        {/* Title */}
-        <Typography
-          variant="h6"
-          component="h3"
-          sx={{ 
-            fontWeight: 600, 
-            textAlign: 'center',
-            color: isLocked ? '#888888' : '#333333',
-            fontSize: { xs: '1rem', sm: '1.1rem', md: '1.25rem' }, // Responsive font size
-            lineHeight: 1.2,
-            px: 1, // Prevent text overflow on small screens
-          }}
-        >
-          {title}
-        </Typography>
-      </Paper>
-    </motion.div>
+    <Box className="ticker-strip-container">
+      <style dangerouslySetInnerHTML={{ __html: tickerStyles }} />
+      <Box className="ticker-strip-wrapper">
+        {tickerMessages.map((msg, i) => (
+          <span key={i} className="ticker-strip-item">
+            {msg}
+          </span>
+        ))}
+        {/* Double messages to enable seamless wrapping */}
+        {tickerMessages.map((msg, i) => (
+          <span key={`dup-${i}`} className="ticker-strip-item">
+            {msg}
+          </span>
+        ))}
+      </Box>
+    </Box>
   );
 }
 
-// --- Main Page Component ---
-export default function Home() {
-  const { user, isInstituteOwner, fetcher } = useAppContext();
+function StatCounter({ end, label }: { end: string; label: string }) {
+  return (
+    <Box sx={{ textAlign: 'center' }}>
+      <Typography sx={{
+        fontFamily: "'Cabinet Grotesk', sans-serif",
+        fontSize: { xs: '1.4rem', sm: '1.6rem', md: '2.1rem' },
+        fontWeight: 900, 
+        color: 'text.primary', 
+        lineHeight: 1,
+      }}>
+        {end}
+      </Typography>
+      <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', mt: 0.5, fontWeight: 600 }}>
+        {label}
+      </Typography>
+    </Box>
+  );
+}
+
+export default function PublicHomePage() {
+  const { user } = useAppContext();
   const router = useRouter();
-  const theme = useTheme();
+  const heroRef = useRef(null);
+  const isHeroInView = useInView(heroRef, { once: true });
 
-  // Data fetching using the global fetcher from context
-  const { data: exams, isLoading: examsLoading } = useSWR('/exams/', fetcher);
-  const { data: topics, isLoading: topicsLoading } = useSWR('/topics/', fetcher);
-
-  const handleCardClick = (path: string) => {
-    if ((path === '/progress' || path === '/profile') && !user) {
-      router.push('/login');
-    } else {
-      router.push(path);
-    }
-  };
-
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1, 
-      transition: { 
-        staggerChildren: 0.1,
-        delayChildren: 0.2 
-      } 
-    },
-  };
-
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      transition: { 
-        type: 'spring', 
-        stiffness: 100, 
-        damping: 12 
-      } 
-    },
-  };
-
-  const dashboardCards = [
-    { 
-      title: "Exams", 
-      icon: <SchoolIcon />, 
-      badgeContent: examsLoading ? <CircularProgress size={12} color="inherit" /> : (exams?.length || 0), 
-      onClick: () => handleCardClick('/exams'),
-      isLocked: false,
-      iconColor: '#1976d2' // Blue
-    },
-    { 
-      title: "Topics", 
-      icon: <CategoryIcon />, 
-      badgeContent: topicsLoading ? <CircularProgress size={12} color="inherit" /> : (topics?.length || 0), 
-      onClick: () => handleCardClick('/topics'),
-      isLocked: false,
-      iconColor: '#2e7d32' // Green
-    },
-    { 
-      title: "Progress", 
-      icon: <TrendingUpIcon />, 
-      badgeContent: user ? "View" : "Login", 
-      onClick: () => handleCardClick('/progress'),
-      isLocked: !user,
-      iconColor: '#ed6c02' // Orange
-    },
-    { 
-      title: "Profile", 
-      icon: <AccountCircleIcon />, 
-      badgeContent: user ? "Account" : "Login", 
-      onClick: () => handleCardClick('/profile'),
-      isLocked: !user,
-      iconColor: '#9c27b0' // Purple
-    }
-  ];
+  // Logged in users get a quick dashboard shortcut
+  if (user) {
+    return (
+      <Box sx={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 3, p: 4 }}>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <Typography variant="h3" component="h1" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, textAlign: 'center', color: 'text.primary' }}>
+            Welcome back! 👋
+          </Typography>
+          <Typography sx={{ color: 'text.secondary', textAlign: 'center', mt: 1 }}>
+            Ready to study today?
+          </Typography>
+        </motion.div>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ width: { xs: '100%', sm: 'auto' } }}>
+          <Button variant="contained" size="large" onClick={() => router.push('/feed')} startIcon={<PlayArrowIcon />} fullWidth>
+            Continue Study Feed
+          </Button>
+          <Button variant="outlined" size="large" onClick={() => router.push('/home')} fullWidth>
+            Dashboard
+          </Button>
+        </Stack>
+      </Box>
+    );
+  }
 
   return (
-    <Box sx={{ 
-      minHeight: '100vh',
-      background: `linear-gradient(135deg, #f5f7fa, #c3cfe2)`,
-      py: { xs: 2, sm: 4, md: 6 },
-      px: { xs: 1, sm: 2 } // Add horizontal padding for mobile
-    }}>
-      <Container maxWidth="lg">
-        <motion.div 
-          variants={containerVariants} 
-          initial="hidden" 
-          animate="visible"
-        >
-          {/* Header */}
-          <motion.div variants={itemVariants}>
-            <Box sx={{ textAlign: 'center', mb: 6 }}>
-              <Typography 
-                variant="h2" 
-                component="h1" 
-                sx={{ 
-                  fontWeight: 700, 
-                  mb: 2, 
-                  color: '#1a1a1a',
-                  textShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                  fontSize: { xs: '2.2rem', sm: '2.8rem', md: '3.5rem' }
+    <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', overflow: 'hidden' }}>
+      {/* ===== HERO ===== */}
+      <Box
+        ref={heroRef}
+        sx={{
+          position: 'relative',
+          minHeight: { xs: 'auto', md: '80vh' },
+          pt: { xs: 3, md: 4 },
+          pb: { xs: 4, md: 6 },
+          display: 'flex', 
+          flexDirection: 'column', 
+          justifyContent: 'center',
+          overflow: 'hidden',
+        }}
+      >
+        {/* Background effects */}
+        <Box sx={{
+          position: 'absolute', inset: 0,
+          background: 'radial-gradient(ellipse 60% 50% at 50% 20%, rgba(27,107,58,0.18) 0%, transparent 70%)',
+          pointerEvents: 'none',
+        }} />
+        <Box sx={{
+          position: 'absolute', top: '10%', right: '5%',
+          width: 300, height: 300, borderRadius: '50%',
+          background: 'rgba(27,107,58,0.05)',
+          filter: 'blur(45px)',
+          pointerEvents: 'none',
+        }} />
+
+        {/* Kerala map SVG outline (subtle) */}
+        <Box sx={{
+          position: 'absolute', right: '-5%', top: '50%', transform: 'translateY(-50%)',
+          opacity: 0.04, fontSize: '18rem', lineHeight: 1,
+          pointerEvents: 'none', display: { xs: 'none', lg: 'block' }
+        }}>
+          🗺️
+        </Box>
+
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, mb: { xs: 3, md: 4 } }}>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {/* Badge */}
+            <Box sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-start' }, mb: 3 }}>
+              <Chip
+                label="🇮🇳 #1 Kerala PSC Platform"
+                sx={{
+                  background: 'rgba(27,107,58,0.12)',
+                  border: '1px solid rgba(46,139,87,0.25)',
+                  color: '#2E8B57',
+                  fontWeight: 800, 
+                  fontSize: '0.75rem',
+                  height: 32,
                 }}
-              >
-                Dashboard
-              </Typography>
-              <Typography 
-                variant="h6" 
-                sx={{ 
-                  color: '#666666',
-                  fontWeight: 400,
-                  maxWidth: 600,
-                  mx: 'auto',
-                  fontSize: { xs: '1rem', sm: '1.1rem', md: '1.25rem' },
-                  lineHeight: 1.5
-                }}
-              >
-                Welcome back! Manage your learning journey with ease
-              </Typography>
+              />
+            </Box>
+
+            {/* Headline */}
+            <Typography
+              component="h1"
+              sx={{
+                fontFamily: "'Cabinet Grotesk', sans-serif",
+                fontWeight: 900,
+                fontSize: { xs: '2.1rem', sm: '3.2rem', md: '4.2rem' },
+                color: 'text.primary',
+                lineHeight: { xs: 1.15, sm: 1.05 },
+                letterSpacing: '-0.03em',
+                textAlign: { xs: 'center', md: 'left' },
+                mb: 2.5,
+              }}
+            >
+              Kerala PSC Topper
+              <Box component="span" sx={{ display: 'block', color: '#2E8B57' }}>
+                in Your Pocket
+              </Box>
+            </Typography>
+
+            {/* Sub-headline */}
+            <Typography sx={{
+              fontSize: { xs: '0.925rem', sm: '1.05rem', md: '1.2rem' },
+              color: 'text.secondary',
+              maxWidth: 520,
+              lineHeight: 1.6,
+              textAlign: { xs: 'center', md: 'left' },
+              mx: { xs: 'auto', md: 0 },
+              mb: 4.5,
+            }}>
+              Daily quiz, mock tests, current affairs, and AI doubt solving — free to start. Used by 47,000+ aspirants across Kerala.
+            </Typography>
+
+            {/* CTAs */}
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={2}
+              sx={{ 
+                justifyContent: { xs: 'center', md: 'flex-start' }, 
+                alignItems: 'center',
+                mb: 5,
+                width: { xs: '100%', sm: 'auto' }
+              }}
+            >
+              <Box sx={{ width: { xs: '100%', sm: 'auto' } }}>
+                <Button
+                  variant="contained"
+                  size="large"
+                  onClick={() => router.push('/register')}
+                  endIcon={<ArrowForwardIcon />}
+                  fullWidth
+                  sx={{
+                    py: 1.6, px: 4, fontSize: '0.95rem',
+                    background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
+                    boxShadow: '0 8px 32px rgba(27,107,58,0.35)',
+                    borderRadius: 3
+                  }}
+                >
+                  Start Free — No Signup
+                </Button>
+              </Box>
+              <Box sx={{ width: { xs: '100%', sm: 'auto' } }}>
+                <Button
+                  variant="outlined"
+                  size="large"
+                  onClick={() => router.push('/institute/login')}
+                  fullWidth
+                  sx={{ py: 1.6, px: 4, fontSize: '0.95rem', borderRadius: 3 }}
+                >
+                  Join as Institute
+                </Button>
+              </Box>
+            </Stack>
+
+            {/* Responsive Social Proof Counter Strip */}
+            <Box sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr 1fr 1fr', sm: '1fr auto 1fr auto 1fr' },
+              gap: { xs: 1.5, sm: 3 },
+              alignItems: 'center',
+              justifyContent: 'center',
+              p: { xs: 2, sm: 3 }, 
+              borderRadius: '20px',
+              bgcolor: 'surface.card',
+              border: '1px solid',
+              borderColor: 'divider',
+              maxWidth: 520,
+              width: '100%',
+              mx: { xs: 'auto', md: 0 },
+            }}>
+              <StatCounter end="47,000+" label="Students" />
+              <Box sx={{ display: { xs: 'none', sm: 'block' }, width: '1px', height: '32px', bgcolor: 'divider' }} />
+              <StatCounter end="140+" label="Institutes" />
+              <Box sx={{ display: { xs: 'none', sm: 'block' }, width: '1px', height: '32px', bgcolor: 'divider' }} />
+              <StatCounter end="12 Lakh" label="Solved today" />
             </Box>
           </motion.div>
+        </Container>
 
-          {/* Institute Owner Portal */}
-          {isInstituteOwner && (
-            <motion.div variants={itemVariants}>
-              <Paper
-                elevation={3}
-                sx={{
-                  p: 4, 
-                  mb: 6, 
-                  borderRadius: 4,
-                  background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-                  position: 'relative',
-                  overflow: 'hidden',
-                  '&::before': {
-                    content: '""',
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: 'linear-gradient(45deg, rgba(255,255,255,0.1) 0%, transparent 50%)',
-                    pointerEvents: 'none',
-                  }
-                }}
+        {/* Live ticker */}
+        <Box sx={{ width: '100%', minWidth: 0, overflow: 'hidden' }}>
+          <TickerStrip />
+        </Box>
+      </Box>
+
+      {/* ===== FEATURES GRID ===== */}
+      <Container maxWidth="lg" sx={{ py: { xs: 8, md: 12 } }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+        >
+          <Typography variant="h2" sx={{
+            fontFamily: "'Cabinet Grotesk'", 
+            fontWeight: 900,
+            textAlign: 'center', 
+            color: 'text.primary', 
+            mb: 1.5,
+            fontSize: { xs: '1.8rem', sm: '2.2rem', md: '2.8rem' },
+            letterSpacing: '-0.02em'
+          }}>
+            Everything You Need to
+            <Box component="span" sx={{ color: '#2E8B57' }}> Top PSC</Box>
+          </Typography>
+          <Typography sx={{ textAlign: 'center', color: 'text.secondary', mb: 6, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
+            One platform. All tools. Zero excuses.
+          </Typography>
+        </motion.div>
+
+        <Grid container spacing={3}>
+          {features.map((f, i) => (
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={f.title}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08, duration: 0.5 }}
+                whileHover={{ y: -6 }}
+                style={{ height: '100%' }}
               >
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  alignItems: 'center', 
-                  flexWrap: 'wrap', 
-                  gap: 3,
-                  position: 'relative',
-                  zIndex: 1
+                <Box sx={{
+                  p: 3.5, 
+                  height: '100%',
+                  bgcolor: 'background.paper',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: '20px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    border: `1px solid ${f.color}40`,
+                    boxShadow: `0 12px 36px ${f.color}15`,
+                  }
                 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Box
-                      sx={{
-                        bgcolor: 'rgba(255, 255, 255, 0.2)',
-                        borderRadius: 2,
-                        p: 1.5,
-                        mr: 3,
-                      }}
-                    >
-                      <CorporateFareIcon sx={{ fontSize: 32, color: 'white' }} />
-                    </Box>
-                    <Box>
-                      <Typography variant="h5" sx={{ fontWeight: 700, color: 'white', mb: 0.5 }}>
-                        Institute Portal
-                      </Typography>
-                      <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.9)' }}>
-                        Manage students, content, and analytics
-                      </Typography>
-                    </Box>
-                  </Box>
-                  <Button
-                    variant="contained" 
-                    size="large" 
-                    onClick={() => router.push('/institute/dashboard')}
-                    endIcon={<ArrowForwardIcon />}
-                    sx={{ 
-                      bgcolor: 'white', 
-                      color: 'primary.main',
-                      fontWeight: 600,
-                      px: 3,
-                      py: 1.5,
-                      borderRadius: 2,
-                      '&:hover': { 
-                        bgcolor: 'grey.100',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
-                      },
-                      transition: 'all 0.3s ease'
-                    }}
-                  >
-                    Access Portal
-                  </Button>
+                  <Typography sx={{ fontSize: '2rem', mb: 2 }}>{f.emoji}</Typography>
+                  <Typography sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, fontSize: '1.15rem', color: 'text.primary', mb: 1 }}>
+                    {f.title}
+                  </Typography>
+                  <Typography sx={{ fontSize: '0.85rem', color: 'text.secondary', lineHeight: 1.6 }}>
+                    {f.desc}
+                  </Typography>
                 </Box>
-              </Paper>
-            </motion.div>
-          )}
-
-          {/* Dashboard Cards */}
-          <motion.div variants={itemVariants}>
-            <Grid container spacing={{ xs: 2, sm: 3 }} sx={{ maxWidth: '800px', margin: '0 auto', px: { xs: 1, sm: 0 } }}>
-              {dashboardCards.map((card) => (
-                <Grid item xs={6} sm={6} md={6} key={card.title}>
-                  <AnimatedSquareCard
-                    title={card.title}
-                    icon={card.icon}
-                    badgeContent={card.badgeContent}
-                    onClick={card.onClick}
-                    variants={itemVariants}
-                    isLocked={card.isLocked}
-                    iconColor={card.iconColor}
-                  />
-                </Grid>
-              ))}
+              </motion.div>
             </Grid>
-          </motion.div>
+          ))}
+        </Grid>
+      </Container>
+
+      {/* ===== EXAMS COVERED ===== */}
+      <Box sx={{ py: { xs: 6, md: 8 }, borderTop: '1px solid', borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Container maxWidth="lg">
+          <Typography sx={{ textAlign: 'center', color: 'text.secondary', mb: 4, fontSize: '0.8rem', letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 800 }}>
+            Exams Covered
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.25, justifyContent: 'center' }}>
+            {exams.map(exam => (
+              <Chip
+                key={exam}
+                label={exam}
+                sx={{
+                  bgcolor: 'surface.card',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  color: 'text.secondary',
+                  fontWeight: 700,
+                  fontSize: '0.75rem',
+                  py: 2,
+                  px: 0.5,
+                  '&:hover': { background: 'rgba(27,107,58,0.12)', borderColor: 'rgba(46,139,87,0.3)', color: '#2E8B57', transform: 'translateY(-1px)' },
+                  transition: 'all 0.2s ease',
+                }}
+              />
+            ))}
+          </Box>
+        </Container>
+      </Box>
+
+      {/* ===== INSTITUTE CTA ===== */}
+      <Container maxWidth="lg" sx={{ py: { xs: 8, md: 10 } }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+        >
+          <Box sx={{
+            p: { xs: 4, md: 6 },
+            background: 'linear-gradient(135deg, rgba(27,107,58,0.15), rgba(27,107,58,0.05))',
+            border: '1px solid rgba(46,139,87,0.22)',
+            borderRadius: '28px',
+            textAlign: 'center',
+            maxWidth: '100%',
+          }}>
+            <Typography sx={{ fontSize: '2rem', mb: 1.5 }}>🏫</Typography>
+            <Typography variant="h3" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: 'text.primary', mb: 1, fontSize: { xs: '1.4rem', sm: '1.8rem', md: '2.2rem' } }}>
+              Running a Coaching Center?
+            </Typography>
+            <Typography sx={{ color: 'text.secondary', mb: 4, maxWidth: 480, mx: 'auto', fontSize: '0.9rem', lineHeight: 1.7 }}>
+              Give your students a world-class app. Custom subdomain, branded portal, attendance, fees, mock tests — all in one.
+            </Typography>
+            <Button
+              variant="contained"
+              size="large"
+              onClick={() => router.push('/institute/login')}
+              endIcon={<ArrowForwardIcon />}
+              sx={{ 
+                background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
+                py: 1.5,
+                px: 4,
+                borderRadius: 2.5
+              }}
+            >
+              Start Institute Portal
+            </Button>
+          </Box>
         </motion.div>
       </Container>
+
+      {/* ===== TESTIMONIALS ===== */}
+      <Container maxWidth="lg" sx={{ pb: { xs: 8, md: 12 } }}>
+        <Typography variant="h2" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, textAlign: 'center', color: 'text.primary', mb: 6, fontSize: { xs: '1.65rem', sm: '2rem', md: '2.5rem' }, letterSpacing: '-0.02em' }}>
+          Real Students, Real Results
+        </Typography>
+        <Grid container spacing={3}>
+          {testimonials.map((t, i) => (
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={t.name}>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.12 }}
+                style={{ height: '100%' }}
+              >
+                <Box sx={{
+                  p: 4, 
+                  height: '100%',
+                  bgcolor: 'background.paper',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: '20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between'
+                }}>
+                  <Typography sx={{ color: 'text.secondary', fontSize: '0.85rem', lineHeight: 1.7, mb: 3.5, fontStyle: 'italic' }}>
+                    "{t.text}"
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.75 }}>
+                    <Avatar sx={{ width: 40, height: 40, background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)', fontSize: '0.95rem', fontWeight: 800 }}>
+                      {t.avatar}
+                    </Avatar>
+                    <Box>
+                      <Typography sx={{ fontWeight: 800, color: 'text.primary', fontSize: '0.85rem' }}>{t.name}</Typography>
+                      <Typography sx={{ fontSize: '0.725rem', color: '#2E8B57', fontWeight: 700 }}>{t.place} · {t.rank}</Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              </motion.div>
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
+
+      {/* ===== FOOTER ===== */}
+      <Box sx={{ borderTop: '1px solid', borderColor: 'divider', py: 5 }}>
+        <Container maxWidth="lg">
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2.5 }}>
+            <Typography sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: 'text.primary', fontSize: '1.05rem' }}>
+              🎓 KPSC Master
+            </Typography>
+            <Typography sx={{ color: 'text.disabled', fontSize: '0.775rem', fontWeight: 500 }}>
+              © 2026 KPSC Master. Kerala's #1 PSC Prep Platform.
+            </Typography>
+            <Stack direction="row" spacing={3.5}>
+              {['Privacy', 'Terms', 'Contact'].map(item => (
+                <Typography key={item} sx={{ fontSize: '0.775rem', color: 'text.disabled', cursor: 'pointer', '&:hover': { color: 'text.secondary' }, fontWeight: 600 }}>
+                  {item}
+                </Typography>
+              ))}
+            </Stack>
+          </Box>
+        </Container>
+      </Box>
     </Box>
   );
 }

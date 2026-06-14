@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { Box } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import InstituteSidebar, { instituteDrawerWidth } from '@/components/InstituteSidebar';
-import InstituteHeader from '../components/InstituteSidebar'; // We'll also create a separate header component
+import InstituteHeader from '@/components/InstituteHeader';
 
 export default function InstitutePortalShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);

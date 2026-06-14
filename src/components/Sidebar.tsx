@@ -1,15 +1,32 @@
 'use client';
 
-import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Box, Typography, Divider, useTheme, useMediaQuery } from '@mui/material';
-import HomeIcon from '@mui/icons-material/Home';
-import QuizIcon from '@mui/icons-material/Quiz';
-import HistoryIcon from '@mui/icons-material/History';
-import SchoolIcon from '@mui/icons-material/School';
-import CategoryIcon from '@mui/icons-material/Category';
+import { usePathname, useRouter } from 'next/navigation';
+import {
+  Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText,
+  Box, Typography, Divider, useTheme, useMediaQuery, Avatar, LinearProgress
+} from '@mui/material';
+import { useAppContext } from '@/context/AppContext';
 
-// Define and export a constant for the drawer width.
-// This allows your main layout to use the same value for perfect alignment.
-export const drawerWidth = 260;
+// Icons
+import HomeIcon from '@mui/icons-material/Home';
+import DynamicFeedIcon from '@mui/icons-material/DynamicFeed';
+import QuizIcon from '@mui/icons-material/Quiz';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import NewspaperIcon from '@mui/icons-material/Newspaper';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import CancelIcon from '@mui/icons-material/Cancel';
+import LeaderboardIcon from '@mui/icons-material/Leaderboard';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import TrackChangesIcon from '@mui/icons-material/TrackChanges';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import ForumIcon from '@mui/icons-material/Forum';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
+import PersonIcon from '@mui/icons-material/Person';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import BoltIcon from '@mui/icons-material/Bolt';
+
+export const drawerWidth = 272;
 
 interface SidebarProps {
   open: boolean;
@@ -17,150 +34,219 @@ interface SidebarProps {
   onNavigate: (path: string) => void;
 }
 
-const mainItems = [
-  { text: 'Home', icon: <HomeIcon />, path: '/' },
-  { text: 'Take a Quiz', icon: <QuizIcon />, path: '/quiz' },
-  { text: 'Exams', icon: <SchoolIcon />, path: '/exams' },
-  { text: 'Topics', icon: <CategoryIcon />, path: '/topics' },
-  { text: 'Previous Papers', icon: <HistoryIcon />, path: '/previous-papers' },
+const navItems = [
+  { text: 'Home', icon: <HomeIcon />, path: '/', section: 'study' },
+  { text: 'Study Feed', icon: <DynamicFeedIcon />, path: '/feed', section: 'study' },
+  { text: 'Daily Quiz', icon: <QuizIcon />, path: '/quiz', section: 'study' },
+  { text: 'Mock Tests', icon: <AssignmentIcon />, path: '/exams', section: 'study' },
+  { text: 'Current Affairs', icon: <NewspaperIcon />, path: '/current-affairs', section: 'study' },
+  { divider: true, label: 'Progress', section: 'progress' },
+  { text: 'Leaderboard', icon: <LeaderboardIcon />, path: '/leaderboard', section: 'progress' },
+  { text: 'Analytics', icon: <BarChartIcon />, path: '/analytics', section: 'progress' },
+  { text: 'Goals', icon: <TrackChangesIcon />, path: '/goals', section: 'progress' },
+  { text: 'Saved Questions', icon: <BookmarkIcon />, path: '/saved', section: 'progress' },
+  { text: 'Wrong Answers', icon: <CancelIcon />, path: '/wrong-answers', section: 'progress' },
+  { divider: true, label: 'Community', section: 'community' },
+  { text: 'AI Doubt Solver', icon: <AutoAwesomeIcon />, path: '/ai-doubt', section: 'community' },
+  { text: 'Community', icon: <ForumIcon />, path: '/community', section: 'community' },
+  { text: 'Notifications', icon: <NotificationsIcon />, path: '/notifications', section: 'community' },
+  { divider: true, label: 'Account', section: 'account' },
+  { text: 'Subscription', icon: <WorkspacePremiumIcon />, path: '/subscription', section: 'account' },
+  { text: 'Profile', icon: <PersonIcon />, path: '/profile', section: 'account' },
 ];
 
-// Clean Modern Blue Theme Colors
-const blueTheme = {
-  primary: '#1976d2',      // Material Blue 700
-  primaryDark: '#1565c0',  // Material Blue 800
-  primaryLight: '#42a5f5', // Material Blue 400
-  secondary: '#546e7a',    // Blue Gray 600
-  background: '#fafafa',   // Light Gray
-  surface: '#ffffff',      // White
-  text: {
-    primary: '#263238',    // Blue Gray 900
-    secondary: '#546e7a',  // Blue Gray 600
-    white: '#ffffff'
-  },
-  accent: '#e3f2fd'        // Light Blue 50
-};
+const LEVEL_NAMES = [
+  '', 'Beginner', 'Aspirant', 'Serious Prep', 'Active Learner',
+  'PSC Ready', 'PSC Scholar', 'PSC Expert', 'District Topper', 'Kerala Topper', 'PSC Master'
+];
 
-// Reusable content for the drawer to avoid repeating code
-const DrawerContent = ({ onNavigate }: { onNavigate: (path: string) => void }) => (
-    <div>
-        <Box sx={{ 
-            p: 3, 
-            background: `linear-gradient(135deg, ${blueTheme.primary} 0%, ${blueTheme.primaryDark} 100%)`,
-            color: blueTheme.text.white,
-            borderBottom: `1px solid ${blueTheme.accent}`
-        }}>
-            <Typography variant="h6" sx={{ 
-                fontWeight: 600,
-                letterSpacing: '0.5px',
-                fontSize: '1.1rem'
+function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
+  const pathname = usePathname();
+  const { profile, themeMode } = useAppContext();
+
+  const xp = profile?.total_xp || 0;
+  const level = profile?.level || 1;
+  const streak = profile?.current_streak || 0;
+  const xpInLevel = xp % 100;
+  const levelName = LEVEL_NAMES[Math.min(level, 10)] || 'PSC Master';
+
+  return (
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* Brand Header */}
+      <Box sx={{
+        p: 2.5,
+        background: themeMode === 'dark' ? 'linear-gradient(135deg, #0F1117 0%, #161B22 100%)' : 'linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 100%)',
+        borderBottom: themeMode === 'dark' ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+          <Box sx={{
+            width: 36, height: 36,
+            background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
+            borderRadius: '10px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 4px 12px rgba(27,107,58,0.4)',
+          }}>
+            <Typography sx={{ fontSize: '18px' }}>🎓</Typography>
+          </Box>
+          <Box>
+            <Typography sx={{
+              fontFamily: "'Cabinet Grotesk', sans-serif",
+              fontWeight: 800, fontSize: '1.1rem',
+              color: themeMode === 'dark' ? '#F0F4F8' : '#0F172A', letterSpacing: '-0.02em', lineHeight: 1
             }}>
-                Navigation
+              KPSC Master
             </Typography>
+            <Typography sx={{ fontSize: '0.7rem', color: themeMode === 'dark' ? '#8892A4' : '#64748B', fontWeight: 500 }}>
+              Kerala PSC Prep Platform
+            </Typography>
+          </Box>
         </Box>
-        <List sx={{ 
-            py: 1,
-            bgcolor: blueTheme.surface
-        }}>
-            {mainItems.map((item, index) => (
-            <ListItem key={item.text} disablePadding>
-                <ListItemButton 
-                    onClick={() => onNavigate(item.path)}
-                    sx={{
-                        mx: 1,
-                        mb: 0.5,
-                        borderRadius: 2,
-                        transition: 'all 0.2s ease-in-out',
-                        '&:hover': {
-                            bgcolor: blueTheme.accent,
-                            color: blueTheme.primary,
-                            transform: 'translateX(4px)',
-                            boxShadow: `0 2px 8px ${blueTheme.primary}20`
-                        },
-                        '&:active': {
-                            transform: 'translateX(2px)',
-                        }
-                    }}
+
+        {/* User XP / Streak bar */}
+        {profile && (
+          <Box sx={{
+            background: themeMode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
+            border: themeMode === 'dark' ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
+            borderRadius: '12px',
+            p: 1.5,
+          }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <BoltIcon sx={{ fontSize: 14, color: '#8B5CF6' }} />
+                <Typography sx={{ fontSize: '0.7rem', color: '#a78bfa', fontWeight: 700, fontFamily: "'JetBrains Mono'" }}>
+                  {xp} XP
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <LocalFireDepartmentIcon sx={{ fontSize: 14, color: '#FF6B2B' }} />
+                <Typography sx={{ fontSize: '0.7rem', color: '#FF6B2B', fontWeight: 700, fontFamily: "'JetBrains Mono'" }}>
+                  {streak}d
+                </Typography>
+              </Box>
+            </Box>
+            <LinearProgress
+              variant="determinate"
+              value={xpInLevel}
+              sx={{
+                height: 4, borderRadius: 4,
+                bgcolor: 'rgba(255,255,255,0.06)',
+                '& .MuiLinearProgress-bar': {
+                  background: 'linear-gradient(90deg, #8B5CF6, #2E8B57)',
+                  borderRadius: 4,
+                }
+              }}
+            />
+            <Typography sx={{ fontSize: '0.65rem', color: '#4A5568', mt: 0.5 }}>
+              Lv.{level} {levelName}
+            </Typography>
+          </Box>
+        )}
+      </Box>
+
+      {/* Navigation */}
+      <Box sx={{ flex: 1, overflowY: 'auto', py: 1, px: 1 }}>
+        <List disablePadding>
+          {navItems.map((item, idx) => {
+            if ('divider' in item && item.divider) {
+              return (
+                <Box key={idx} sx={{ px: 1, pt: 2, pb: 0.5 }}>
+                  <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, color: '#4A5568', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                    {item.label}
+                  </Typography>
+                </Box>
+              );
+            }
+            const path = item.path;
+            if (!path) return null;
+            const isActive = pathname === path || (path !== '/' && pathname?.startsWith(path));
+            return (
+              <ListItem key={item.path} disablePadding sx={{ mb: 0.25 }}>
+                <ListItemButton
+                  onClick={() => onNavigate(item.path!)}
+                  selected={isActive}
+                  sx={{
+                    borderRadius: '10px',
+                    py: 1,
+                    px: 1.5,
+                    minHeight: 44,
+                    '& .MuiListItemIcon-root': {
+                      color: isActive ? '#2E8B57' : '#4A5568',
+                      minWidth: 36,
+                      transition: 'color 0.2s ease',
+                    },
+                    '& .MuiListItemText-primary': {
+                      fontSize: '0.875rem',
+                      fontWeight: isActive ? 700 : 500,
+                      color: isActive ? '#F0F4F8' : '#8892A4',
+                      fontFamily: "'Satoshi', sans-serif",
+                      transition: 'all 0.2s ease',
+                    },
+                    ...(isActive ? {
+                      background: 'rgba(27, 107, 58, 0.18)',
+                      borderLeft: '3px solid #2E8B57',
+                      pl: '13px',
+                    } : {}),
+                  }}
                 >
-                    <ListItemIcon sx={{ 
-                        color: blueTheme.secondary,
-                        minWidth: 40,
-                        transition: 'color 0.2s ease-in-out',
-                        '.MuiListItemButton-root:hover &': {
-                            color: blueTheme.primary
-                        }
-                    }}>
-                        {item.icon}
-                    </ListItemIcon>
-                    <ListItemText 
-                        primary={item.text} 
-                        sx={{
-                            '& .MuiListItemText-primary': {
-                                color: blueTheme.text.primary,
-                                fontWeight: 500,
-                                fontSize: '0.95rem',
-                                transition: 'color 0.2s ease-in-out',
-                                '.MuiListItemButton-root:hover &': {
-                                    color: blueTheme.primary,
-                                    fontWeight: 600
-                                }
-                            }
-                        }}
-                    />
+                  <ListItemIcon>{item.icon}</ListItemIcon>
+                  <ListItemText primary={item.text} />
                 </ListItemButton>
-            </ListItem>
-            ))}
+              </ListItem>
+            );
+          })}
         </List>
-    </div>
-);
+      </Box>
+
+      {/* Footer */}
+      <Box sx={{ p: 2, borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
+        <Typography sx={{ fontSize: '0.65rem', color: '#4A5568' }}>
+          © 2026 KPSC Master
+        </Typography>
+      </Box>
+    </Box>
+  );
+}
 
 export default function Sidebar({ open, onClose, onNavigate }: SidebarProps) {
   const theme = useTheme();
-  // Check if the screen is large (lg breakpoint = 1200px and up)
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg'));
+  const router = useRouter();
+  const { themeMode } = useAppContext();
 
-  // On large screens, render a permanent, always-visible sidebar
+  const handleNavigate = (path: string) => {
+    router.push(path);
+    onNavigate(path);
+  };
+
+  const drawerSx = {
+    width: drawerWidth,
+    flexShrink: 0,
+    [`& .MuiDrawer-paper`]: {
+      width: drawerWidth,
+      boxSizing: 'border-box',
+      background: themeMode === 'dark' ? '#0F1117' : '#ffffff',
+      border: 'none',
+      borderRight: themeMode === 'dark' ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+    },
+  };
+
   if (isLargeScreen) {
     return (
-        <Drawer
-            variant="permanent"
-            sx={{
-                width: drawerWidth,
-                flexShrink: 0,
-                [`& .MuiDrawer-paper`]: { 
-                    width: drawerWidth, 
-                    boxSizing: 'border-box',
-                    bgcolor: blueTheme.background,
-                    borderRight: `1px solid ${blueTheme.accent}`,
-                    boxShadow: '0 0 20px rgba(25, 118, 210, 0.08)'
-                },
-            }}
-        >
-            <DrawerContent onNavigate={onNavigate} />
-        </Drawer>
+      <Drawer variant="permanent" sx={drawerSx}>
+        <DrawerContent onNavigate={handleNavigate} />
+      </Drawer>
     );
   }
 
-  // On smaller screens, render the temporary pop-out menu you already had
   return (
     <Drawer
       variant="temporary"
       open={open}
       onClose={onClose}
-      ModalProps={{
-        keepMounted: true, // Better for mobile performance
-      }}
-      sx={{
-        display: { xs: 'block', lg: 'none' },
-        [`& .MuiDrawer-paper`]: { 
-            boxSizing: 'border-box', 
-            width: drawerWidth,
-            bgcolor: blueTheme.background,
-            boxShadow: '0 8px 32px rgba(25, 118, 210, 0.15)'
-        },
-      }}
+      ModalProps={{ keepMounted: true }}
+      sx={{ display: { xs: 'block', lg: 'none' }, ...drawerSx }}
     >
-      <DrawerContent onNavigate={onNavigate} />
+      <DrawerContent onNavigate={handleNavigate} />
     </Drawer>
   );
 }

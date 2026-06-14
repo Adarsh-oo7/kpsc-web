@@ -18,7 +18,7 @@ const StyledFormControl = styled(FormControl)(({ theme }) => ({
     '& .MuiInputLabel-root': { color: theme.palette.text.secondary },
     '& .MuiInputBase-root': {
         backgroundColor: 'rgba(255, 255, 255, 0.05)',
-        borderRadius: theme.shape.borderRadius * 2,
+        borderRadius: (theme.shape.borderRadius as number) * 2,
         '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
     },
 }));
@@ -123,7 +123,7 @@ export default function InstituteSettingsPage() {
             <Box sx={{ p: { xs: 2, md: 4 }, bgcolor: 'background.paper', borderRadius: 4 }}>
                 <Grid container spacing={4} alignItems="center">
                     {/* Logo Upload */}
-                    <Grid item xs={12} md={4} sx={{ textAlign: 'center' }}>
+                    <Grid size={{ xs: 12, md: 4 }} sx={{ textAlign: 'center' }}>
                       <FormControl>
                         <InputLabel htmlFor="logo-upload" sx={{ cursor: 'pointer', transform: 'none', position: 'static' }}>
                             <motion.div whileHover={{ scale: 1.05 }} style={{ position: 'relative' }}>
@@ -146,7 +146,7 @@ export default function InstituteSettingsPage() {
                     </Grid>
 
                     {/* Form Fields */}
-                    <Grid item xs={12} md={8}>
+                    <Grid size={{ xs: 12, md: 8 }}>
                         <Stack spacing={3}>
                             <StyledFormControl fullWidth>
                                 <TextField
@@ -169,7 +169,7 @@ export default function InstituteSettingsPage() {
                     </Grid>
 
                     {/* Save Button */}
-                    <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <Grid size={{ xs: 12 }} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                         <Button type="submit" variant="contained" size="large" disabled={loading} sx={{ py: 1.5, px: 5, fontWeight: 'bold' }}>
                             {loading ? <CircularProgress size={24} color="inherit" /> : 'Save Changes'}
                         </Button>

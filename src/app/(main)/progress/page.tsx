@@ -83,22 +83,22 @@ export default function ProgressPage() {
             </Box>
             
             <Grid container spacing={3} sx={{ mb: 4 }}>
-                <Grid xs={12} sm={6} md={3}><StatCard title="Net Marks" value={overall_stats.net_marks} icon={<GpsFixedIcon color="primary" sx={{ fontSize: 40 }} />} /></Grid>
-                <Grid xs={12} sm={6} md={3}><StatCard title="Accuracy" value={`${overall_stats.accuracy.toFixed(1)}%`} icon={<ShowChartIcon color="primary" sx={{ fontSize: 40 }} />} /></Grid>
-                <Grid xs={12} sm={6} md={3}><StatCard title="Correct" value={overall_stats.correct} icon={<CheckCircleOutlineIcon color="success" sx={{ fontSize: 40 }} />} /></Grid>
-                <Grid xs={12} sm={6} md={3}><StatCard title="Wrong" value={overall_stats.wrong} icon={<CancelOutlinedIcon color="error" sx={{ fontSize: 40 }} />} /></Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}><StatCard title="Net Marks" value={overall_stats.net_marks} icon={<GpsFixedIcon color="primary" sx={{ fontSize: 40 }} />} /></Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}><StatCard title="Accuracy" value={`${overall_stats.accuracy.toFixed(1)}%`} icon={<ShowChartIcon color="primary" sx={{ fontSize: 40 }} />} /></Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}><StatCard title="Correct" value={overall_stats.correct} icon={<CheckCircleOutlineIcon color="success" sx={{ fontSize: 40 }} />} /></Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}><StatCard title="Wrong" value={overall_stats.wrong} icon={<CancelOutlinedIcon color="error" sx={{ fontSize: 40 }} />} /></Grid>
             </Grid>
 
             <Paper sx={{p: 3, borderRadius: 4, bgcolor: 'background.paper', mb: 4}}>
                 <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 2 }}>Your Personalized Study Plan</Typography>
                 <Grid container spacing={4}>
-                    <Grid item xs={12} md={6}>
+                    <Grid size={{ xs: 12, md: 6 }}>
                         <Typography variant="h6" sx={{display: 'flex', alignItems: 'center', mb: 2}}><LightbulbIcon color="warning" sx={{mr: 1}}/> Focus On These Topics</Typography>
                         <Stack spacing={1.5}>
                              {weakest_topics.length > 0 ? weakest_topics.map((topic: any) => <TopicFeedbackItem key={topic.question__topic__name} topic={topic} isStrength={false} />) : <Typography color="text.secondary" sx={{pl:1}}>Great job! No specific weak areas found.</Typography>}
                         </Stack>
                     </Grid>
-                    <Grid item xs={12} md={6}>
+                    <Grid size={{ xs: 12, md: 6 }}>
                         <Typography variant="h6" sx={{display: 'flex', alignItems: 'center', mb: 2}}><FitnessCenterIcon color="success" sx={{mr: 1}}/> Your Strengths</Typography>
                         <Stack spacing={1.5}>
                             {strongest_topics.map((topic: any) => <TopicFeedbackItem key={topic.question__topic__name} topic={topic} isStrength={true} />)}

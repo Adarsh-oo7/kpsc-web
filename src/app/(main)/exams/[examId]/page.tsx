@@ -26,7 +26,7 @@ export default function ExamModeSelectionPage() {
             <Typography variant="h6" sx={{ mb: 4, color: 'text.secondary' }}>How would you like to practice?</Typography>
 
             <Grid container spacing={4}>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                     <Paper sx={{ p: 4, borderRadius: 4, textAlign: 'center', height: '100%' }}>
                         <LibraryBooksIcon color="primary" sx={{ fontSize: 60, mb: 2 }} />
                         <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>Study Mode</Typography>
@@ -36,7 +36,7 @@ export default function ExamModeSelectionPage() {
                         <Button variant="outlined" size="large" onClick={() => router.push(`/exam/${examId}/study`)}>Start Studying</Button>
                     </Paper>
                 </Grid>
-                <Grid item xs={12} md={6}>
+                <Grid size={{ xs: 12, md: 6 }}>
                     <Paper sx={{ p: 4, borderRadius: 4, textAlign: 'center', height: '100%' }}>
                         <TimerIcon color="primary" sx={{ fontSize: 60, mb: 2 }} />
                         <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 1 }}>Quiz Mode</Typography>

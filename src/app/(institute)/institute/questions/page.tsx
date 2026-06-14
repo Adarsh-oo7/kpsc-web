@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import useSWR from 'swr';
-import axios from 'axios';
+import apiClient from '@/lib/apiClient';
 import {
   Box, Typography, Button, CircularProgress, Alert, Paper,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
@@ -13,15 +13,8 @@ import {
 import { motion } from 'framer-motion';
 import AddIcon from '@mui/icons-material/Add';
 
-// --- Helper Fetcher ---
-const fetcher = async (url: string) => {
-    const token = localStorage.getItem('access_token');
-    if (!token) throw new Error('Not authenticated');
-    const fullUrl = `${process.env.NEXT_PUBLIC_API_URL}${url}`;
-    const res = await fetch(fullUrl, { headers: { Authorization: `Bearer ${token}` } });
-    if (!res.ok) throw new Error('Failed to fetch data');
-    return res.json();
-};
+// --- Helper Fetcher (uses apiClient — auth headers injected automatically) ---
+const fetcher = (url: string) => apiClient.get(url).then(r => r.data);
 
 const initialFormState = {
     text: '',
@@ -76,9 +69,7 @@ export default function ManageQuestionsPage() {
         const payload = { ...formState, options: optionsPayload };
 
         try {
-            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/institute/questions/`, payload, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
-            });
+            await apiClient.post('/institute/questions/', payload);
             mutateQuestions();
             handleCloseDialog();
         } catch (err: any) {
@@ -138,7 +129,7 @@ export default function ManageQuestionsPage() {
                         <TextField name="text" label="Question Text" value={formState.text} onChange={handleFormChange} multiline rows={3} fullWidth />
                         <Grid container spacing={2}>
                             {formState.options.map((option, index) => (
-                                <Grid item xs={12} sm={6} key={index}>
+                                <Grid size={{ xs: 12, sm: 6 }} key={index}>
                                     <TextField label={`Option ${String.fromCharCode(65 + index)}`} value={option} onChange={(e) => handleOptionChange(index, e.target.value)} fullWidth />
                                 </Grid>
                             ))}
@@ -153,28 +144,28 @@ export default function ManageQuestionsPage() {
                         </FormControl>
                         <TextField name="explanation" label="Explanation (Optional)" value={formState.explanation} onChange={handleFormChange} multiline rows={2} fullWidth />
                         <Grid container spacing={2}>
-                            <Grid item xs={12} sm={4}>
+                            <Grid size={{ xs: 12, sm: 4 }}>
                                 <FormControl fullWidth>
                                     <InputLabel>Difficulty</InputLabel>
-                                    <Select name="difficulty" label="Difficulty" value={formState.difficulty} onChange={handleFormChange}>
+                                    <Select name="difficulty" label="Difficulty" value={formState.difficulty} onChange={(e) => handleFormChange(e as any)}>
                                         <MenuItem value="easy">Easy</MenuItem>
                                         <MenuItem value="medium">Medium</MenuItem>
                                         <MenuItem value="hard">Hard</MenuItem>
                                     </Select>
                                 </FormControl>
                             </Grid>
-                            <Grid item xs={12} sm={4}>
+                            <Grid size={{ xs: 12, sm: 4 }}>
                                 <FormControl fullWidth>
                                     <InputLabel>Exam</InputLabel>
-                                    <Select name="exam" label="Exam" value={formState.exam} onChange={handleFormChange}>
+                                    <Select name="exam" label="Exam" value={formState.exam} onChange={(e) => handleFormChange(e as any)}>
                                         {exams?.map((exam: any) => <MenuItem key={exam.id} value={exam.id}>{exam.name}</MenuItem>)}
                                     </Select>
                                 </FormControl>
                             </Grid>
-                            <Grid item xs={12} sm={4}>
+                            <Grid size={{ xs: 12, sm: 4 }}>
                                 <FormControl fullWidth>
                                     <InputLabel>Topic</InputLabel>
-                                    <Select name="topic" label="Topic" value={formState.topic} onChange={handleFormChange}>
+                                    <Select name="topic" label="Topic" value={formState.topic} onChange={(e) => handleFormChange(e as any)}>
                                         {topics?.map((topic: any) => <MenuItem key={topic.id} value={topic.id}>{topic.name}</MenuItem>)}
                                     </Select>
                                 </FormControl>

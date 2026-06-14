@@ -43,7 +43,7 @@ export default function NotificationsMenu() {
                         <MenuItem 
                             key={msg.id} 
                             onClick={() => handleMessageClick(msg.id)} 
-                            selected={!msg.read_by.includes(user.id)}
+                            selected={user ? !msg.read_by.includes(user.id) : false}
                         >
                             <ListItemText
                                 primary={msg.subject}

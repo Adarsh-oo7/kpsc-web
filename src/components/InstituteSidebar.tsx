@@ -10,6 +10,8 @@ import EmailIcon from '@mui/icons-material/Email';
 import StyleIcon from '@mui/icons-material/Style';
 import SettingsIcon from '@mui/icons-material/Settings';
 import PaymentsIcon from '@mui/icons-material/Payments';
+import GroupsIcon from '@mui/icons-material/Groups';
+import DescriptionIcon from '@mui/icons-material/Description';
 
 // Define and export the drawer width for consistent layout
 export const instituteDrawerWidth = 280;
@@ -22,10 +24,12 @@ interface InstituteSidebarProps {
 const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/institute/dashboard' },
   { text: 'Students', icon: <PeopleIcon />, path: '/institute/students' },
+  { text: 'Batches', icon: <GroupsIcon />, path: '/institute/batches' },
+  { text: 'Study Materials', icon: <DescriptionIcon />, path: '/institute/notes' },
   { text: 'Questions', icon: <LibraryBooksIcon />, path: '/institute/questions' },
   { text: 'Topics', icon: <CategoryIcon />, path: '/institute/topics' },
   { text: 'Messaging', icon: <EmailIcon />, path: '/institute/messaging' },
-  { text: 'Fee Management', icon: <PaymentsIcon />, path: '/institute/fees' }, // Assuming a future fees overview page
+  { text: 'Fee Management', icon: <PaymentsIcon />, path: '/institute/fees' },
   { text: 'Customization', icon: <StyleIcon />, path: '/institute/customization' },
   { text: 'Settings', icon: <SettingsIcon />, path: '/institute/settings' },
 ];

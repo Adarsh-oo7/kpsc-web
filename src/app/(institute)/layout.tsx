@@ -2,23 +2,33 @@
 
 import { useState, useEffect } from 'react';
 import { Box, CssBaseline, Toolbar, CircularProgress } from '@mui/material';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAppContext } from '../../context/AppContext';
 import InstituteSidebar from '@/components/InstituteSidebar';
 import InstituteHeader from '@/components/InstituteHeader';
 
 export default function InstitutePortalLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user, isInstituteOwner, isLoading } = useAppContext();
 
+  const isLoginPage = pathname === '/institute/login';
+  const isRegisterPage = pathname === '/institute/register';
+  const isBypassAuth = isLoginPage || isRegisterPage;
+
   // This is the protection logic for the entire portal
   useEffect(() => {
-    if (isLoading) return; // Wait until user check is complete
+    if (isLoading || isBypassAuth) return; // Wait until user check is complete, or bypass on login/register pages
     if (!user || !isInstituteOwner) {
       router.push('/institute/login'); // Redirect if not an authenticated owner
     }
-  }, [user, isInstituteOwner, isLoading, router]);
+  }, [user, isInstituteOwner, isLoading, router, isBypassAuth]);
+
+  // If on login or register page, directly render children without portal frame or loading overlay
+  if (isBypassAuth) {
+    return <>{children}</>;
+  }
 
   // While checking the user's status, show a loading screen
   if (isLoading || !user || !isInstituteOwner) {
@@ -44,8 +54,7 @@ export default function InstitutePortalLayout({ children }: { children: React.Re
         sx={{
           flexGrow: 1,
           p: 3,
-          width: { lg: `calc(100% - ${280}px)` }, // Use instituteDrawerWidth
-          ml: { lg: `${280}px` }, // Use instituteDrawerWidth
+          width: '100%',
         }}
       >
         {/* This Toolbar adds space to push content below the fixed header */}

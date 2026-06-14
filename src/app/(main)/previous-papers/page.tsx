@@ -115,7 +115,7 @@ export default function PreviousPapersPage() {
                     </Typography>
                     <Grid container spacing={3}>
                         {category.exams.map((exam: any) => (
-                            <Grid item xs={6} sm={4} md={3} key={exam.id}>
+                            <Grid size={{ xs: 6, sm: 4, md: 3 }} key={exam.id}>
                                 <ExamCard exam={exam} onClick={() => handleExamSelect(exam.id.toString())} categoryName={category.name} />
                             </Grid>
                         ))}

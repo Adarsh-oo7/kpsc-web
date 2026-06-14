@@ -21,6 +21,8 @@ interface AppContextType {
   setExamId: (id: string | null) => void;
   topicId: string | null;
   setTopicId: (id: string | null) => void;
+  themeMode: 'light' | 'dark';
+  toggleThemeMode: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -34,11 +36,27 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<any | null>(null);
   const [isInstituteOwner, setIsInstituteOwner] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [themeMode, setThemeMode] = useState<'light' | 'dark'>('dark');
   const [examId, setExamId] = useState<string | null>(null);
   const [topicId, setTopicId] = useState<string | null>(null);
   
   const { mutate } = useSWRConfig();
   const router = useRouter();
+
+  useEffect(() => {
+    const savedMode = localStorage.getItem('theme_mode');
+    if (savedMode === 'light' || savedMode === 'dark') {
+      setThemeMode(savedMode);
+    }
+  }, []);
+
+  const toggleThemeMode = () => {
+    setThemeMode(prev => {
+      const next = prev === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('theme_mode', next);
+      return next;
+    });
+  };
 
   // --- Core Functions ---
 
@@ -126,6 +144,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setExamId,
     topicId,
     setTopicId,
+    themeMode,
+    toggleThemeMode,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
