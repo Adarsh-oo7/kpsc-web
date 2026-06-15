@@ -46,7 +46,7 @@ export default function BrowseInstitutesPage() {
 
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 4, color: 'white' }}>
+            <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 4, color: 'text.primary' }}>
                 Find Your Institute
             </Typography>
 

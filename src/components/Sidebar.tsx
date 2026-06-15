@@ -35,7 +35,7 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { text: 'Home', icon: <HomeIcon />, path: '/', section: 'study' },
+  { text: 'Home', icon: <HomeIcon />, path: '/home', section: 'study' },
   { text: 'Study Feed', icon: <DynamicFeedIcon />, path: '/feed', section: 'study' },
   { text: 'Daily Quiz', icon: <QuizIcon />, path: '/quiz', section: 'study' },
   { text: 'Mock Tests', icon: <AssignmentIcon />, path: '/exams', section: 'study' },
@@ -150,7 +150,7 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
             if ('divider' in item && item.divider) {
               return (
                 <Box key={idx} sx={{ px: 1, pt: 2, pb: 0.5 }}>
-                  <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, color: '#4A5568', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                  <Typography sx={{ fontSize: '0.65rem', fontWeight: 700, color: themeMode === 'dark' ? '#4A5568' : '#64748B', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                     {item.label}
                   </Typography>
                 </Box>
@@ -170,19 +170,21 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
                     px: 1.5,
                     minHeight: 44,
                     '& .MuiListItemIcon-root': {
-                      color: isActive ? '#2E8B57' : '#4A5568',
+                      color: isActive ? '#2E8B57' : (themeMode === 'dark' ? '#4A5568' : '#64748B'),
                       minWidth: 36,
                       transition: 'color 0.2s ease',
                     },
                     '& .MuiListItemText-primary': {
                       fontSize: '0.875rem',
                       fontWeight: isActive ? 700 : 500,
-                      color: isActive ? '#F0F4F8' : '#8892A4',
+                      color: isActive 
+                        ? (themeMode === 'dark' ? '#F0F4F8' : '#2E8B57') 
+                        : (themeMode === 'dark' ? '#8892A4' : '#475569'),
                       fontFamily: "'Satoshi', sans-serif",
                       transition: 'all 0.2s ease',
                     },
                     ...(isActive ? {
-                      background: 'rgba(27, 107, 58, 0.18)',
+                      background: themeMode === 'dark' ? 'rgba(27, 107, 58, 0.18)' : 'rgba(27, 107, 58, 0.08)',
                       borderLeft: '3px solid #2E8B57',
                       pl: '13px',
                     } : {}),
@@ -196,10 +198,10 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
           })}
         </List>
       </Box>
-
+ 
       {/* Footer */}
-      <Box sx={{ p: 2, borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
-        <Typography sx={{ fontSize: '0.65rem', color: '#4A5568' }}>
+      <Box sx={{ p: 2, borderTop: themeMode === 'dark' ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)', textAlign: 'center' }}>
+        <Typography sx={{ fontSize: '0.65rem', color: themeMode === 'dark' ? '#4A5568' : '#64748B' }}>
           © 2026 KPSC Master
         </Typography>
       </Box>

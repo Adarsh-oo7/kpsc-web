@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import {
   Box, Typography, Grid, Alert, CircularProgress, Paper,
-  Stack, TextField, InputAdornment, Container, Chip
+  Stack, TextField, InputAdornment, Container, Chip,
+  Dialog, DialogTitle, DialogContent, DialogActions, Button
 } from '@mui/material';
 import { useAppContext } from '@/context/AppContext';
 import { motion, Variants } from 'framer-motion';
@@ -60,9 +61,10 @@ const ExamCard = ({ exam, onClick, categoryName }: { exam: any; onClick: () => v
 
 
 export default function PreviousPapersPage() {
-  const { setExamId, fetcher } = useAppContext();
+  const { setExamId, fetcher, user } = useAppContext();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
 
   // CORRECTED: This now fetches all exams, which represent previous papers
   const { data: categories, error, isLoading } = useSWR('/exams/', fetcher);
@@ -78,6 +80,10 @@ export default function PreviousPapersPage() {
 
   // CORRECTED: This ensures reliable navigation to the quiz
   const handleExamSelect = (selectedExamId: string) => {
+    if (!user) {
+      setAuthDialogOpen(true);
+      return;
+    }
     setExamId(selectedExamId);
     router.push(`/quiz?exam_id=${selectedExamId}`);
   };
@@ -126,6 +132,70 @@ export default function PreviousPapersPage() {
                 <Alert severity="info">{searchQuery ? 'No papers match your search.' : 'No previous papers found.'}</Alert>
             )}
         </Stack>
+
+      {/* Auth Verification Dialog */}
+      <Dialog
+        open={authDialogOpen}
+        onClose={() => setAuthDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 5,
+            p: 2,
+            bgcolor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider'
+          }
+        }}
+      >
+        <DialogTitle sx={{ p: 1, textAlign: 'center', fontWeight: 900, fontFamily: "'Cabinet Grotesk'", fontSize: '1.4rem' }}>
+          Authentication Required 🎓
+        </DialogTitle>
+        <DialogContent sx={{ p: 2, textAlign: 'center' }}>
+          <Typography sx={{ color: 'text.secondary', fontSize: '0.925rem', mb: 1 }}>
+            To begin this mock exam, track study streaks, and view explanations, please sign in or register a free student account.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'center', gap: 1.5, p: 1, pb: 2 }}>
+          <Button
+            variant="outlined"
+            onClick={() => setAuthDialogOpen(false)}
+            sx={{ borderRadius: '10px', textTransform: 'none', px: 3, fontWeight: 700 }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setAuthDialogOpen(false);
+              router.push('/login');
+            }}
+            sx={{ borderRadius: '10px', textTransform: 'none', px: 3, fontWeight: 700 }}
+          >
+            Login
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setAuthDialogOpen(false);
+              router.push('/register');
+            }}
+            sx={{
+              borderRadius: '10px',
+              textTransform: 'none',
+              px: 3,
+              fontWeight: 700,
+              background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #2E8B57, #3da068)'
+              }
+            }}
+          >
+            Register
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

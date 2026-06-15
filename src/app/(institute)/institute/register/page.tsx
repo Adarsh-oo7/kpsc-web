@@ -30,21 +30,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 import apiClient from '@/lib/apiClient';
 import { useAppContext } from '@/context/AppContext';
 
-// Custom text field styled for premium dark theme inputs and autocomplete overrides
-const StyledTextField = styled(TextField)({
+// Custom text field styled for premium theme inputs and autocomplete overrides
+const StyledTextField = styled(TextField)(({ theme }) => ({
   '& .MuiInputBase-root': {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)',
     borderRadius: '14px',
-    color: '#F0F4F8',
+    color: theme.palette.text.primary,
     height: '56px',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
+    border: '1px solid',
+    borderColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
     transition: 'all 0.3s ease',
     '&:hover': {
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-      borderColor: 'rgba(255, 255, 255, 0.15)',
+      backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)',
+      borderColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)',
     },
     '&.Mui-focused': {
-      backgroundColor: 'rgba(255, 255, 255, 0.04)',
+      backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.01)',
       borderColor: '#8B5CF6', // Purple theme accent
       boxShadow: '0 0 0 2px rgba(139, 92, 246, 0.2)',
     },
@@ -54,17 +55,19 @@ const StyledTextField = styled(TextField)({
     paddingLeft: '10px',
     fontFamily: "'Satoshi', sans-serif",
     '&::placeholder': {
-      color: '#8892A4',
+      color: theme.palette.text.secondary,
       opacity: 1,
     },
     '&:-webkit-autofill': {
-      WebkitBoxShadow: '0 0 0 1000px #161B22 inset !important',
-      WebkitTextFillColor: '#F0F4F8 !important',
+      WebkitBoxShadow: theme.palette.mode === 'dark' 
+        ? '0 0 0 1000px #161B22 inset !important' 
+        : '0 0 0 1000px #ffffff inset !important',
+      WebkitTextFillColor: `${theme.palette.text.primary} !important`,
       transition: 'background-color 5000s ease-in-out 0s',
     }
   },
-  '& .MuiInputAdornment-root': { color: '#8892A4', marginRight: '8px', marginLeft: '8px' },
-});
+  '& .MuiInputAdornment-root': { color: theme.palette.text.secondary, marginRight: '8px', marginLeft: '8px' },
+}));
 
 export default function InstituteRegisterPage() {
   const router = useRouter();
@@ -237,8 +240,10 @@ export default function InstituteRegisterPage() {
         justifyContent: 'center',
         minHeight: '100vh',
         p: 3,
-        bgcolor: '#0F1117',
-        backgroundImage: 'radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%), radial-gradient(circle at 15% 80%, rgba(46, 139, 87, 0.08) 0%, transparent 50%)',
+        bgcolor: 'background.default',
+        backgroundImage: (theme) => theme.palette.mode === 'dark'
+          ? 'radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%), radial-gradient(circle at 15% 80%, rgba(46, 139, 87, 0.08) 0%, transparent 50%)'
+          : 'radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%), radial-gradient(circle at 15% 80%, rgba(46, 139, 87, 0.04) 0%, transparent 50%)',
       }}
     >
       <motion.div
@@ -252,8 +257,9 @@ export default function InstituteRegisterPage() {
           sx={{
             p: { xs: 4, md: 5 },
             borderRadius: '24px',
-            bgcolor: 'rgba(22, 27, 34, 0.8)',
-            border: '1px solid rgba(255,255,255,0.06)',
+            bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(22, 27, 34, 0.8)' : 'rgba(255, 255, 255, 0.9)',
+            border: '1px solid',
+            borderColor: 'divider',
             backdropFilter: 'blur(12px)',
             width: '100%',
           }}
@@ -271,16 +277,16 @@ export default function InstituteRegisterPage() {
               <CorporateFareIcon sx={{ fontSize: 24, color: 'white' }} />
             </Box>
             
-            <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 900, color: '#F0F4F8', letterSpacing: '-0.02em', textAlign: 'center' }}>
+            <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 900, color: 'text.primary', letterSpacing: '-0.02em', textAlign: 'center' }}>
               Institute Portal
             </Typography>
-            <Typography sx={{ color: '#8892A4', fontSize: '0.9rem', mt: 0.5 }}>
+            <Typography sx={{ color: 'text.secondary', fontSize: '0.9rem', mt: 0.5 }}>
               Register Your Coaching Academy
             </Typography>
           </Box>
 
           {/* Stepper progress indicator */}
-          <Stepper activeStep={currentStep - 1} alternativeLabel sx={{ mb: 4, '& .MuiStepLabel-label': { color: '#8892A4', fontFamily: "'Satoshi', sans-serif" }, '& .MuiStepLabel-label.Mui-active': { color: '#8B5CF6', fontWeight: 'bold' }, '& .MuiStepLabel-label.Mui-completed': { color: '#2E8B57' }, '& .MuiStepIcon-root': { color: 'rgba(255,255,255,0.1)' }, '& .MuiStepIcon-root.Mui-active': { color: '#8B5CF6' }, '& .MuiStepIcon-root.Mui-completed': { color: '#2E8B57' } }}>
+          <Stepper activeStep={currentStep - 1} alternativeLabel sx={{ mb: 4, '& .MuiStepLabel-label': { color: 'text.secondary', fontFamily: "'Satoshi', sans-serif" }, '& .MuiStepLabel-label.Mui-active': { color: '#8B5CF6', fontWeight: 'bold' }, '& .MuiStepLabel-label.Mui-completed': { color: '#2E8B57' }, '& .MuiStepIcon-root': { color: (theme) => theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)' }, '& .MuiStepIcon-root.Mui-active': { color: '#8B5CF6' }, '& .MuiStepIcon-root.Mui-completed': { color: '#2E8B57' } }}>
             <Step>
               <StepLabel>Account Details</StepLabel>
             </Step>
@@ -504,17 +510,17 @@ export default function InstituteRegisterPage() {
 
           {/* Bottom link */}
           <Box sx={{ mt: 4, textAlign: 'center' }}>
-            <Typography variant="body2" sx={{ color: '#8892A4' }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               Already registered your academy?{' '}
               <MuiLink 
                 component={Link} 
                 href="/institute/login" 
                 sx={{ 
-                  color: '#8B5CF6', 
+                  color: 'primary.main', 
                   fontWeight: 700, 
                   textDecoration: 'none',
                   transition: 'color 0.2s',
-                  '&:hover': { color: '#a78bfa', textDecoration: 'underline' } 
+                  '&:hover': { color: 'primary.dark', textDecoration: 'underline' } 
                 }}
               >
                 Log In Here

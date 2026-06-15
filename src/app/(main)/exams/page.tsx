@@ -118,7 +118,7 @@ const getSyllabusWeightage = (examName: string) => {
 };
 
 export default function ExamsPage() {
-  const { setExamId, fetcher, themeMode } = useAppContext();
+  const { setExamId, fetcher, themeMode, user } = useAppContext();
   const router = useRouter();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
@@ -131,6 +131,7 @@ export default function ExamsPage() {
   const [syllabusOpen, setSyllabusOpen] = useState(false);
   const [selectedExamForSyllabus, setSelectedExamForSyllabus] = useState<any>(null);
   const [selectedSyllabus, setSelectedSyllabus] = useState<any>(null);
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
 
   // Fetch Categories & Exams
   const { data: categories, error, isLoading } = useSWR('/exams/', fetcher);
@@ -198,6 +199,10 @@ export default function ExamsPage() {
   }, [categories]);
 
   const handleExamSelect = (examId: string) => {
+    if (!user) {
+      setAuthDialogOpen(true);
+      return;
+    }
     setExamId(examId);
     router.push(`/quiz?exam_id=${examId}`);
   };
@@ -1022,6 +1027,70 @@ export default function ExamsPage() {
             </DialogActions>
           </>
         )}
+      </Dialog>
+
+      {/* Auth Verification Dialog */}
+      <Dialog
+        open={authDialogOpen}
+        onClose={() => setAuthDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 5,
+            p: 2,
+            bgcolor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider'
+          }
+        }}
+      >
+        <DialogTitle sx={{ p: 1, textAlign: 'center', fontWeight: 900, fontFamily: "'Cabinet Grotesk'", fontSize: '1.4rem' }}>
+          Authentication Required 🎓
+        </DialogTitle>
+        <DialogContent sx={{ p: 2, textAlign: 'center' }}>
+          <Typography sx={{ color: 'text.secondary', fontSize: '0.925rem', mb: 1 }}>
+            To begin this mock exam, track study streaks, and view explanations, please sign in or register a free student account.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'center', gap: 1.5, p: 1, pb: 2 }}>
+          <Button
+            variant="outlined"
+            onClick={() => setAuthDialogOpen(false)}
+            sx={{ borderRadius: '10px', textTransform: 'none', px: 3, fontWeight: 700 }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setAuthDialogOpen(false);
+              router.push('/login');
+            }}
+            sx={{ borderRadius: '10px', textTransform: 'none', px: 3, fontWeight: 700 }}
+          >
+            Login
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              setAuthDialogOpen(false);
+              router.push('/register');
+            }}
+            sx={{
+              borderRadius: '10px',
+              textTransform: 'none',
+              px: 3,
+              fontWeight: 700,
+              background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #2E8B57, #3da068)'
+              }
+            }}
+          >
+            Register
+          </Button>
+        </DialogActions>
       </Dialog>
     </Container>
   );

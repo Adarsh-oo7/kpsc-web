@@ -23,21 +23,22 @@ import { motion } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
 
-// Styled component for a consistent, premium dark text field design
-const StyledTextField = styled(TextField)({
+// Styled component for a consistent, premium theme text field design
+const StyledTextField = styled(TextField)(({ theme }) => ({
   '& .MuiInputBase-root': {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)',
     borderRadius: '14px',
-    color: '#F0F4F8',
+    color: theme.palette.text.primary,
     height: '56px',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
+    border: '1px solid',
+    borderColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
     transition: 'all 0.3s ease',
     '&:hover': {
-      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-      borderColor: 'rgba(255, 255, 255, 0.15)',
+      backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.04)',
+      borderColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)',
     },
     '&.Mui-focused': {
-      backgroundColor: 'rgba(255, 255, 255, 0.04)',
+      backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.01)',
       borderColor: '#2E8B57',
       boxShadow: '0 0 0 2px rgba(46, 139, 87, 0.2)',
     },
@@ -47,17 +48,19 @@ const StyledTextField = styled(TextField)({
     paddingLeft: '10px',
     fontFamily: "'Satoshi', sans-serif",
     '&::placeholder': {
-      color: '#8892A4',
+      color: theme.palette.text.secondary,
       opacity: 1,
     },
     '&:-webkit-autofill': {
-      WebkitBoxShadow: '0 0 0 1000px #161B22 inset !important',
-      WebkitTextFillColor: '#F0F4F8 !important',
+      WebkitBoxShadow: theme.palette.mode === 'dark' 
+        ? '0 0 0 1000px #161B22 inset !important' 
+        : '0 0 0 1000px #ffffff inset !important',
+      WebkitTextFillColor: `${theme.palette.text.primary} !important`,
       transition: 'background-color 5000s ease-in-out 0s',
     }
   },
-  '& .MuiInputAdornment-root': { color: '#8892A4', marginRight: '8px', marginLeft: '8px' },
-});
+  '& .MuiInputAdornment-root': { color: theme.palette.text.secondary, marginRight: '8px', marginLeft: '8px' },
+}));
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -102,7 +105,7 @@ export default function LoginPage() {
     }
   };
 
-  // While checking for an existing session, show a clean, styled dark loading screen
+  // While checking for an existing session, show a clean, styled loading screen
   if (isLoading) {
     return (
       <Box sx={{ 
@@ -110,7 +113,7 @@ export default function LoginPage() {
         justifyContent: 'center', 
         alignItems: 'center', 
         height: '100vh', 
-        bgcolor: '#0F1117' 
+        bgcolor: 'background.default' 
       }}>
         <CircularProgress sx={{ color: '#2E8B57' }} />
       </Box>
@@ -126,8 +129,10 @@ export default function LoginPage() {
         justifyContent: 'center',
         minHeight: '100vh',
         p: 3,
-        bgcolor: '#0F1117',
-        backgroundImage: 'radial-gradient(circle at 80% 20%, rgba(27, 107, 58, 0.12) 0%, transparent 50%), radial-gradient(circle at 15% 80%, rgba(245, 158, 11, 0.08) 0%, transparent 50%)',
+        bgcolor: 'background.default',
+        backgroundImage: (theme) => theme.palette.mode === 'dark'
+          ? 'radial-gradient(circle at 80% 20%, rgba(27, 107, 58, 0.12) 0%, transparent 50%), radial-gradient(circle at 15% 80%, rgba(245, 158, 11, 0.08) 0%, transparent 50%)'
+          : 'radial-gradient(circle at 80% 20%, rgba(27, 107, 58, 0.06) 0%, transparent 50%), radial-gradient(circle at 15% 80%, rgba(245, 158, 11, 0.04) 0%, transparent 50%)',
       }}
     >
       <motion.div
@@ -141,8 +146,9 @@ export default function LoginPage() {
           sx={{
             p: { xs: 4, md: 5 },
             borderRadius: '24px',
-            bgcolor: 'rgba(22, 27, 34, 0.8)',
-            border: '1px solid rgba(255,255,255,0.06)',
+            bgcolor: (theme) => theme.palette.mode === 'dark' ? 'rgba(22, 27, 34, 0.8)' : 'rgba(255, 255, 255, 0.9)',
+            border: '1px solid',
+            borderColor: 'divider',
             backdropFilter: 'blur(12px)',
             width: '100%',
           }}
@@ -160,10 +166,10 @@ export default function LoginPage() {
               <Typography sx={{ fontSize: '24px' }}>🎓</Typography>
             </Box>
             
-            <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 900, color: '#F0F4F8', letterSpacing: '-0.02em' }}>
+            <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 900, color: 'text.primary', letterSpacing: '-0.02em' }}>
               Welcome Back
             </Typography>
-            <Typography sx={{ color: '#8892A4', fontSize: '0.9rem', mt: 0.5 }}>
+            <Typography sx={{ color: 'text.secondary', fontSize: '0.9rem', mt: 0.5 }}>
               Login to continue your PSC preparation
             </Typography>
           </Box>
@@ -241,42 +247,42 @@ export default function LoginPage() {
 
           {/* Separation Divider */}
           <Box sx={{ display: 'flex', alignItems: 'center', my: 4 }}>
-            <Box sx={{ flex: 1, height: '1px', bgcolor: 'rgba(255,255,255,0.06)' }} />
-            <Typography variant="caption" sx={{ px: 2, color: '#4A5568', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+            <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
+            <Typography variant="caption" sx={{ px: 2, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
               Portal Links
             </Typography>
-            <Box sx={{ flex: 1, height: '1px', bgcolor: 'rgba(255,255,255,0.06)' }} />
+            <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
           </Box>
 
           <Stack spacing={2} sx={{ alignItems: 'center' }}>
-            <Typography variant="body2" sx={{ color: '#8892A4' }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               Are you an institute owner?{' '}
               <MuiLink 
                 component={Link} 
                 href="/institute/login" 
                 sx={{ 
-                  color: '#F59E0B', 
+                  color: 'secondary.main', 
                   fontWeight: 700, 
                   textDecoration: 'none',
                   transition: 'color 0.2s',
-                  '&:hover': { color: '#d97706', textDecoration: 'underline' } 
+                  '&:hover': { color: 'secondary.dark', textDecoration: 'underline' } 
                 }}
               >
                 Portal Login
               </MuiLink>
             </Typography>
 
-            <Typography variant="body2" sx={{ color: '#8892A4' }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               Don’t have an account?{' '}
               <MuiLink 
                 component={Link} 
                 href="/register" 
                 sx={{ 
-                  color: '#2E8B57', 
+                  color: 'primary.main', 
                   fontWeight: 700, 
                   textDecoration: 'none',
                   transition: 'color 0.2s',
-                  '&:hover': { color: '#22c55e', textDecoration: 'underline' } 
+                  '&:hover': { color: 'primary.dark', textDecoration: 'underline' } 
                 }}
               >
                 Create Account

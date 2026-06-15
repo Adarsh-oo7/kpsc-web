@@ -4,7 +4,7 @@ import { useState } from 'react';
 import {
   AppBar, Toolbar, IconButton, Box, Typography,
   Badge, Avatar, Tooltip, Popover, List, ListItem, ListItemButton,
-  ListItemText, Divider, CircularProgress, Button
+  ListItemText, Divider, CircularProgress, Button, Stack, Drawer
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -12,7 +12,7 @@ import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import BoltIcon from '@mui/icons-material/Bolt';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAppContext } from '@/context/AppContext';
 import { drawerWidth } from './Sidebar';
 
@@ -23,8 +23,10 @@ interface MainHeaderProps {
 export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
   const { user, profile, logout, unreadCount, messages, markAsRead, isLoading, themeMode, toggleThemeMode } = useAppContext();
   const router = useRouter();
+  const pathname = usePathname();
   const [notifAnchor, setNotifAnchor] = useState<HTMLButtonElement | null>(null);
   const [profileAnchor, setProfileAnchor] = useState<HTMLButtonElement | null>(null);
+  const [visitorDrawerOpen, setVisitorDrawerOpen] = useState(false);
 
   const streak = profile?.current_streak || 0;
   const xp = profile?.total_xp || 0;
@@ -35,7 +37,239 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
     router.push('/login');
   };
 
+  const visitorLinks = [
+    { label: 'Home', path: '/' },
+    { label: 'Features', path: '/features' },
+    { label: 'Exams', path: '/exams' },
+    { label: 'Current Affairs', path: '/current-affairs' },
+    { label: 'Institutes', path: '/institutes' },
+    { label: 'Testimonials', path: '/testimonials' },
+    { label: 'Blog', path: '/blog' },
+    { label: 'Contact', path: '/contact' },
+  ];
+
   if (isLoading) return null;
+
+  if (!user) {
+    return (
+      <AppBar
+        position="fixed"
+        elevation={0}
+        sx={{
+          background: themeMode === 'dark' ? 'rgba(15,17,23,0.85)' : 'rgba(255,255,255,0.85)',
+          backdropFilter: 'blur(16px)',
+          borderBottom: themeMode === 'dark' ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
+          boxShadow: 'none',
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          color: 'text.primary',
+        }}
+      >
+        <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64, px: { xs: 2, sm: 3 } }}>
+          {/* Left: Mobile Menu Toggle & Brand/Logo */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <IconButton
+              onClick={() => setVisitorDrawerOpen(true)}
+              edge="start"
+              sx={{ display: { lg: 'none' }, color: themeMode === 'dark' ? '#8892A4' : '#64748B' }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Box 
+              onClick={() => router.push('/')}
+              sx={{ display: 'flex', alignItems: 'center', gap: 1.25, cursor: 'pointer' }}
+            >
+              <Box sx={{
+                width: 32, height: 32,
+                background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
+                borderRadius: '8px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 4px 10px rgba(27,107,58,0.3)',
+              }}>
+                <Typography sx={{ fontSize: '16px' }}>🎓</Typography>
+              </Box>
+              <Typography
+                sx={{
+                  fontFamily: "'Cabinet Grotesk', sans-serif",
+                  fontWeight: 900, fontSize: '1.1rem',
+                  color: 'text.primary', letterSpacing: '-0.02em',
+                }}
+              >
+                KPSC Master
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Center: Scroll links (desktop only) */}
+          <Stack 
+            direction="row" 
+            spacing={3} 
+            sx={{ 
+              display: { xs: 'none', lg: 'flex' },
+              alignItems: 'center'
+            }}
+          >
+            {visitorLinks.map((link) => {
+              const isActive = pathname === link.path;
+              return (
+                <Typography
+                  key={link.path}
+                  onClick={() => router.push(link.path)}
+                  sx={{
+                    fontSize: '0.875rem',
+                    fontWeight: 600,
+                    color: isActive ? 'primary.main' : 'text.secondary',
+                    cursor: 'pointer',
+                    '&:hover': { color: 'primary.main' },
+                    transition: 'color 0.2s',
+                  }}
+                >
+                  {link.label}
+                </Typography>
+              );
+            })}
+          </Stack>
+
+          {/* Right: Actions */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Tooltip title={themeMode === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
+              <IconButton onClick={toggleThemeMode} sx={{ color: 'text.secondary' }}>
+                {themeMode === 'dark' ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
+              </IconButton>
+            </Tooltip>
+
+            <Button
+              variant="text"
+              size="small"
+              onClick={() => router.push('/login')}
+              sx={{ fontWeight: 700, fontSize: '0.85rem' }}
+            >
+              Login
+            </Button>
+            <Button
+              variant="contained"
+              size="small"
+              onClick={() => router.push('/register')}
+              sx={{ 
+                background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
+                py: 0.75, px: 2, borderRadius: '8px',
+                fontWeight: 700, fontSize: '0.85rem'
+              }}
+            >
+              Register
+            </Button>
+          </Box>
+        </Toolbar>
+
+        {/* Visitor Mobile Drawer */}
+        <Drawer
+          anchor="left"
+          open={visitorDrawerOpen}
+          onClose={() => setVisitorDrawerOpen(false)}
+          PaperProps={{
+            sx: {
+              width: 280,
+              bgcolor: 'background.paper',
+              borderRight: '1px solid',
+              borderColor: 'divider',
+              p: 2.5,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+            }
+          }}
+        >
+          <Box>
+            {/* Logo Header */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, mb: 4 }}>
+              <Box sx={{
+                width: 32, height: 32,
+                background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
+                borderRadius: '8px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 4px 10px rgba(27,107,58,0.3)',
+              }}>
+                <Typography sx={{ fontSize: '16px' }}>🎓</Typography>
+              </Box>
+              <Typography
+                sx={{
+                  fontFamily: "'Cabinet Grotesk', sans-serif",
+                  fontWeight: 900, fontSize: '1.1rem',
+                  color: 'text.primary', letterSpacing: '-0.02em',
+                }}
+              >
+                KPSC Master
+              </Typography>
+            </Box>
+
+            {/* Links List */}
+            <List disablePadding>
+              {visitorLinks.map((link) => {
+                const isActive = pathname === link.path;
+                return (
+                  <ListItem key={link.path} disablePadding sx={{ mb: 1 }}>
+                    <ListItemButton
+                      onClick={() => {
+                        router.push(link.path);
+                        setVisitorDrawerOpen(false);
+                      }}
+                      sx={{
+                        borderRadius: '10px',
+                        bgcolor: isActive ? 'rgba(27, 107, 58, 0.08)' : 'transparent',
+                        color: isActive ? 'primary.main' : 'text.secondary',
+                        '&:hover': {
+                          bgcolor: 'action.hover',
+                        }
+                      }}
+                    >
+                      <ListItemText 
+                        primary={link.label} 
+                        primaryTypographyProps={{ 
+                          fontWeight: isActive ? 700 : 500,
+                          fontSize: '0.925rem',
+                        }} 
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                );
+              })}
+            </List>
+          </Box>
+
+          <Box sx={{ mt: 'auto', pt: 3, borderTop: '1px solid', borderColor: 'divider' }}>
+            <Stack spacing={1.5}>
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={() => {
+                  router.push('/login');
+                  setVisitorDrawerOpen(false);
+                }}
+                sx={{ py: 1.25, borderRadius: '10px', fontWeight: 700 }}
+              >
+                Login
+              </Button>
+              <Button
+                variant="contained"
+                fullWidth
+                onClick={() => {
+                  router.push('/register');
+                  setVisitorDrawerOpen(false);
+                }}
+                sx={{
+                  py: 1.25,
+                  borderRadius: '10px',
+                  background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
+                  fontWeight: 700,
+                }}
+              >
+                Register
+              </Button>
+            </Stack>
+          </Box>
+        </Drawer>
+      </AppBar>
+    );
+  }
 
   return (
     <AppBar
@@ -48,6 +282,7 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
         borderBottom: themeMode === 'dark' ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
         boxShadow: 'none',
         zIndex: (theme) => theme.zIndex.drawer + 1,
+        color: 'text.primary',
       }}
     >
       <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64, px: { xs: 2, sm: 3 } }}>
@@ -184,22 +419,23 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
         PaperProps={{
           sx: {
             width: 320, mt: 1,
-            background: '#161B22',
-            border: '1px solid rgba(255,255,255,0.08)',
+            bgcolor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider',
             borderRadius: '16px',
             maxHeight: 400, overflowY: 'auto',
           }
         }}
       >
-        <Box sx={{ p: 2, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-          <Typography sx={{ fontWeight: 700, color: '#F0F4F8', fontFamily: "'Cabinet Grotesk'" }}>
+        <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Typography sx={{ fontWeight: 700, color: 'text.primary', fontFamily: "'Cabinet Grotesk'" }}>
             Notifications
           </Typography>
         </Box>
         {messages.length === 0 ? (
           <Box sx={{ p: 3, textAlign: 'center' }}>
             <Typography sx={{ fontSize: '1.5rem', mb: 1 }}>🔔</Typography>
-            <Typography sx={{ color: '#8892A4', fontSize: '0.875rem' }}>
+            <Typography sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
               You're all caught up! Come back after today's quiz.
             </Typography>
           </Box>
@@ -211,16 +447,19 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
                 onClick={() => markAsRead(msg.id)}
                 sx={{
                   cursor: 'pointer', py: 1.5, px: 2,
-                  background: !msg.read_by?.includes(user?.id) ? 'rgba(27,107,58,0.08)' : 'transparent',
-                  '&:hover': { background: 'rgba(255,255,255,0.04)' },
-                  borderBottom: i < messages.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+                  background: !msg.read_by?.includes(user?.id) 
+                    ? (themeMode === 'dark' ? 'rgba(27,107,58,0.15)' : 'rgba(27,107,58,0.08)') 
+                    : 'transparent',
+                  '&:hover': { bgcolor: 'action.hover' },
+                  borderBottom: i < messages.length - 1 ? '1px solid' : 'none',
+                  borderColor: 'divider',
                 }}
               >
                 <ListItemText
                   primary={msg.subject || msg.title || 'Notification'}
                   secondary={msg.body || msg.content || ''}
-                  primaryTypographyProps={{ sx: { fontSize: '0.875rem', fontWeight: 600, color: '#F0F4F8' } }}
-                  secondaryTypographyProps={{ sx: { fontSize: '0.8rem', color: '#8892A4', mt: 0.25 } }}
+                  primaryTypographyProps={{ sx: { fontSize: '0.875rem', fontWeight: 600, color: 'text.primary' } }}
+                  secondaryTypographyProps={{ sx: { fontSize: '0.8rem', color: 'text.secondary', mt: 0.25 } }}
                 />
               </ListItem>
             ))}
@@ -238,17 +477,18 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
         PaperProps={{
           sx: {
             width: 220, mt: 1,
-            background: '#161B22',
-            border: '1px solid rgba(255,255,255,0.08)',
+            bgcolor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider',
             borderRadius: '16px',
           }
         }}
       >
-        <Box sx={{ p: 2, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-          <Typography sx={{ fontWeight: 700, color: '#F0F4F8', fontSize: '0.9rem' }}>
+        <Box sx={{ p: 2, borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Typography sx={{ fontWeight: 700, color: 'text.primary', fontSize: '0.9rem' }}>
             {user?.username}
           </Typography>
-          <Typography sx={{ color: '#8892A4', fontSize: '0.75rem' }}>
+          <Typography sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>
             {user?.email}
           </Typography>
         </Box>
@@ -265,12 +505,12 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
               >
                 <ListItemText
                   primary={item.label}
-                  primaryTypographyProps={{ sx: { fontSize: '0.875rem', color: '#F0F4F8' } }}
+                  primaryTypographyProps={{ sx: { fontSize: '0.875rem', color: 'text.primary' } }}
                 />
               </ListItemButton>
             </ListItem>
           ))}
-          <Divider sx={{ my: 0.5, borderColor: 'rgba(255,255,255,0.06)' }} />
+          <Divider sx={{ my: 0.5 }} />
           <ListItem disablePadding>
             <ListItemButton
               onClick={handleLogout}

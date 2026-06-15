@@ -18,6 +18,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
 
@@ -137,6 +138,39 @@ const quickActions = [
   { label: 'Leaderboard', icon: <LeaderboardIcon />, path: '/leaderboard', color: '#D97706', bg: 'rgba(217,119,6,0.15)', border: 'rgba(217,119,6,0.2)' },
 ];
 
+const motivationalQuotes = [
+  { text: "Arise, awake, and stop not till the goal is reached.", author: "Swami Vivekananda" },
+  { text: "You have to dream before your dreams can come true.", author: "Dr. A.P.J. Abdul Kalam" },
+  { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+  { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
+  { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
+  { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+  { text: "The only limit to our realization of tomorrow will be our doubts of today.", author: "Franklin D. Roosevelt" },
+  { text: "Do not wait; the time will never be 'just right.' Start where you stand.", author: "Napoleon Hill" },
+  { text: "Your talent determines what you can do. Your motivation determines how much you are willing to do.", author: "Lou Holtz" },
+  { text: "The best way to predict the future is to create it.", author: "Abraham Lincoln" },
+  { text: "Education is the most powerful weapon which you can use to change the world.", author: "Nelson Mandela" },
+  { text: "There are no shortcuts to any place worth going.", author: "Beverly Sills" },
+  { text: "If you fail, never give up because FAIL means 'First Attempt In Learning'.", author: "Dr. A.P.J. Abdul Kalam" },
+  { text: "Strength is life, weakness is death.", author: "Swami Vivekananda" },
+  { text: "It is during our darkest moments that we must focus to see the light.", author: "Aristotle" },
+  { text: "A person who never made a mistake never tried anything new.", author: "Albert Einstein" },
+  { text: "The future depends on what you do today.", author: "Mahatma Gandhi" },
+  { text: "Don't let what you cannot do interfere with what you can do.", author: "John Wooden" },
+  { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
+  { text: "Continuous effort - not strength or intelligence - is the key to unlocking our potential.", author: "Winston Churchill" },
+  { text: "Genius is 1% talent and 99% hard work.", author: "Albert Einstein" },
+  { text: "Our greatest weakness lies in giving up. The most certain way to succeed is always to try just one more time.", author: "Thomas A. Edison" },
+  { text: "Focus on the journey, not the destination. Joy is found not in finishing an activity but in doing it.", author: "Greg Anderson" },
+  { text: "Ninety-nine percent of the failures come from people who have the habit of making excuses.", author: "George Washington Carver" },
+  { text: "Patience and perseverance have a magical effect before which difficulties disappear and obstacles vanish.", author: "John Quincy Adams" },
+  { text: "The structure of success is built on the foundation of self-discipline.", author: "Unknown" },
+  { text: "Success is the sum of small efforts, repeated day in and day out.", author: "Robert Collier" },
+  { text: "If you want to shine like a sun, first burn like a sun.", author: "Dr. A.P.J. Abdul Kalam" },
+  { text: "Concentrate all your thoughts upon the work at hand. The sun's rays do not burn until brought to a focus.", author: "Alexander Graham Bell" },
+  { text: "An investment in knowledge pays the best interest.", author: "Benjamin Franklin" }
+];
+
 // ============================================================
 // Main Component
 // ============================================================
@@ -144,6 +178,21 @@ export default function HomePage() {
   const { profile, fetcher, user, isLoading: ctxLoading } = useAppContext();
   const router = useRouter();
   const [heroIndex, setHeroIndex] = useState(0);
+  const [quoteIndex, setQuoteIndex] = useState(0);
+
+  // Initialize with a random quote index on component mount
+  useEffect(() => {
+    const randomIndex = Math.floor(Math.random() * motivationalQuotes.length);
+    setQuoteIndex(randomIndex);
+  }, []);
+
+  const handleNewQuote = () => {
+    let newIndex = quoteIndex;
+    while (newIndex === quoteIndex && motivationalQuotes.length > 1) {
+      newIndex = Math.floor(Math.random() * motivationalQuotes.length);
+    }
+    setQuoteIndex(newIndex);
+  };
 
   useEffect(() => {
     if (!ctxLoading && !user) router.push('/login');
@@ -259,6 +308,89 @@ export default function HomePage() {
             color="#F59E0B"
           />
         </Stack>
+      </motion.div>
+
+      {/* Daily Inspiration / Quote Card */}
+      <motion.div 
+        initial={{ opacity: 0, y: 16 }} 
+        animate={{ opacity: 1, y: 0 }} 
+        transition={{ delay: 0.12, duration: 0.5 }}
+      >
+        <Box sx={{
+          mb: 3,
+          p: 2.5,
+          position: 'relative',
+          background: (theme) => theme.palette.mode === 'dark' 
+            ? 'linear-gradient(135deg, rgba(27,107,58,0.12) 0%, rgba(27,107,58,0.04) 100%)' 
+            : 'linear-gradient(135deg, rgba(27,107,58,0.06) 0%, rgba(27,107,58,0.01) 100%)',
+          border: '1px solid',
+          borderColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(46,139,87,0.2)' : 'rgba(46,139,87,0.15)',
+          borderLeft: '4px solid #2E8B57',
+          borderRadius: '16px',
+          overflow: 'hidden'
+        }}>
+          {/* Header row with Title and Button */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+              <FormatQuoteIcon sx={{ color: '#2E8B57', fontSize: '1.25rem', transform: 'rotate(180deg)' }} />
+              <Typography sx={{ 
+                fontSize: '0.7rem', 
+                fontWeight: 700, 
+                color: '#2E8B57', 
+                letterSpacing: '0.08em', 
+                textTransform: 'uppercase' 
+              }}>
+                Daily Inspiration
+              </Typography>
+            </Box>
+            <Button 
+              size="small" 
+              onClick={handleNewQuote}
+              sx={{ 
+                fontSize: '0.7rem', 
+                color: '#2E8B57', 
+                fontWeight: 700,
+                textTransform: 'none',
+                p: 0,
+                minWidth: 0,
+                height: 'auto',
+                '&:hover': { background: 'none', textDecoration: 'underline' }
+              }}
+            >
+              New Quote ⚡
+            </Button>
+          </Box>
+
+          {/* Quote Text and Author inside AnimatePresence for smooth transitions */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={quoteIndex}
+              initial={{ opacity: 0, x: 8 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -8 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Typography sx={{ 
+                fontStyle: 'italic', 
+                fontSize: '0.9rem', 
+                color: 'text.primary', 
+                lineHeight: 1.5,
+                fontWeight: 500,
+                mb: 0.75
+              }}>
+                "{motivationalQuotes[quoteIndex]?.text}"
+              </Typography>
+              <Typography sx={{ 
+                fontSize: '0.75rem', 
+                color: 'text.secondary', 
+                fontWeight: 600,
+                textAlign: 'right'
+              }}>
+                — {motivationalQuotes[quoteIndex]?.author}
+              </Typography>
+            </motion.div>
+          </AnimatePresence>
+        </Box>
       </motion.div>
 
       {/* Hero Swipeable Strip */}
