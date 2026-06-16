@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Box, Typography, Button, Container, Grid, Chip, Stack, Avatar, CircularProgress, TextField } from '@mui/material';
-import { motion, useInView } from 'framer-motion';
+import { motion } from 'framer-motion';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { useAppContext } from '@/context/AppContext';
@@ -110,8 +110,6 @@ function StatCounter({ end, label }: { end: string; label: string }) {
 export default function PublicHomePage() {
   const { user } = useAppContext();
   const router = useRouter();
-  const heroRef = useRef(null);
-  const isHeroInView = useInView(heroRef, { once: true });
 
   // Logged in users get redirected automatically to their dashboard
   useEffect(() => {
@@ -132,7 +130,6 @@ export default function PublicHomePage() {
     <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', overflow: 'hidden' }}>
       {/* ===== HERO ===== */}
       <Box
-        ref={heroRef}
         sx={{
           position: 'relative',
           minHeight: { xs: 'auto', md: '80vh' },
@@ -170,7 +167,7 @@ export default function PublicHomePage() {
         <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, mb: { xs: 3, md: 4 } }}>
           <motion.div
             initial={{ opacity: 0, y: 30 }}
-            animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           >
             {/* Badge */}
