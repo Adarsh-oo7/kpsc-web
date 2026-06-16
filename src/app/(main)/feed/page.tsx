@@ -171,7 +171,8 @@ export default function StudyFeedPage() {
   const handleNext = async () => {
     if (!currentCard) return;
     const isQuiz = typeof currentCard.id === 'string' && currentCard.id.startsWith('quiz-');
-    if (!isQuiz) {
+    const isReask = typeof currentCard.id === 'string' && currentCard.id.startsWith('reask-');
+    if (!isQuiz && !isReask) {
       try {
         await apiClient.post('/study-feed/view/', { card_id: currentCard.id });
         // Optimistically update views_today without refetching from server
@@ -212,10 +213,52 @@ export default function StudyFeedPage() {
         setLevelUp(res.data.gamification.new_level);
       }
       mutateProfile();
+
+      // If user got the answer wrong, re-inject this question card 3 cards later
+      if (!correct) {
+        const reaskCard = {
+          ...currentCard,
+          id: `reask-${currentCard.id}-${Date.now()}`,
+        };
+        const targetIndex = currentIndex + 4; // Inserts it 3 cards later (e.g. current index + 4)
+        const updatedCards = [...cards];
+        if (targetIndex >= updatedCards.length) {
+          updatedCards.push(reaskCard);
+        } else {
+          updatedCards.splice(targetIndex, 0, reaskCard);
+        }
+        if (feedData) {
+          mutateFeed({
+            ...feedData,
+            cards: updatedCards
+          }, { revalidate: false });
+        }
+      }
     } catch {
       const correct = selectedOption === currentCard.content_data?.correct_answer;
       setIsCorrect(correct);
       setIsAnswered(true);
+
+      // Re-inject on connection failure too
+      if (!correct) {
+        const reaskCard = {
+          ...currentCard,
+          id: `reask-${currentCard.id}-${Date.now()}`,
+        };
+        const targetIndex = currentIndex + 4;
+        const updatedCards = [...cards];
+        if (targetIndex >= updatedCards.length) {
+          updatedCards.push(reaskCard);
+        } else {
+          updatedCards.splice(targetIndex, 0, reaskCard);
+        }
+        if (feedData) {
+          mutateFeed({
+            ...feedData,
+            cards: updatedCards
+          }, { revalidate: false });
+        }
+      }
     } finally {
       setIsSubmitting(false);
     }
