@@ -16,7 +16,7 @@ import {
   Link as MuiLink
 } from '@mui/material';
 import Link from 'next/link';
-import CorporateFareIcon from '@mui/icons-material/CorporateFare';
+import Image from 'next/image';
 import PersonOutline from '@mui/icons-material/PersonOutline';
 import LockOutlined from '@mui/icons-material/LockOutlined';
 import { motion } from 'framer-motion';
@@ -138,15 +138,26 @@ export default function InstituteLoginPage() {
         >
           {/* Logo & Header */}
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
+            {/* Logo container */}
             <Box sx={{
-              width: 50, height: 50,
-              background: 'linear-gradient(135deg, #8B5CF6, #4C1D95)',
-              borderRadius: '12px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 14px rgba(139,92,246,0.3)',
-              mb: 2
+              width: 80,
+              height: 80,
+              bgcolor: 'white',
+              borderRadius: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mb: 2.5,
+              boxShadow: '0 8px 24px rgba(139,92,246,0.25)',
+              overflow: 'hidden',
             }}>
-              <CorporateFareIcon sx={{ fontSize: 24, color: 'white' }} />
+              <Image
+                src="/logo.png"
+                alt="KPSC Master Logo"
+                width={64}
+                height={64}
+                style={{ objectFit: 'contain' }}
+              />
             </Box>
             
             <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 900, color: 'text.primary', letterSpacing: '-0.02em' }}>
