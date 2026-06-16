@@ -19,6 +19,7 @@ async function getQuestion(slug: string) {
   }
 }
 
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
