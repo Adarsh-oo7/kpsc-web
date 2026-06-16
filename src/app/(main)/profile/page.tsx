@@ -55,6 +55,23 @@ const getLevelProgress = (xp: number, lvl: number) => {
   return { pct, remaining, nextXp: nextThreshold };
 };
 
+const DISTRICTS = [
+  { key: 'TVM', name: 'Thiruvananthapuram' },
+  { key: 'KLM', name: 'Kollam' },
+  { key: 'PTA', name: 'Pathanamthitta' },
+  { key: 'ALP', name: 'Alappuzha' },
+  { key: 'KTY', name: 'Kottayam' },
+  { key: 'IDK', name: 'Idukki' },
+  { key: 'EKM', name: 'Ernakulam' },
+  { key: 'TCR', name: 'Thrissur' },
+  { key: 'PKD', name: 'Palakkad' },
+  { key: 'MLP', name: 'Malappuram' },
+  { key: 'KOZ', name: 'Kozhikode' },
+  { key: 'WYD', name: 'Wayanad' },
+  { key: 'KNR', name: 'Kannur' },
+  { key: 'KSD', name: 'Kasaragod' },
+];
+
 export default function ProfilePage() {
   const { user, fetcher, isLoading: isContextLoading } = useAppContext();
   const router = useRouter();
@@ -67,6 +84,7 @@ export default function ProfilePage() {
     qualifications: '',
     date_of_birth: '',
     place: '',
+    district: '',
     preferred_topics_ids: [] as number[],
     preferred_exams_ids: [] as number[],
     preferred_difficulty: '',
@@ -85,6 +103,7 @@ export default function ProfilePage() {
   const { data: topics } = useSWR(user ? '/topics/' : null, fetcher);
   const { data: examsData } = useSWR(user ? '/exams/' : null, fetcher);
   const { data: dashData } = useSWR(user ? '/my-progress-dashboard/' : null, fetcher);
+  const { data: activityData } = useSWR(user ? '/auth/profile/activity/' : null, fetcher);
 
   // Populate form data
   useEffect(() => {
@@ -94,6 +113,7 @@ export default function ProfilePage() {
         qualifications: profileData.qualifications || '',
         date_of_birth: profileData.date_of_birth || '',
         place: profileData.place || '',
+        district: profileData.district || '',
         preferred_topics_ids: profileData.preferred_topics?.map((t: any) => t.id) || [],
         preferred_exams_ids: profileData.preferred_exams?.map((e: any) => e.id) || [],
         preferred_difficulty: profileData.preferred_difficulty || '',
@@ -134,6 +154,7 @@ export default function ProfilePage() {
     if (formData.qualifications) data.append('qualifications', formData.qualifications);
     if (formData.date_of_birth) data.append('date_of_birth', formData.date_of_birth);
     if (formData.place) data.append('place', formData.place);
+    if (formData.district) data.append('district', formData.district);
     if (formData.preferred_difficulty) data.append('preferred_difficulty', formData.preferred_difficulty);
     if (formData.bio) data.append('bio', formData.bio);
     formData.preferred_topics_ids.forEach(id => data.append('preferred_topics_ids', id.toString()));
@@ -150,6 +171,39 @@ export default function ProfilePage() {
       setIsSubmitting(false);
     }
   };
+
+  const getHeatmapGridData = () => {
+    const today = new Date();
+    const weeksCount = 24;
+    const totalDays = weeksCount * 7;
+    const startDate = new Date();
+    startDate.setDate(today.getDate() - totalDays + 1);
+    const dayOfWeek = startDate.getDay();
+    startDate.setDate(startDate.getDate() - dayOfWeek);
+    
+    const activityDates = new Set(activityData?.activity || []);
+    
+    const weeks = [];
+    const tempDate = new Date(startDate);
+    
+    for (let w = 0; w < weeksCount; w++) {
+      const weekDays = [];
+      for (let d = 0; d < 7; d++) {
+        const dateStr = tempDate.toISOString().split('T')[0];
+        const isActive = activityDates.has(dateStr);
+        weekDays.push({
+          date: new Date(tempDate),
+          dateStr,
+          isActive
+        });
+        tempDate.setDate(tempDate.getDate() + 1);
+      }
+      weeks.push(weekDays);
+    }
+    return weeks;
+  };
+
+  const heatmapWeeks = getHeatmapGridData();
 
   if (isContextLoading || (!profileData && !profileError)) {
     return (
@@ -399,11 +453,11 @@ export default function ProfilePage() {
                       />
                     </Grid>
 
-                    {/* Place */}
+                    {/* Place / Town */}
                     <Grid size={{ xs: 12, sm: 6 }}>
                       <TextField
-                        label="Place / District"
-                        placeholder="e.g., Thrissur"
+                        label="Place / Town"
+                        placeholder="e.g., Chalakudy"
                         fullWidth
                         value={formData.place}
                         onChange={(e) => setFormData({ ...formData, place: e.target.value })}
@@ -419,6 +473,34 @@ export default function ProfilePage() {
                           borderRadius: '12px'
                         }}
                       />
+                    </Grid>
+
+                    {/* District Dropdown */}
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <FormControl fullWidth sx={{
+                        '& .MuiInputLabel-root': { color: '#8892A4' },
+                        '& .MuiOutlinedInput-root': {
+                          '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
+                          '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
+                          '&.Mui-focused fieldset': { borderColor: '#2E8B57' },
+                        },
+                        bgcolor: 'rgba(255,255,255,0.01)',
+                        borderRadius: '12px'
+                      }}>
+                        <InputLabel id="district-label">District (Kerala)</InputLabel>
+                        <Select
+                          labelId="district-label"
+                          value={formData.district}
+                          onChange={(e) => setFormData({ ...formData, district: e.target.value as string })}
+                          sx={{ color: '#F0F4F8' }}
+                          label="District (Kerala)"
+                        >
+                          <MenuItem value=""><em>None</em></MenuItem>
+                          {DISTRICTS.map((d) => (
+                            <MenuItem key={d.key} value={d.key}>{d.name}</MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                     </Grid>
                   </Grid>
                 </CardContent>
@@ -595,6 +677,62 @@ export default function ProfilePage() {
                       🔥 Maximum Level Achieved!
                     </Typography>
                   )}
+                </Stack>
+              </CardContent>
+            </Card>
+
+            {/* Heatmap Card */}
+            <Card sx={{ background: '#161B22', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', mb: 4 }}>
+              <CardContent sx={{ p: 3 }}>
+                <Typography sx={{ fontWeight: 800, color: '#F0F4F8', display: 'flex', alignItems: 'center', gap: 1, mb: 2.5 }}>
+                  <LocalFireDepartmentIcon sx={{ color: '#2E8B57' }} /> Study Activity Heatmap
+                </Typography>
+                
+                <Box sx={{ display: 'flex', overflowX: 'auto', pb: 1, gap: '4px' }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', pr: 1, py: '2px', height: '88px', fontSize: '0.65rem', color: '#8892A4' }}>
+                    <Typography sx={{ fontSize: 'inherit' }}>Sun</Typography>
+                    <Typography sx={{ fontSize: 'inherit' }}>Tue</Typography>
+                    <Typography sx={{ fontSize: 'inherit' }}>Thu</Typography>
+                    <Typography sx={{ fontSize: 'inherit' }}>Sat</Typography>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', gap: '3px' }}>
+                    {heatmapWeeks.map((week, wIdx) => (
+                      <Box key={wIdx} sx={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                        {week.map((day, dIdx) => {
+                          const isToday = day.dateStr === new Date().toISOString().split('T')[0];
+                          return (
+                            <Tooltip
+                              key={dIdx}
+                              title={`${day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}: ${day.isActive ? 'Active Study Day' : 'No activity'}`}
+                              arrow
+                            >
+                              <Box sx={{
+                                width: 10,
+                                height: 10,
+                                borderRadius: '2px',
+                                bgcolor: day.isActive ? '#2E8B57' : 'rgba(255, 255, 255, 0.06)',
+                                border: isToday ? '1px solid #8B5CF6' : 'none',
+                                transition: 'transform 0.1s',
+                                '&:hover': {
+                                  transform: 'scale(1.3)',
+                                  bgcolor: day.isActive ? '#39D353' : 'rgba(255, 255, 255, 0.15)',
+                                  zIndex: 10
+                                }
+                              }} />
+                            </Tooltip>
+                          );
+                        })}
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+                
+                <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center" sx={{ mt: 1.5 }}>
+                  <Typography sx={{ fontSize: '0.65rem', color: '#8892A4' }}>Less</Typography>
+                  <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: 'rgba(255, 255, 255, 0.06)' }} />
+                  <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: '#2E8B57' }} />
+                  <Typography sx={{ fontSize: '0.65rem', color: '#8892A4' }}>More</Typography>
                 </Stack>
               </CardContent>
             </Card>

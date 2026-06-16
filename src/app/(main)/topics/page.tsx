@@ -158,9 +158,8 @@ export default function TopicsPage() {
     );
   }, [topics, searchQuery]);
 
-  const handleTopicSelect = (selectedTopicId: string) => {
-    setTopicId(selectedTopicId);
-    router.push(`/quiz?topic_id=${selectedTopicId}`);
+  const handleTopicSelect = (slug: string) => {
+    router.push(`/topics/${slug}`);
   };
 
   return (
@@ -246,7 +245,7 @@ export default function TopicsPage() {
             <Box key={topic.id}>
               <TopicCard 
                 topic={topic} 
-                onClick={() => handleTopicSelect(topic.id.toString())} 
+                onClick={() => handleTopicSelect(topic.slug)} 
               />
             </Box>
           ))
