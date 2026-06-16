@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Box, Typography, Button, Container, Grid, Chip, Stack, Avatar, CircularProgress, TextField } from '@mui/material';
 import { motion } from 'framer-motion';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -617,9 +618,12 @@ export default function PublicHomePage() {
       <Box sx={{ borderTop: '1px solid', borderColor: 'divider', py: 5 }}>
         <Container maxWidth="lg">
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2.5 }}>
-            <Typography sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: 'text.primary', fontSize: '1.05rem' }}>
-              🎓 KPSC Master
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Image src="/logo.png" alt="KPSC Master Logo" width={24} height={24} style={{ objectFit: 'contain' }} />
+              <Typography sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: 'text.primary', fontSize: '1.05rem' }}>
+                KPSC Master
+              </Typography>
+            </Box>
             <Typography sx={{ color: 'text.disabled', fontSize: '0.775rem', fontWeight: 500 }}>
               © 2026 KPSC Master. Kerala's #1 PSC Prep Platform.
             </Typography>

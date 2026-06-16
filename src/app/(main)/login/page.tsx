@@ -16,6 +16,7 @@ import {
   Stack
 } from '@mui/material';
 import Link from 'next/link';
+import Image from 'next/image';
 import PersonOutline from '@mui/icons-material/PersonOutline';
 import LockOutlined from '@mui/icons-material/LockOutlined';
 import KeyIcon from '@mui/icons-material/Key';
@@ -195,14 +196,22 @@ export default function LoginPage() {
           {/* Logo & Header */}
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
             <Box sx={{
-              width: 50, height: 50,
-              background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
-              borderRadius: '12px',
+              width: 80, height: 80,
+              bgcolor: 'white',
+              borderRadius: '20px',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 14px rgba(27,107,58,0.3)',
-              mb: 2
+              boxShadow: '0 8px 24px rgba(46, 139, 87, 0.25)',
+              overflow: 'hidden',
+              p: 1,
+              mb: 2.5
             }}>
-              <Typography sx={{ fontSize: '24px' }}>🎓</Typography>
+              <Image
+                src="/logo.png"
+                alt="KPSC Master Logo"
+                width={64}
+                height={64}
+                style={{ objectFit: 'contain' }}
+              />
             </Box>
             
             <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 900, color: 'text.primary', letterSpacing: '-0.02em' }}>

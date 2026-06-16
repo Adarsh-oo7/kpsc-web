@@ -6,6 +6,7 @@ import {
   Box, Typography, Divider, useTheme, useMediaQuery, Avatar, LinearProgress
 } from '@mui/material';
 import { useAppContext } from '@/context/AppContext';
+import Image from 'next/image';
 
 // Icons
 import HomeIcon from '@mui/icons-material/Home';
@@ -81,12 +82,16 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
           <Box sx={{
             width: 36, height: 36,
-            background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
-            borderRadius: '10px',
+            position: 'relative',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(27,107,58,0.4)',
           }}>
-            <Typography sx={{ fontSize: '18px' }}>🎓</Typography>
+            <Image
+              src="/logo.png"
+              alt="KPSC Master Logo"
+              width={36}
+              height={36}
+              style={{ objectFit: 'contain' }}
+            />
           </Box>
           <Box>
             <Typography sx={{

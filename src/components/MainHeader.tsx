@@ -15,6 +15,7 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAppContext } from '@/context/AppContext';
 import { drawerWidth } from './Sidebar';
+import Image from 'next/image';
 
 interface MainHeaderProps {
   onDrawerToggle: () => void;
@@ -80,12 +81,16 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
             >
               <Box sx={{
                 width: 32, height: 32,
-                background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
-                borderRadius: '8px',
+                position: 'relative',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 4px 10px rgba(27,107,58,0.3)',
               }}>
-                <Typography sx={{ fontSize: '16px' }}>🎓</Typography>
+                <Image
+                  src="/logo.png"
+                  alt="KPSC Master Logo"
+                  width={32}
+                  height={32}
+                  style={{ objectFit: 'contain' }}
+                />
               </Box>
               <Typography
                 sx={{
@@ -183,12 +188,16 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, mb: 4 }}>
               <Box sx={{
                 width: 32, height: 32,
-                background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
-                borderRadius: '8px',
+                position: 'relative',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 4px 10px rgba(27,107,58,0.3)',
               }}>
-                <Typography sx={{ fontSize: '16px' }}>🎓</Typography>
+                <Image
+                  src="/logo.png"
+                  alt="KPSC Master Logo"
+                  width={32}
+                  height={32}
+                  style={{ objectFit: 'contain' }}
+                />
               </Box>
               <Typography
                 sx={{
@@ -295,16 +304,32 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
           >
             <MenuIcon />
           </IconButton>
-          <Typography
+          <Box
+            onClick={() => router.push('/home')}
             sx={{
-              display: { lg: 'none' },
-              fontFamily: "'Cabinet Grotesk', sans-serif",
-              fontWeight: 800, fontSize: '1rem',
-              color: themeMode === 'dark' ? '#F0F4F8' : '#0F172A', letterSpacing: '-0.02em',
+              display: { xs: 'flex', lg: 'none' },
+              alignItems: 'center',
+              gap: 1,
+              cursor: 'pointer',
             }}
           >
-            KPSC Master
-          </Typography>
+            <Image
+              src="/logo.png"
+              alt="KPSC Master Logo"
+              width={28}
+              height={28}
+              style={{ objectFit: 'contain' }}
+            />
+            <Typography
+              sx={{
+                fontFamily: "'Cabinet Grotesk', sans-serif",
+                fontWeight: 800, fontSize: '1rem',
+                color: themeMode === 'dark' ? '#F0F4F8' : '#0F172A', letterSpacing: '-0.02em',
+              }}
+            >
+              KPSC Master
+            </Typography>
+          </Box>
         </Box>
 
         {/* Center: Streak Badge (clickable) */}
