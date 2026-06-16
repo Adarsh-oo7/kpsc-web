@@ -116,6 +116,7 @@ export default function StudyFeedPage() {
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
+      revalidateIfStale: false,
     }
   );
   const { data: userProfile, mutate: mutateProfile } = useSWR(
