@@ -111,7 +111,12 @@ export default function StudyFeedPage() {
 
   // Data
   const { data: feedData, error: feedError, isLoading: feedLoading, mutate: mutateFeed } = useSWR(
-    user ? '/study-feed/' : null, fetcher
+    user ? '/study-feed/' : null,
+    fetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    }
   );
   const { data: userProfile, mutate: mutateProfile } = useSWR(
     user ? '/auth/profile/' : null, fetcher
@@ -155,12 +160,28 @@ export default function StudyFeedPage() {
     setBookmarked(false);
   }, [currentIndex]);
 
+  // Bounds check currentIndex when cards change
+  useEffect(() => {
+    if (cards.length > 0 && currentIndex >= cards.length) {
+      setCurrentIndex(0);
+    }
+  }, [cards.length, currentIndex]);
+
   const handleNext = async () => {
     if (!currentCard) return;
-    if (typeof currentCard.id === 'number' || !String(currentCard.id).startsWith('quiz-')) {
-      try { await apiClient.post('/study-feed/view/', { card_id: currentCard.id }); } catch { }
+    const isQuiz = typeof currentCard.id === 'string' && currentCard.id.startsWith('quiz-');
+    if (!isQuiz) {
+      try {
+        await apiClient.post('/study-feed/view/', { card_id: currentCard.id });
+        // Optimistically update views_today without refetching from server
+        if (feedData) {
+          mutateFeed({
+            ...feedData,
+            views_today: (feedData.views_today || 0) + 1
+          }, { revalidate: false });
+        }
+      } catch { }
     }
-    mutateFeed();
     mutateProfile();
     if (currentIndex < cards.length - 1) {
       setCurrentIndex(prev => prev + 1);
