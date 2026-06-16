@@ -6,12 +6,17 @@ import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 async function getCurrentAffair(slug: string) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-  const res = await fetch(`${apiUrl}/api/public/current-affairs/${slug}/`, {
-    next: { revalidate: 3600 }
-  });
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+    const res = await fetch(`${apiUrl}/api/public/current-affairs/${slug}/`, {
+      next: { revalidate: 3600 }
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching current affair:", error);
+    return null;
+  }
 }
 
 interface PageProps {

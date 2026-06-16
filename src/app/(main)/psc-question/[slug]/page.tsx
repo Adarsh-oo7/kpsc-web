@@ -6,12 +6,17 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 // Helper to fetch data on the server
 async function getQuestion(slug: string) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-  const res = await fetch(`${apiUrl}/api/public/questions/${slug}/`, {
-    next: { revalidate: 3600 } // Cache and revalidate every hour
-  });
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+    const res = await fetch(`${apiUrl}/api/public/questions/${slug}/`, {
+      next: { revalidate: 3600 } // Cache and revalidate every hour
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching question:", error);
+    return null;
+  }
 }
 
 interface PageProps {

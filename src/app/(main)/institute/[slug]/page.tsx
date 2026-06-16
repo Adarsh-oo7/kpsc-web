@@ -9,12 +9,17 @@ import SchoolIcon from '@mui/icons-material/School';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 async function getInstitute(slug: string) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-  const res = await fetch(`${apiUrl}/api/institute/public/detail/${slug}/`, {
-    next: { revalidate: 3600 }
-  });
-  if (!res.ok) return null;
-  return res.json();
+  try {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+    const res = await fetch(`${apiUrl}/api/institute/public/detail/${slug}/`, {
+      next: { revalidate: 3600 }
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (error) {
+    console.error("Error fetching institute:", error);
+    return null;
+  }
 }
 
 interface PageProps {

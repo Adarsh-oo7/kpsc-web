@@ -195,8 +195,14 @@ export default function HomePage() {
   };
 
   useEffect(() => {
-    if (!ctxLoading && !user) router.push('/login');
-  }, [user, ctxLoading, router]);
+    if (!ctxLoading) {
+      if (!user) {
+        router.push('/login');
+      } else if (profile?.is_owner !== true && (!profile?.preferred_exams || profile.preferred_exams.length === 0)) {
+        router.push('/onboarding');
+      }
+    }
+  }, [user, profile, ctxLoading, router]);
 
   // Fetch progress dashboard
   const { data: dashData, isLoading: dashLoading } = useSWR(

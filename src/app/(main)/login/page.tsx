@@ -22,6 +22,7 @@ import KeyIcon from '@mui/icons-material/Key';
 import { motion } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
+import GoogleSignInButton from '@/components/GoogleSignInButton';
 
 // Styled component for a consistent, premium theme text field design
 const StyledTextField = styled(TextField)(({ theme }) => ({
@@ -68,14 +69,18 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { login, user, isLoading } = useAppContext();
+  const { login, user, profile, isLoading } = useAppContext();
 
   // Redirect to home if a user is already logged in and finished loading
   useEffect(() => {
     if (!isLoading && user) {
-      router.push('/');
+      if (profile?.is_owner !== true && (!profile?.preferred_exams || profile.preferred_exams.length === 0)) {
+        router.push('/onboarding');
+      } else {
+        router.push('/');
+      }
     }
-  }, [user, isLoading, router]);
+  }, [user, profile, isLoading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,11 +93,13 @@ export default function LoginPage() {
       const { access, refresh } = tokenResponse.data;
 
       // The login function handles everything else
-      const profile = await login(access, refresh);
+      const profileData = await login(access, refresh);
 
       // Redirect based on the role returned from the context's login function
-      if (profile?.is_owner === true) {
+      if (profileData?.is_owner === true) {
         router.push('/institute/dashboard');
+      } else if (!profileData?.preferred_exams || profileData.preferred_exams.length === 0) {
+        router.push('/onboarding');
       } else {
         router.push('/');
       }
@@ -103,6 +110,38 @@ export default function LoginPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = async (credential: string) => {
+    setError('');
+    setLoading(true);
+    try {
+      const response = await apiClient.post('/auth/google/', { credential });
+      const { access, refresh, has_preferred_exams } = response.data;
+
+      const profileData = await login(access, refresh);
+
+      if (profileData?.is_owner === true) {
+        router.push('/institute/dashboard');
+      } else if (!has_preferred_exams || !profileData?.preferred_exams || profileData.preferred_exams.length === 0) {
+        router.push('/onboarding');
+      } else {
+        router.push('/');
+      }
+    } catch (err: any) {
+      console.error(err);
+      if (err.response?.data?.error) {
+        setError(err.response.data.error);
+      } else {
+        setError('Google Sign-In failed. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = (errorMsg: string) => {
+    setError(errorMsg);
   };
 
   // While checking for an existing session, show a clean, styled loading screen
@@ -245,8 +284,22 @@ export default function LoginPage() {
             </Stack>
           </form>
 
+          {/* Google Sign In Option */}
+          <Box sx={{ display: 'flex', alignItems: 'center', my: 2.5 }}>
+            <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
+            <Typography variant="caption" sx={{ px: 2, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              or
+            </Typography>
+            <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
+          </Box>
+
+          <GoogleSignInButton 
+            onSuccess={handleGoogleSuccess} 
+            onError={handleGoogleError} 
+          />
+
           {/* Separation Divider */}
-          <Box sx={{ display: 'flex', alignItems: 'center', my: 4 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mt: 3, mb: 4 }}>
             <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
             <Typography variant="caption" sx={{ px: 2, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
               Portal Links

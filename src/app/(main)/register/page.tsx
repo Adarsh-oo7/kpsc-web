@@ -21,6 +21,9 @@ import MailOutline from '@mui/icons-material/MailOutline';
 import LockOutlined from '@mui/icons-material/LockOutlined';
 import { motion } from 'framer-motion';
 import apiClient from '@/lib/apiClient';
+import { useAppContext } from '@/context/AppContext';
+import GoogleSignInButton from '@/components/GoogleSignInButton';
+
 
 // Styled component for a consistent, premium theme text field design
 const StyledTextField = styled(TextField)(({ theme }) => ({
@@ -71,6 +74,41 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { login } = useAppContext();
+
+  const handleGoogleSuccess = async (credential: string) => {
+    setError('');
+    setSuccess('');
+    setLoading(true);
+    try {
+      const response = await apiClient.post('/auth/google/', { credential });
+      const { access, refresh, has_preferred_exams } = response.data;
+
+      const profileData = await login(access, refresh);
+
+      if (profileData?.is_owner === true) {
+        router.push('/institute/dashboard');
+      } else if (!has_preferred_exams || !profileData?.preferred_exams || profileData.preferred_exams.length === 0) {
+        router.push('/onboarding');
+      } else {
+        router.push('/');
+      }
+    } catch (err: any) {
+      console.error(err);
+      if (err.response?.data?.error) {
+        setError(err.response.data.error);
+      } else {
+        setError('Google Sign-In failed. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = (errorMsg: string) => {
+    setError(errorMsg);
+  };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -275,8 +313,22 @@ export default function RegisterPage() {
             </Stack>
           </form>
 
+          {/* Google Sign In Option */}
+          <Box sx={{ display: 'flex', alignItems: 'center', my: 2.5 }}>
+            <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
+            <Typography variant="caption" sx={{ px: 2, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              or
+            </Typography>
+            <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
+          </Box>
+
+          <GoogleSignInButton 
+            onSuccess={handleGoogleSuccess} 
+            onError={handleGoogleError} 
+          />
+
           {/* Bottom link */}
-          <Box sx={{ mt: 4, textAlign: 'center' }}>
+          <Box sx={{ mt: 3, textAlign: 'center' }}>
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               Already have an account?{' '}
               <MuiLink 

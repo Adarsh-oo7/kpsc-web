@@ -41,6 +41,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="description" content="KPSC Master — Kerala PSC Topper in Your Pocket. Daily quiz, mock tests, current affairs, and AI doubt solving for Kerala PSC aspirants." />
         <meta name="theme-color" content="#0F1117" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+        
+        {/* Google Identity Services SDK */}
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
       </head>
       <body>
         <AppProvider>
