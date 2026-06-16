@@ -44,11 +44,11 @@ export default function ManageRequestsPage() {
                     {requests && requests.length > 0 ? requests.map((req: any) => (
                         <ListItem key={req.id} divider sx={{py: 2}}>
                             <ListItemAvatar>
-                                <Avatar src={req.student_profile.profile_photo || ''} />
+                                <Avatar src={req.profile_photo || ''} />
                             </ListItemAvatar>
                             <ListItemText
-                                primary={req.student_profile.user.username}
-                                secondary={req.student_profile.user.email}
+                                primary={req.user?.username || 'Unknown User'}
+                                secondary={req.user?.email || ''}
                             />
                             <Stack direction="row" spacing={1}>
                                 <Button variant="contained" color="success" onClick={() => handleProcessRequest(req.id, 'approve')}>

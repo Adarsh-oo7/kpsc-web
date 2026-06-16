@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import useSWR from 'swr';
 import apiClient from '@/lib/apiClient';
+import { useAppContext } from '@/context/AppContext';
 import {
   Box, Typography, Button, CircularProgress, Alert, Paper,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
@@ -16,18 +17,19 @@ import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-// --- Reusable Fetcher (uses apiClient — auth headers injected automatically) ---
-const fetcher = (url: string) => apiClient.get(url).then(r => r.data);
+
 
 interface Topic {
     id: number;
     name: string;
 }
 
-const API_URL = '/api/institute/topics/';
+// FIXED: Correct URL (no /api/ prefix, apiClient baseURL already includes /api)
+const API_URL = '/institute/topics/';
 
 export default function ManageTopicsPage() {
-    // SWR hook to fetch topics
+    // FIXED: Use context fetcher for proper auth
+    const { fetcher } = useAppContext();
     const { data: topics, error, isLoading, mutate } = useSWR<Topic[]>(API_URL, fetcher);
 
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -93,7 +95,7 @@ export default function ManageTopicsPage() {
             {isLoading && <CircularProgress />}
             {error && <Alert severity="error">Failed to load topics. Please try again.</Alert>}
 
-            <Paper sx={{ borderRadius: 4, overflow: 'hidden' }}>
+            <Paper sx={{ borderRadius: 4, overflow: 'hidden', bgcolor: 'background.paper' }}>
                 <TableContainer>
                     <Table>
                         <TableHead>
@@ -122,6 +124,15 @@ export default function ManageTopicsPage() {
                                     </TableCell>
                                 </TableRow>
                             ))}
+                            {(!topics || topics.length === 0) && !isLoading && (
+                                <TableRow>
+                                    <TableCell colSpan={3} align="center" sx={{ py: 6 }}>
+                                        <Typography color="text.secondary">
+                                            No topics yet. Add your first topic!
+                                        </Typography>
+                                    </TableCell>
+                                </TableRow>
+                            )}
                         </TableBody>
                     </Table>
                 </TableContainer>

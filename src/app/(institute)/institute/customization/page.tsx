@@ -5,15 +5,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import useSWR from 'swr';
 import apiClient from '@/lib/apiClient';
+import { useAppContext } from '@/context/AppContext';
 import {
   Box, Typography, Button, Alert, CircularProgress, Grid, Paper, styled, IconButton
 } from '@mui/material';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
-import ClearIcon from '@mui/icons-material/Clear';
 import { motion, AnimatePresence } from 'framer-motion';
-
-// --- Reusable Fetcher (uses apiClient — auth headers injected automatically) ---
-const fetcher = (url: string) => apiClient.get(url).then(r => r.data);
 
 // --- Styled component for the image upload area ---
 const ImageUploadBox = styled(Box)(({ theme }) => ({
@@ -54,15 +51,19 @@ const UploadOverlay = styled(Box)({
 
 // --- Main Page Component ---
 export default function CustomizationPage() {
+    // Use the universal fetcher from context for proper auth
+    const { fetcher } = useAppContext();
+
     const [files, setFiles] = useState<{ [key: string]: File | null }>({});
     const [previews, setPreviews] = useState<{ [key: string]: string | null }>({});
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const { data: instituteData, mutate } = useSWR('/api/institute/my-institute/', fetcher);
+    // FIXED: Use context fetcher and correct URL (no /api/ prefix, apiClient handles that)
+    const { data: instituteData, mutate } = useSWR('/institute/my-institute/', fetcher);
 
-    const BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000';
+    const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
     // Set initial previews from fetched data
     useEffect(() => {

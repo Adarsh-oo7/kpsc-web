@@ -117,10 +117,10 @@ export default function InstituteDashboard() {
               <ActionButton icon={<PersonAddIcon />} label="Add Student" onClick={() => router.push('/institute/students')} />
             </Grid>
             <Grid size={{ xs: 6, sm: 3 }}>
-              <ActionButton icon={<CampaignIcon />} label="Broadcast" onClick={() => router.push('/institute/messages')} />
+              <ActionButton icon={<CampaignIcon />} label="Broadcast" onClick={() => router.push('/institute/messaging')} />
             </Grid>
             <Grid size={{ xs: 6, sm: 3 }}>
-              <ActionButton icon={<AssignmentIcon />} label="New Test" onClick={() => router.push('/institute/tests')} />
+              <ActionButton icon={<AssignmentIcon />} label="Questions" onClick={() => router.push('/institute/questions')} />
             </Grid>
             <Grid size={{ xs: 6, sm: 3 }}>
               <ActionButton icon={<NoteAddIcon />} label="Upload PDF" onClick={() => router.push('/institute/notes')} />

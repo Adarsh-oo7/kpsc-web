@@ -34,7 +34,7 @@ export default function MessagingPage() {
     const [isSending, setIsSending] = useState(false);
 
     // Fetch the list of students to populate the dropdown
-    const { data: students, error: studentsError } = useSWR('/api/institute/students/', fetcher);
+    const { data: students, error: studentsError } = useSWR('/institute/students/', fetcher);
 
     const handleFormChange = (e: React.ChangeEvent<any>) => {
         const { name, value } = e.target;

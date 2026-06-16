@@ -31,12 +31,15 @@ export default function ManageStudentsPage() {
     const { data: students, error, isLoading, mutate } = useSWR('/institute/students/', fetcher);
 
     const [dialogOpen, setDialogOpen] = useState(false);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [studentToDelete, setStudentToDelete] = useState<{ id: number; name: string } | null>(null);
     const [tabValue, setTabValue] = useState(0);
     const [createForm, setCreateForm] = useState(initialCreateFormState);
     const [addForm, setAddForm] = useState(initialAddFormState);
     const [searchQuery, setSearchQuery] = useState('');
     const [formError, setFormError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Client-side filtering logic for the search field
     const filteredStudents = useMemo(() => {
@@ -45,7 +48,7 @@ export default function ManageStudentsPage() {
         return students.filter((profile: any) =>
             profile.user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
             profile.user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            profile.user.full_name.toLowerCase().includes(searchQuery.toLowerCase())
+            (profile.user.full_name || '').toLowerCase().includes(searchQuery.toLowerCase())
         );
     }, [students, searchQuery]);
 
@@ -94,11 +97,43 @@ export default function ManageStudentsPage() {
             setIsSubmitting(false);
         }
     };
+
+    const handleOpenDeleteDialog = (profile: any) => {
+        setStudentToDelete({
+            id: profile.id,
+            name: profile.user.full_name || profile.user.username
+        });
+        setDeleteDialogOpen(true);
+    };
+
+    const handleCloseDeleteDialog = () => {
+        setDeleteDialogOpen(false);
+        setStudentToDelete(null);
+    };
+
+    const handleDeleteStudent = async () => {
+        if (!studentToDelete) return;
+        setIsDeleting(true);
+        try {
+            await apiClient.delete(`/institute/students/${studentToDelete.id}/`);
+            mutate(); // Refresh the list
+            handleCloseDeleteDialog();
+        } catch (err: any) {
+            alert(err.response?.data?.detail || 'Failed to remove student from institute.');
+        } finally {
+            setIsDeleting(false);
+        }
+    };
     
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-                <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>Manage Students</Typography>
+                <Box>
+                    <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>Manage Students</Typography>
+                    <Typography variant="subtitle2" sx={{ color: 'grey.400', mt: 0.5 }}>
+                        {students?.length || 0} student{students?.length !== 1 ? 's' : ''} enrolled
+                    </Typography>
+                </Box>
                 <Button variant="contained" onClick={handleOpenDialog} startIcon={<AddIcon />}>Add Student</Button>
             </Box>
 
@@ -136,7 +171,7 @@ export default function ManageStudentsPage() {
                                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                 <Avatar src={profile.profile_photo || ''} sx={{ width: 40, height: 40, mr: 2 }} />
                                                 <Box>
-                                                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{profile.user.full_name}</Typography>
+                                                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{profile.user.full_name || `${profile.user.first_name} ${profile.user.last_name}`.trim() || profile.user.username}</Typography>
                                                     <Typography variant="body2" color="text.secondary">{profile.user.email}</Typography>
                                                 </Box>
                                             </Box>
@@ -155,16 +190,18 @@ export default function ManageStudentsPage() {
                                             )}
                                         </TableCell>
                                         <TableCell align="right">
-                                            <Tooltip title="Manage Fees">
-                                                <IconButton color="primary" onClick={() => router.push(`/institute/students/${profile.id}/fees`)}>
-                                                    <PaymentsIcon />
-                                                </IconButton>
-                                            </Tooltip>
-                                            <Tooltip title="Delete Student (Coming Soon)">
-                                                <IconButton color="error">
-                                                    <DeleteIcon />
-                                                </IconButton>
-                                            </Tooltip>
+                                            <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                                                <Tooltip title="Manage Fees">
+                                                    <IconButton color="primary" onClick={() => router.push(`/institute/students/${profile.id}/fees`)}>
+                                                        <PaymentsIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                                <Tooltip title="Remove Student from Institute">
+                                                    <IconButton color="error" onClick={() => handleOpenDeleteDialog(profile)}>
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Stack>
                                         </TableCell>
                                     </TableRow>
                                 )) : (
@@ -229,6 +266,28 @@ export default function ManageStudentsPage() {
                          </DialogActions>
                      </form>
                 )}
+            </Dialog>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog open={deleteDialogOpen} onClose={handleCloseDeleteDialog} maxWidth="xs" fullWidth>
+                <DialogTitle sx={{ color: 'error.main' }}>Remove Student</DialogTitle>
+                <DialogContent>
+                    <Typography>
+                        Are you sure you want to remove <strong>{studentToDelete?.name}</strong> from your institute? 
+                        This will unlink them from your institute but will not delete their account.
+                    </Typography>
+                </DialogContent>
+                <DialogActions sx={{ p: 2 }}>
+                    <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
+                    <Button 
+                        onClick={handleDeleteStudent} 
+                        variant="contained" 
+                        color="error" 
+                        disabled={isDeleting}
+                    >
+                        {isDeleting ? <CircularProgress size={24} /> : 'Remove Student'}
+                    </Button>
+                </DialogActions>
             </Dialog>
         </motion.div>
     );
