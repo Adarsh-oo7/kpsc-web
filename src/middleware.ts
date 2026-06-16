@@ -28,8 +28,15 @@ export function middleware(request: NextRequest) {
   } else {
     // e.g. abc.kpscmaster.com
     const parts = hostname.split('.');
-    if (parts.length > 2 && parts[0] !== 'www' && parts[0] !== 'api' && parts[0] !== 'admin') {
-      subdomain = parts[0];
+    const isVercelDomain = hostname.endsWith('.vercel.app');
+    if (isVercelDomain) {
+      if (parts.length > 3 && parts[0] !== 'kpsc-web' && parts[0] !== 'www') {
+        subdomain = parts[0];
+      }
+    } else {
+      if (parts.length > 2 && parts[0] !== 'www' && parts[0] !== 'api' && parts[0] !== 'admin') {
+        subdomain = parts[0];
+      }
     }
   }
 
