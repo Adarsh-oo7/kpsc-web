@@ -285,11 +285,20 @@ function QuizContent() {
 
   if (isLoading) return <Box sx={{ display: 'flex', justifyContent: 'center', pt: 8 }}><CircularProgress size={32} /></Box>;
   if (error) return <Alert severity="error">Could not load quiz questions.</Alert>;
-  if (!apiUrl || !questions?.length) {
+  if (!apiUrl) {
     return (
       <Box sx={{ textAlign: 'center', py: 8 }}>
         <Typography sx={{ color: '#8892A4', mb: 3 }}>Select an exam or topic to start a quiz.</Typography>
         <Button variant="contained" onClick={() => router.push('/exams')}>Choose Exam</Button>
+      </Box>
+    );
+  }
+
+  if (questions && questions.length === 0) {
+    return (
+      <Box sx={{ textAlign: 'center', py: 8 }}>
+        <Typography sx={{ color: '#8892A4', mb: 3 }}>No questions available for this exam or topic.</Typography>
+        <Button variant="contained" onClick={() => router.push('/exams')}>Choose Another Exam</Button>
       </Box>
     );
   }
