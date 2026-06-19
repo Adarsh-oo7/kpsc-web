@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://www.kpscmaster.in/sitemap.xml

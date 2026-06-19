@@ -1,10 +1,9 @@
 // app/(main)/blog/[slug]/page.tsx
 
-'use client';
-
-import { useParams, useRouter } from 'next/navigation';
+import React from 'react';
+import Link from 'next/link';
+import { Metadata } from 'next';
 import { Container, Box, Typography, Button, Chip, Stack, Card, Divider } from '@mui/material';
-import { motion } from 'framer-motion';
 import { blogPosts } from '@/lib/blogPosts';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -13,7 +12,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 const blogContents: Record<string, React.ReactNode> = {
   'how-to-crack-kerala-psc-ldc': (
     <Box sx={{ color: 'text.primary', '& p': { mb: 3, lineHeight: 1.7, fontSize: '1.025rem' } }}>
-      <Typography variant="h5" sx={{ fontWeight: 800, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
+      <Typography variant="h5" component="h2" sx={{ fontWeight: 800, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
         Why 6 Months is the Sweet Spot
       </Typography>
       <p>
@@ -23,7 +22,7 @@ const blogContents: Record<string, React.ReactNode> = {
         A 6-month duration gives you sufficient runway to digest the vast syllabus without experiencing study burnout. Let’s break down the ideal schedule.
       </p>
 
-      <Typography variant="h5" sx={{ fontWeight: 800, mt: 4, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
+      <Typography variant="h5" component="h2" sx={{ fontWeight: 800, mt: 4, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
         Phase 1: Months 1 & 2 — Foundation & Concepts
       </Typography>
       <p>
@@ -35,7 +34,7 @@ const blogContents: Record<string, React.ReactNode> = {
         <li><strong>English Grammar:</strong> Master tense forms, active/passive voice, direct/indirect speech, and prepositions.</li>
       </ul>
 
-      <Typography variant="h5" sx={{ fontWeight: 800, mt: 4, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
+      <Typography variant="h5" component="h2" sx={{ fontWeight: 800, mt: 4, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
         Phase 2: Months 3 & 4 — Subject-Wise Depth & Daily Quizzes
       </Typography>
       <p>
@@ -45,7 +44,7 @@ const blogContents: Record<string, React.ReactNode> = {
         Use the <strong>KPSC Master Daily Quiz</strong> feature. Attempting 10 questions daily keeps your brain wired to look for patterns and retrieve information under mild pressure.
       </p>
 
-      <Typography variant="h5" sx={{ fontWeight: 800, mt: 4, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
+      <Typography variant="h5" component="h2" sx={{ fontWeight: 800, mt: 4, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
         Phase 3: Months 5 & 6 — Full Mock Papers & Weakness Profiles
       </Typography>
       <p>
@@ -58,14 +57,14 @@ const blogContents: Record<string, React.ReactNode> = {
   ),
   'kerala-psc-degree-level-syllabus-guide': (
     <Box sx={{ color: 'text.primary', '& p': { mb: 3, lineHeight: 1.7, fontSize: '1.025rem' } }}>
-      <Typography variant="h5" sx={{ fontWeight: 800, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
+      <Typography variant="h5" component="h2" sx={{ fontWeight: 800, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
         Understanding the Two-Stage System
       </Typography>
       <p>
         Degree level exams (such as Secretariat Assistant, Sub Inspector, and Block Development Officer) are conducted in a two-stage filter: the Preliminary exam and the Main exam. Understanding the weightage of each section is the key to passing the prelims efficiently.
       </p>
 
-      <Typography variant="h5" sx={{ fontWeight: 800, mt: 4, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
+      <Typography variant="h5" component="h2" sx={{ fontWeight: 800, mt: 4, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
         Syllabus Weightage Analysis
       </Typography>
       <p>
@@ -79,7 +78,7 @@ const blogContents: Record<string, React.ReactNode> = {
         <li><strong>Current Affairs & General Science (25 Marks):</strong> High focus on technological advancements, awards, sports, and state government schemes.</li>
       </ul>
 
-      <Typography variant="h5" sx={{ fontWeight: 800, mt: 4, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
+      <Typography variant="h5" component="h2" sx={{ fontWeight: 800, mt: 4, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
         High-Yield Chapters to Study First
       </Typography>
       <p>
@@ -95,14 +94,14 @@ const blogContents: Record<string, React.ReactNode> = {
   ),
   'mastering-kerala-history-renaissance': (
     <Box sx={{ color: 'text.primary', '& p': { mb: 3, lineHeight: 1.7, fontSize: '1.025rem' } }}>
-      <Typography variant="h5" sx={{ fontWeight: 800, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
+      <Typography variant="h5" component="h2" sx={{ fontWeight: 800, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
         Core Reformers and Their Lifeworks
       </Typography>
       <p>
         Kerala Renaissance is one of the most scoring sub-topics in KPSC exams, yet many students lose marks here due to confusion between similar publications or quotes. Let’s organize the core facts systematically.
       </p>
 
-      <Typography variant="h5" sx={{ fontWeight: 800, mt: 4, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
+      <Typography variant="h5" component="h2" sx={{ fontWeight: 800, mt: 4, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
         1. Sree Narayana Guru (1856 - 1928)
       </Typography>
       <p>
@@ -114,7 +113,7 @@ const blogContents: Record<string, React.ReactNode> = {
         <li><strong>Literary Works:</strong> Advaitha Deepika, Atmopadesa Satakam, Daiva Dasakam.</li>
       </ul>
 
-      <Typography variant="h5" sx={{ fontWeight: 800, mt: 4, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
+      <Typography variant="h5" component="h2" sx={{ fontWeight: 800, mt: 4, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
         2. Chattampi Swamikal (1853 - 1924)
       </Typography>
       <p>
@@ -125,7 +124,7 @@ const blogContents: Record<string, React.ReactNode> = {
         <li><strong>Famous Quote:</strong> "The whole world is one family."</li>
       </ul>
 
-      <Typography variant="h5" sx={{ fontWeight: 800, mt: 4, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
+      <Typography variant="h5" component="h2" sx={{ fontWeight: 800, mt: 4, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
         3. Ayyankali (1863 - 1941)
       </Typography>
       <p>
@@ -139,14 +138,14 @@ const blogContents: Record<string, React.ReactNode> = {
   ),
   'kerala-psc-current-affairs-daily-routine': (
     <Box sx={{ color: 'text.primary', '& p': { mb: 3, lineHeight: 1.7, fontSize: '1.025rem' } }}>
-      <Typography variant="h5" sx={{ fontWeight: 800, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
+      <Typography variant="h5" component="h2" sx={{ fontWeight: 800, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
         The Pitfall of Monthly PDF Cramming
       </Typography>
       <p>
         Most aspirants study current affairs by reading 100-page monthly compilation PDFs three days before the exam. This results in cognitive overload and makes it hard to distinguish between options during the test.
       </p>
 
-      <Typography variant="h5" sx={{ fontWeight: 800, mt: 4, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
+      <Typography variant="h5" component="h2" sx={{ fontWeight: 800, mt: 4, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
         The 15-Minute Daily Routine
       </Typography>
       <p>
@@ -158,7 +157,7 @@ const blogContents: Record<string, React.ReactNode> = {
         <li><strong>Solve Daily MCQs (5 Mins):</strong> Answer the current affairs multiple choice questions immediately after reading. Solving active questions is the single most effective way to lock the details into your memory.</li>
       </ol>
 
-      <Typography variant="h5" sx={{ fontWeight: 800, mt: 4, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
+      <Typography variant="h5" component="h2" sx={{ fontWeight: 800, mt: 4, mb: 2, fontFamily: "'Cabinet Grotesk'" }}>
         Subjects to Keep an Eye On
       </Typography>
       <p>
@@ -173,31 +172,87 @@ const blogContents: Record<string, React.ReactNode> = {
   )
 };
 
-export default function BlogDetailPage() {
-  const router = useRouter();
-  const params = useParams();
-  const slug = params.slug as string;
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
 
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const post = blogPosts.find((p) => p.slug === slug);
+
+  if (!post) {
+    return {
+      title: 'Article Not Found | KPSC Master',
+      description: 'The requested blog article could not be found.',
+    };
+  }
+
+  return {
+    title: `${post.title} | KPSC Master Blog`,
+    description: post.summary,
+    alternates: {
+      canonical: `/blog/${slug}`,
+    }
+  };
+}
+
+export default async function BlogDetailPage({ params }: PageProps) {
+  const { slug } = await params;
   const post = blogPosts.find((p) => p.slug === slug);
   const content = blogContents[slug];
 
   if (!post || !content) {
     return (
       <Container maxWidth="md" sx={{ py: 12, textAlign: 'center' }}>
-        <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold' }}>Article Not Found</Typography>
-        <Button startIcon={<ArrowBackIcon />} onClick={() => router.push('/blog')}>
+        <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold', color: 'text.primary' }}>Article Not Found</Typography>
+        <Button component={Link} href="/blog" variant="contained" startIcon={<ArrowBackIcon />}>
           Back to Blog
         </Button>
       </Container>
     );
   }
 
+  // Generate structured BlogPosting JSON-LD Schema
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    'headline': post.title,
+    'description': post.summary,
+    'datePublished': '2026-06-19T00:00:00Z', // default placeholder/matching post year
+    'author': {
+      '@type': 'Organization',
+      'name': 'KPSC Master Editorial Team',
+      'logo': {
+        '@type': 'ImageObject',
+        'url': 'https://www.kpscmaster.in/logo.png'
+      }
+    },
+    'publisher': {
+      '@type': 'Organization',
+      'name': 'KPSC Master',
+      'logo': {
+        '@type': 'ImageObject',
+        'url': 'https://www.kpscmaster.in/logo.png'
+      }
+    },
+    'mainEntityOfPage': {
+      '@type': 'WebPage',
+      '@id': `https://www.kpscmaster.in/blog/${slug}`
+    }
+  };
+
   return (
     <Container maxWidth="md" sx={{ pt: { xs: 3, md: 6 }, pb: { xs: 8, md: 12 } }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       {/* Back button */}
       <Button
+        component={Link}
+        href="/blog"
         startIcon={<ArrowBackIcon />}
-        onClick={() => router.push('/blog')}
         sx={{
           color: 'text.secondary',
           fontWeight: 700,
@@ -209,11 +264,7 @@ export default function BlogDetailPage() {
       </Button>
 
       {/* Main post container */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <Box>
         {/* Title, tags and author metadata */}
         <Box sx={{ mb: 5 }}>
           <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 3 }}>
@@ -316,9 +367,10 @@ export default function BlogDetailPage() {
           </Typography>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ justifyContent: 'center' }}>
             <Button
+              component={Link}
+              href="/register"
               variant="contained"
               size="large"
-              onClick={() => router.push('/register')}
               endIcon={<ArrowForwardIcon />}
               sx={{
                 py: 1.5,
@@ -332,9 +384,10 @@ export default function BlogDetailPage() {
               Sign Up Free
             </Button>
             <Button
+              component={Link}
+              href="/login"
               variant="outlined"
               size="large"
-              onClick={() => router.push('/login')}
               sx={{
                 py: 1.5,
                 px: 4,
@@ -347,7 +400,7 @@ export default function BlogDetailPage() {
             </Button>
           </Stack>
         </Card>
-      </motion.div>
+      </Box>
     </Container>
   );
 }
