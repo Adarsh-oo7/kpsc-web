@@ -1,22 +1,18 @@
-'use client';
-
-import { AppProvider, useAppContext } from '@/context/AppContext';
-import { getTheme } from '@/theme';
-import { ThemeProvider } from '@mui/material/styles';
-import { CssBaseline } from '@mui/material';
 import '@/globals.css';
+import type { Metadata, Viewport } from 'next';
+import { Providers } from './providers';
 
-function ThemeWrapper({ children }: { children: React.ReactNode }) {
-  const { themeMode } = useAppContext();
-  const currentTheme = getTheme(themeMode);
-  
-  return (
-    <ThemeProvider theme={currentTheme}>
-      <CssBaseline />
-      {children}
-    </ThemeProvider>
-  );
-}
+export const metadata: Metadata = {
+  title: 'KPSC Master — Kerala PSC Topper in Your Pocket | Daily Quiz & Mock Tests',
+  description: 'KPSC Master — Kerala PSC Topper in Your Pocket. Daily quiz, mock tests, current affairs, and AI doubt solving for Kerala PSC aspirants.',
+};
+
+export const viewport: Viewport = {
+  themeColor: '#0F1117',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -35,22 +31,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap"
           rel="stylesheet"
         />
-
-        {/* SEO Meta */}
-        <title>KPSC Master — Kerala PSC Topper in Your Pocket | Daily Quiz & Mock Tests</title>
-        <meta name="description" content="KPSC Master — Kerala PSC Topper in Your Pocket. Daily quiz, mock tests, current affairs, and AI doubt solving for Kerala PSC aspirants." />
-        <meta name="theme-color" content="#0F1117" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         
         {/* Google Identity Services SDK */}
+        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
         <script src="https://accounts.google.com/gsi/client" async defer></script>
       </head>
       <body>
-        <AppProvider>
-          <ThemeWrapper>
-            {children}
-          </ThemeWrapper>
-        </AppProvider>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );
