@@ -85,7 +85,7 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
                 <Image
-                  src="/logo.png"
+                  src="/KPSC MASTER.png"
                   alt="KPSC Master Logo"
                   width={32}
                   height={32}
@@ -192,7 +192,7 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
                 <Image
-                  src="/logo.png"
+                  src="/KPSC MASTER.png"
                   alt="KPSC Master Logo"
                   width={32}
                   height={32}
@@ -314,7 +314,7 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
             }}
           >
             <Image
-              src="/logo.png"
+              src="/KPSC MASTER.png"
               alt="KPSC Master Logo"
               width={28}
               height={28}

@@ -1,271 +1,338 @@
-// app/(main)/features/page.tsx
-
 'use client';
 
-import { Container, Box, Typography, Grid, Button, Stack, Chip } from '@mui/material';
+import {
+  Container,
+  Box,
+  Typography,
+  Button,
+  Stack,
+  Chip,
+} from '@mui/material';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import React from 'react';
 
 const featuresList = [
   {
     emoji: '📚',
     title: 'Psychology-Driven Daily Quiz',
     tagline: 'Build habit, stay consistent',
-    desc: 'Our spaced-repetition algorithm feeds you bite-sized daily quizzes that optimize memory retention. Answer daily, keep your streak alive, and climb the ranks without feeling burned out.',
+    desc: 'Our spaced-repetition algorithm feeds you bite-sized daily quizzes that optimize memory retention.',
     color: '#1B6B3A',
-    details: ['10 highly relevant questions daily', 'Instant detailed Malayalam & English explanations', 'Personalized difficulty levels', 'Streak tracking with streak badges']
+    details: [
+      '10 highly relevant questions daily',
+      'Instant Malayalam & English explanations',
+      'Personalized difficulty levels',
+      'Streak tracking with badges',
+    ],
+    insight: {
+      icon: '🧠',
+      title: 'Built on cognitive science',
+      subtitle: 'Spaced repetition + active recall system',
+    },
   },
   {
     emoji: '📝',
     title: 'Full-Length Mock Tests',
-    tagline: 'Simulate the real exam hall pressure',
-    desc: 'Practice under real time constraints with official KPSC weightages. Choose from LDC, LGS, Degree Level, and 12+ other categories. Your performance profile will highlight weak areas automatically.',
+    tagline: 'Simulate real exam pressure',
+    desc: 'Practice under real time constraints with official KPSC patterns.',
     color: '#7C3AED',
-    details: ['Official timer & marks calculation', 'District-wise & State-wide rank lists', 'Previous year papers in simulated exam format', 'Automatic wrong answers bookmarking']
+    details: [
+      'Official timer & scoring',
+      'Rank tracking system',
+      'Previous year papers',
+      'Auto error bookmarking',
+    ],
+    insight: {
+      icon: '⏱️',
+      title: 'Real exam simulation',
+      subtitle: 'Build speed + accuracy under pressure',
+    },
   },
   {
     emoji: '📰',
     title: 'Interactive Current Affairs',
-    tagline: 'KPSC-probabilty tagged daily news',
-    desc: 'Don’t just read news — interact with it. Our team curates daily news articles and tags them with probable exam questions. Answer daily current affairs MCQs to lock in the information.',
+    tagline: 'Exam-focused daily news',
+    desc: 'News curated and tagged for PSC relevance.',
     color: '#2563EB',
-    details: ['Daily summaries curated specifically for Kerala PSC', 'Integrated multiple choice questions', 'Tagging by historical relevance', 'Bookmark important news for revision']
+    details: [
+      'Daily PSC summaries',
+      'MCQ integration',
+      'Historical tagging',
+      'Bookmark system',
+    ],
+    insight: {
+      icon: '🗞️',
+      title: 'Smart news filtering',
+      subtitle: 'Only exam-relevant content shown',
+    },
   },
   {
     emoji: '🤖',
-    title: 'AI Explanations & Doubt Solving',
-    tagline: 'Your personal PSC tutor, 24/7',
-    desc: 'Stuck on a tough question? Our custom-trained AI explains answers in clear Malayalam and English. Ask follow-up questions to clarify concepts on history, science, math, or grammar.',
+    title: 'AI Doubt Solver',
+    tagline: '24/7 personal tutor',
+    desc: 'Instant explanations in Malayalam + English.',
     color: '#DC2626',
-    details: ['Detailed bilingual explanations', 'Step-by-step math problem solving', 'Context-specific history snippets', 'Doubt clearing helper inside every question']
+    details: [
+      'Step-by-step answers',
+      'Math problem solving',
+      'Concept breakdowns',
+      'Instant help system',
+    ],
+    insight: {
+      icon: '🤖',
+      title: 'AI-powered learning',
+      subtitle: 'Instant concept clarity anytime',
+    },
   },
   {
     emoji: '🏆',
-    title: 'Kerala-Wide Leaderboard',
-    tagline: 'Stay motivated through competitive spirit',
-    desc: 'Healthy competition drives consistent studying. View your daily, weekly, and district rankings. Watch your name climb the board as you answer questions correctly and build XP.',
+    title: 'Leaderboard System',
+    tagline: 'Competitive learning',
+    desc: 'Track your rank across Kerala.',
     color: '#D97706',
-    details: ['Filter rankings by your district', 'Separate leaderboard for mock exams', 'Weekly topper badges and certificates', 'Track study time compared to peers']
+    details: [
+      'District ranking',
+      'Mock test leaderboard',
+      'Weekly badges',
+      'XP tracking',
+    ],
+    insight: {
+      icon: '📊',
+      title: 'Gamified system',
+      subtitle: 'XP + ranks + motivation loop',
+    },
   },
   {
     emoji: '⚡',
     title: 'Infinite Study Feed',
-    tagline: 'Microlearning in a modern social feed format',
-    desc: 'Replace doomscrolling with microlearning. Swipe through an Instagram-like study feed containing quick facts, community polls, quick questions, and high-yield PSC study cards.',
+    tagline: 'Microlearning feed',
+    desc: 'Instagram-style PSC learning experience.',
     color: '#0891B2',
-    details: ['Short, highly informative facts', 'Community MCQ polls and discussions', 'Visual infographics and memory maps', 'Save card options for offline revision']
-  }
+    details: [
+      'Short facts',
+      'MCQ polls',
+      'Infographics',
+      'Save cards',
+    ],
+    insight: {
+      icon: '⚡',
+      title: 'Social learning UX',
+      subtitle: 'Turn scrolling into studying',
+    },
+  },
 ];
 
 export default function FeaturesPage() {
   const router = useRouter();
+  const [activeIndex, setActiveIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      const sections = document.querySelectorAll('[data-timeline-item]');
+      let current = 0;
+
+      sections.forEach((sec, i) => {
+        const rect = sec.getBoundingClientRect();
+        if (rect.top < window.innerHeight * 0.5) current = i;
+      });
+
+      setActiveIndex(current);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <Container maxWidth="lg" sx={{ pt: { xs: 4, md: 8 }, pb: { xs: 8, md: 12 } }}>
-      {/* Header section */}
-      <Box sx={{ textAlign: 'center', mb: 8 }}>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <Chip
-            label="✨ Advanced Platform Features"
-            sx={{
-              background: 'rgba(27,107,58,0.12)',
-              border: '1px solid rgba(46,139,87,0.25)',
-              color: '#2E8B57',
-              fontWeight: 800,
-              fontSize: '0.75rem',
-              height: 32,
-              mb: 3
-            }}
-          />
-          <Typography
-            variant="h2"
-            sx={{
-              fontFamily: "'Cabinet Grotesk', sans-serif",
-              fontWeight: 900,
-              fontSize: { xs: '2.2rem', sm: '3rem', md: '3.6rem' },
-              color: 'text.primary',
-              letterSpacing: '-0.02em',
-              mb: 2
-            }}
-          >
-            Study Smarter, Not Harder
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{
-              color: 'text.secondary',
-              maxWidth: 600,
-              mx: 'auto',
-              fontSize: { xs: '1rem', sm: '1.1rem' },
-              lineHeight: 1.6
-            }}
-          >
-            Discover the scientific features designed specifically to help you build consistency, track progress, and ace the Kerala PSC exams.
-          </Typography>
-        </motion.div>
+    <Container maxWidth="lg" sx={{ py: { xs: 6, md: 10 } }}>
+
+      {/* HEADER */}
+      <Box textAlign="center" mb={8}>
+        <Chip
+          label="✨ Advanced Features"
+          sx={{
+            bgcolor: 'rgba(27,107,58,0.12)',
+            color: '#2E8B57',
+            fontWeight: 800,
+            mb: 2,
+          }}
+        />
+
+        <Typography variant="h2" fontWeight={900}>
+          Study Smarter, Not Harder
+        </Typography>
+
+        <Typography color="text.secondary" maxWidth={600} mx="auto" mt={2}>
+          Scientifically designed PSC preparation platform
+        </Typography>
       </Box>
 
-      {/* Features Detail Grid */}
-      <Stack spacing={8}>
-        {featuresList.map((f, i) => {
-          const isEven = i % 2 === 0;
-          return (
-            <motion.div
-              key={f.title}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-100px' }}
-              transition={{ duration: 0.6, ease: 'easeOut' }}
-            >
-              <Grid
-                container
-                spacing={{ xs: 4, md: 8 }}
-                sx={{
-                  alignItems: 'center',
-                  flexDirection: isEven ? 'row' : 'row-reverse',
-                }}
+      {/* TIMELINE */}
+      <Box sx={{ position: 'relative', py: 10 }}>
+
+        {/* CENTER LINE */}
+        <Box
+          sx={{
+            position: 'absolute',
+            left: '50%',
+            top: 0,
+            bottom: 0,
+            width: '2px',
+            bgcolor: 'rgba(0,0,0,0.08)',
+            transform: 'translateX(-50%)',
+          }}
+        />
+
+        {/* PROGRESS LINE */}
+        <Box
+          sx={{
+            position: 'absolute',
+            left: '50%',
+            top: 0,
+            width: '2px',
+            bgcolor: '#2E8B57',
+            transform: 'translateX(-50%)',
+            height: `${((activeIndex + 1) / featuresList.length) * 100}%`,
+            transition: 'height 0.5s ease',
+          }}
+        />
+
+        <Stack spacing={14}>
+
+          {featuresList.map((f, i) => {
+            const isLeft = i % 2 === 0;
+            const isActive = i === activeIndex;
+
+            return (
+              <motion.div
+                key={f.title}
+                data-timeline-item
+                initial={{ opacity: 0, y: 60 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false, amount: 0.4 }}
               >
-                {/* Visual Card Representation */}
-                <Grid size={{ xs: 12, md: 5 }}>
+
+                {/* GRID LAYOUT (FIXED NO OVERLAP) */}
+                <Box
+                  sx={{
+                    display: 'grid',
+                    gridTemplateColumns: { xs: '1fr', md: '1fr 80px 1fr' },
+                    alignItems: 'center',
+                  }}
+                >
+
+                  {/* CARD */}
                   <Box
                     sx={{
-                      p: 5,
-                      bgcolor: 'background.paper',
+                      gridColumn: { xs: '1', md: isLeft ? '1' : '3' },
+                      p: 4,
+                      borderRadius: 4,
+                      alignSelf: 'center',
+                      bgcolor: isActive ? 'background.paper' : 'rgba(255,255,255,0.6)',
                       border: '1px solid',
                       borderColor: 'divider',
-                      borderRadius: '28px',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
+                      boxShadow: isActive
+                        ? '0 25px 60px rgba(0,0,0,0.08)'
+                        : '0 10px 30px rgba(0,0,0,0.03)',
+                      transform: isActive ? 'scale(1.02)' : 'scale(0.98)',
+                      opacity: isActive ? 1 : 0.7,
+                      transition: 'all 0.4s ease',
+                    }}
+                  >
+
+                    <Typography fontWeight={900} fontSize="1.4rem">
+                      {f.title}
+                    </Typography>
+
+                    <Typography color="text.secondary" mt={1} mb={2}>
+                      {f.desc}
+                    </Typography>
+
+                    {f.details.map((d, idx) => (
+                      <Box key={idx} display="flex" gap={1}>
+                        <Box sx={{ color: f.color }}>●</Box>
+                        <Typography fontSize="0.9rem">{d}</Typography>
+                      </Box>
+                    ))}
+
+                  </Box>
+
+                  {/* DOT */}
+                  <Box
+                    sx={{
+                      gridColumn: '2',
+                      display: { xs: 'none', md: 'flex' },
                       justifyContent: 'center',
-                      aspectRatio: '1.1/1',
-                      boxShadow: `0 10px 40px rgba(0,0,0,0.02)`,
-                      position: 'relative',
-                      overflow: 'hidden',
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '4px',
-                        background: `linear-gradient(90deg, ${f.color}, ${f.color}80)`,
-                      }
+                      alignSelf: 'center',
                     }}
                   >
                     <Box
                       sx={{
-                        width: 90,
-                        height: 90,
-                        borderRadius: '24px',
-                        background: `${f.color}15`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '3.2rem',
-                        mb: 3,
-                        boxShadow: `0 8px 20px ${f.color}10`,
+                        width: isActive ? 18 : 12,
+                        height: isActive ? 18 : 12,
+                        borderRadius: '50%',
+                        bgcolor: isActive ? f.color : '#ccc',
+                        boxShadow: isActive
+                          ? `0 0 0 8px ${f.color}25`
+                          : '0 0 0 4px rgba(0,0,0,0.05)',
+                        transition: 'all 0.3s ease',
                       }}
-                    >
-                      {f.emoji}
-                    </Box>
-                    <Typography
-                      variant="h5"
-                      sx={{
-                        fontFamily: "'Cabinet Grotesk', sans-serif",
-                        fontWeight: 800,
-                        color: 'text.primary',
-                        textAlign: 'center',
-                        mb: 1
-                      }}
-                    >
-                      {f.title.split(' ').slice(-2).join(' ')}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: f.color,
-                        fontWeight: 700,
-                        letterSpacing: '0.05em',
-                        textTransform: 'uppercase',
-                      }}
-                    >
-                      {f.tagline}
-                    </Typography>
+                    />
                   </Box>
-                </Grid>
 
-                {/* Feature Content */}
-                <Grid size={{ xs: 12, md: 7 }}>
-                  <Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+                  {/* INSIGHT PANEL (FIXED NO OVERLAP) */}
+                  <Box
+                    sx={{
+                      gridColumn: { xs: '1', md: isLeft ? '3' : '1' },
+                      display: { xs: 'none', md: 'block' },
+                      alignSelf: 'center',
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        p: 3,
+                        borderRadius: 4,
+                        bgcolor: 'rgba(255,255,255,0.6)',
+                        border: '1px solid rgba(0,0,0,0.06)',
+                        backdropFilter: 'blur(10px)',
+                        display: 'flex',
+                        gap: 2,
+                        alignItems: 'flex-start',
+                      }}
+                    >
                       <Box
                         sx={{
+                          width: 38,
+                          height: 38,
+                          borderRadius: 2,
+                          bgcolor: `${f.color}15`,
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          width: 36,
-                          height: 36,
-                          borderRadius: '50%',
-                          bgcolor: `${f.color}15`,
-                          color: f.color,
-                          fontSize: '1.25rem',
-                          fontWeight: 'bold',
                         }}
                       >
-                        {i + 1}
+                        {f.insight.icon}
                       </Box>
-                      <Typography
-                        variant="h4"
-                        sx={{
-                          fontFamily: "'Cabinet Grotesk', sans-serif",
-                          fontWeight: 900,
-                          fontSize: '1.75rem',
-                          color: 'text.primary',
-                          letterSpacing: '-0.01em',
-                        }}
-                      >
-                        {f.title}
-                      </Typography>
+
+                      <Box>
+                        <Typography fontWeight={800} fontSize="0.95rem">
+                          {f.insight.title}
+                        </Typography>
+                        <Typography fontSize="0.8rem" color="text.secondary">
+                          {f.insight.subtitle}
+                        </Typography>
+                      </Box>
                     </Box>
-
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        color: 'text.secondary',
-                        mb: 3.5,
-                        fontSize: '1rem',
-                        lineHeight: 1.6,
-                      }}
-                    >
-                      {f.desc}
-                    </Typography>
-
-                    <Grid container spacing={1.5} sx={{ mb: 4 }}>
-                      {f.details.map((detail, idx) => (
-                        <Grid size={{ xs: 12, sm: 6 }} key={idx}>
-                          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.25 }}>
-                            <Box sx={{ color: f.color, mt: 0.25, fontSize: '1rem' }}>✓</Box>
-                            <Typography sx={{ fontSize: '0.85rem', color: 'text.primary', fontWeight: 500 }}>
-                              {detail}
-                            </Typography>
-                          </Box>
-                        </Grid>
-                      ))}
-                    </Grid>
                   </Box>
-                </Grid>
-              </Grid>
-            </motion.div>
-          );
-        })}
-      </Stack>
+
+                </Box>
+              </motion.div>
+            );
+          })}
+        </Stack>
+      </Box>
 
       {/* Bottom CTA block */}
       <Box
@@ -333,6 +400,7 @@ export default function FeaturesPage() {
           </Button>
         </Stack>
       </Box>
+
     </Container>
   );
 }

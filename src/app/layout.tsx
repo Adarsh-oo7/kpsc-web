@@ -4,7 +4,15 @@ import { AppProvider, useAppContext } from '@/context/AppContext';
 import { getTheme } from '@/theme';
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
+import { JetBrains_Mono } from "next/font/google";
 import '@/globals.css';
+
+const jetbrainsMono = JetBrains_Mono({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  variable: "--font-jetbrains",
+  display: "swap",
+});
 
 function ThemeWrapper({ children }: { children: React.ReactNode }) {
   const { themeMode } = useAppContext();
@@ -20,7 +28,7 @@ function ThemeWrapper({ children }: { children: React.ReactNode }) {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en"  className={jetbrainsMono.variable}>
       <head>
         {/* Fontshare CDN — Cabinet Grotesk + Satoshi */}
         <link rel="preconnect" href="https://api.fontshare.com" />

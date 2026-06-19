@@ -86,7 +86,7 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <Image
-              src="/logo.png"
+              src="/KPSC MASTER.png"
               alt="KPSC Master Logo"
               width={36}
               height={36}

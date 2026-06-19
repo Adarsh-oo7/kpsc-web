@@ -7,7 +7,19 @@ import { Box, Typography, Button, Container, Grid, Chip, Stack, Avatar, Circular
 import { motion } from 'framer-motion';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { useAppContext } from '@/context/AppContext';
+import { useTheme, useMediaQuery } from '@mui/material';
+import QuizIcon from '@mui/icons-material/Quiz';
+import AssignmentIcon from '@mui/icons-material/Assignment';
+import PublicIcon from '@mui/icons-material/Public';
+import SmartToyIcon from '@mui/icons-material/SmartToy';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import DynamicFeedIcon from '@mui/icons-material/DynamicFeed';
+import SchoolIcon from '@mui/icons-material/School';
+import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
+import PhoneOutlinedIcon from '@mui/icons-material/PhoneOutlined';
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 
 // Ticker messages
 const tickerMessages = [
@@ -21,12 +33,42 @@ const tickerMessages = [
 ];
 
 const features = [
-  { emoji: '📚', title: 'Daily Quiz', desc: 'Psychology-driven questions that keep you coming back', color: '#1B6B3A' },
-  { emoji: '📝', title: 'Mock Tests', desc: 'Full-length LDC, LGS, Degree Level exams with timer', color: '#7C3AED' },
-  { emoji: '📰', title: 'Current Affairs', desc: 'PSC-probability tagged daily news with MCQ injection', color: '#2563EB' },
-  { emoji: '🤖', title: 'AI Explanations', desc: 'Malayalam + English AI explanations for every answer', color: '#DC2626' },
-  { emoji: '🏆', title: 'Leaderboard', desc: 'District & Kerala rankings — your position always visible', color: '#D97706' },
-  { emoji: '⚡', title: 'Study Feed', desc: 'Instagram-like feed of questions, facts & current affairs', color: '#0891B2' },
+  {
+    icon: <QuizIcon />,
+    title: 'Daily Smart Quiz',
+    desc: 'Addictive psychology-based questions that boost retention daily',
+    color: '#16A34A',
+  },
+  {
+    icon: <AssignmentIcon />,
+    title: 'Real Exam Mock Tests',
+    desc: 'Timed LDC, LGS & Degree-level exams with real pressure simulation',
+    color: '#7C3AED',
+  },
+  {
+    icon: <PublicIcon />,
+    title: 'PSC Current Affairs',
+    desc: 'High-probability news with MCQs curated for Kerala PSC',
+    color: '#2563EB',
+  },
+  {
+    icon: <SmartToyIcon />,
+    title: 'AI-Powered Explanations',
+    desc: 'Clear Malayalam + English explanations for every answer',
+    color: '#DC2626',
+  },
+  {
+    icon: <EmojiEventsIcon />,
+    title: 'Live Leaderboard',
+    desc: 'Compete with district & Kerala rankings in real-time',
+    color: '#F59E0B',
+  },
+  {
+    icon: <DynamicFeedIcon />,
+    title: 'Smart Study Feed',
+    desc: 'Scrollable feed of questions, facts & daily updates',
+    color: '#06B6D4',
+  },
 ];
 
 const exams = ['LDC', 'LGS', 'Degree Level', 'VEO', 'LD Typist', 'LP/UP Teacher', 'Police Constable', 'Fire & Rescue', 'PSC Secretariat', 'KPSC Clerk', 'Company Board', 'Water Authority'];
@@ -95,8 +137,8 @@ function StatCounter({ end, label }: { end: string; label: string }) {
       <Typography sx={{
         fontFamily: "'Cabinet Grotesk', sans-serif",
         fontSize: { xs: '1.4rem', sm: '1.6rem', md: '2.1rem' },
-        fontWeight: 900, 
-        color: 'text.primary', 
+        fontWeight: 900,
+        color: 'text.primary',
         lineHeight: 1,
       }}>
         {end}
@@ -109,8 +151,12 @@ function StatCounter({ end, label }: { end: string; label: string }) {
 }
 
 export default function PublicHomePage() {
+
   const { user } = useAppContext();
   const router = useRouter();
+
+  const theme = useTheme();
+  const hideImage = useMediaQuery('(min-width:767px) and (max-width:1024px)');
 
   // Logged in users get redirected automatically to their dashboard
   useEffect(() => {
@@ -136,16 +182,20 @@ export default function PublicHomePage() {
           minHeight: { xs: 'auto', md: '80vh' },
           pt: { xs: 3, md: 4 },
           pb: { xs: 4, md: 6 },
-          display: 'flex', 
-          flexDirection: 'column', 
+          display: 'flex',
+          flexDirection: 'column',
           justifyContent: 'center',
           overflow: 'hidden',
+          backgroundImage: `
+    radial-gradient(circle, rgba(46,139,88,0.12) 2px, transparent 1px)
+  `,
+          backgroundSize: '70px 70px', // 👈 controls spacing (grid size)
         }}
       >
         {/* Background effects */}
         <Box sx={{
           position: 'absolute', inset: 0,
-          background: 'radial-gradient(ellipse 60% 50% at 50% 20%, rgba(27,107,58,0.18) 0%, transparent 70%)',
+          background: 'radial-gradient(ellipse 90% 80% at 70% 20%, rgba(27,107,58,0.25) 0%, transparent 50%)',
           pointerEvents: 'none',
         }} />
         <Box sx={{
@@ -158,135 +208,227 @@ export default function PublicHomePage() {
 
         {/* Kerala map SVG outline (subtle) */}
         <Box sx={{
-          position: 'absolute', right: '-5%', top: '50%', transform: 'translateY(-50%)',
+          position: 'absolute', right: '10%', top: '40%', transform: 'translateY(-50%)',
           opacity: 0.04, fontSize: '18rem', lineHeight: 1,
           pointerEvents: 'none', display: { xs: 'none', lg: 'block' }
         }}>
           🗺️
         </Box>
 
-        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1, mb: { xs: 3, md: 4 } }}>
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        <Box sx={{ width: '100%', px: { xs: 2, md: 6 }, position: 'relative', zIndex: 1 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', md: 'row' },
+              alignItems: 'center',
+              justifyContent: 'space-between', // 👈 KEY
+              width: '100%',
+              gap: { xs: 4, md: 6 },
+            }}
           >
-            {/* Badge */}
-            <Box sx={{ display: 'flex', justifyContent: { xs: 'center', md: 'flex-start' }, mb: 3 }}>
-              <Chip
-                label="🇮🇳 #1 Kerala PSC Platform"
+            <Box sx={{
+              flex: 1, maxWidth: 600, mx: { xs: 'auto', md: 'auto', lg: 0 }, // 👈 THIS is the fix
+              textAlign: { xs: 'center', md: 'center', lg: 'left' },
+            }}>
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {/* Badge */}
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: { xs: 'center', md: 'center', lg: 'flex-start' },
+                    mb: 3
+                  }}
+                >
+                  <Chip
+                    label="🇮🇳 #1 Kerala PSC Platform"
+                    sx={{
+                      background: 'rgba(27,107,58,0.12)',
+                      border: '1px solid rgba(46,139,87,0.25)',
+                      color: '#2E8B57',
+                      fontWeight: 800,
+                      fontSize: '0.75rem',
+                      height: 32,
+                    }}
+                  />
+                </Box>
+
+                {/* Headline */}
+                <Typography
+                  component="h1"
+                  sx={{
+                    fontFamily: "'Cabinet Grotesk', sans-serif",
+                    fontWeight: 900,
+
+                    // 🔥 Fluid typography instead of breakpoint jumps
+                    fontSize: "clamp(1.8rem, 4vw, 4.2rem)",
+
+                    color: 'text.primary',
+                    lineHeight: { xs: 1.2, sm: 1.1, md: 1.05 },
+                    letterSpacing: '-0.03em',
+
+                    mb: { xs: 2, sm: 2.5, md: 3 },
+
+                    textAlign: { xs: 'center', md: 'center', lg: 'left' },
+                    px: { xs: 1, sm: 0 }, // 👈 prevents text touching edges on small screens
+                  }}
+                >
+                  Kerala PSC Topper
+
+                  <Box
+                    component="span"
+                    sx={{
+                      display: 'block',
+                      color: '#2E8B57',
+                      fontSize: "clamp(1.8rem, 4vw, 4.2rem)", // 👈 match scaling
+                    }}
+                  >
+                    in Your Pocket
+                  </Box>
+                </Typography>
+
+                {/* Sub-headline */}
+                <Typography
+                  sx={{
+                    fontSize: "clamp(0.9rem, 1.2vw, 1.2rem)", // 🔥 fluid scaling
+                    color: 'text.secondary',
+
+                    maxWidth: { xs: '100%', sm: 520 },
+                    lineHeight: 1.6,
+
+                    textAlign: { xs: 'center', md: 'center', lg: 'left' },
+                    mx: { xs: 'auto', lg: 0 },
+
+                    px: { xs: 1.5, sm: 0 }, // 👈 padding for small devices
+                    mb: { xs: 3, sm: 4, md: 4.5 },
+                  }}
+                >
+                  Daily quiz, mock tests, current affairs, and AI doubt solving — free to start. Used by 47,000+ aspirants across Kerala.
+                </Typography>
+
+                {/* CTAs */}
+                <Stack
+                  direction={{ xs: 'column', sm: 'row' }}
+                  spacing={{ xs: 1.5, sm: 2 }}
+                  sx={{
+                    justifyContent: { xs: 'center', md: 'center', lg: 'flex-start' },
+                    alignItems: 'stretch', // 👈 important for equal button height
+                    mb: { xs: 4, md: 5 },
+                    width: '100%',
+                    maxWidth: 500, // 👈 keeps it neat on large screens
+                    mx: { xs: 'auto', lg: 0 }, // 👈 center on mobile
+                  }}
+                >
+                  <Button
+                    variant="contained"
+                    size="large"
+                    onClick={() => router.push('/register')}
+                    endIcon={<ArrowForwardIcon />}
+                    fullWidth
+                    sx={{
+                      flex: 1, // 👈 equal width in row layout
+
+                      py: { xs: 1.4, sm: 1.6 },
+                      px: { xs: 2.5, sm: 4 },
+
+                      fontSize: "clamp(0.85rem, 1vw, 0.95rem)",
+
+                      background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
+                      boxShadow: '0 8px 32px rgba(27,107,58,0.35)',
+                      borderRadius: 3,
+
+                      whiteSpace: 'nowrap', // 👈 prevents breaking
+                    }}
+                  >
+                    Start Free — No Signup
+                  </Button>
+
+                  <Button
+                    variant="outlined"
+                    size="large"
+                    onClick={() => router.push('/institute/login')}
+                    fullWidth
+                    sx={{
+                      flex: 1,
+
+                      py: { xs: 1.4, sm: 1.6 },
+                      px: { xs: 2.5, sm: 4 },
+
+                      fontSize: "clamp(0.85rem, 1vw, 0.95rem)",
+
+                      borderRadius: 3,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Join as Institute
+                  </Button>
+                </Stack>
+
+                {/* Responsive Social Proof Counter Strip */}
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: { xs: 'column', sm: 'row' },
+
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+
+                    gap: { xs: 2, sm: 0 },
+
+                    p: { xs: 2, sm: 3 },
+
+                    borderRadius: '20px',
+                    bgcolor: 'surface.card',
+                    border: '1px solid',
+                    borderColor: 'divider',
+
+                    maxWidth: 520,
+                    width: '100%',
+                    mx: 'auto',
+                  }}
+                >
+                  <StatCounter end="47,000+" label="Students" />
+                  <StatCounter end="140+" label="Institutes" />
+                  <StatCounter end="12 Lakh" label="Solved today" />
+                </Box>
+              </motion.div>
+            </Box>
+            <Box
+              sx={{
+                flex: 1,
+                display: hideImage ? 'none' : 'flex',
+                justifyContent: { xs: 'center', md: 'flex-end' },
+                order: { xs: -1, md: 0 },
+
+              }}
+            >
+              <Box
+                component="img"
+                src="/hero-light.png"
+                alt="Hero"
                 sx={{
-                  background: 'rgba(27,107,58,0.12)',
-                  border: '1px solid rgba(46,139,87,0.25)',
-                  color: '#2E8B57',
-                  fontWeight: 800, 
-                  fontSize: '0.75rem',
-                  height: 32,
+                  width: '100%',
+                  maxWidth: '600px',
+                  height: 'auto',
+                  objectFit: 'contain',
                 }}
               />
             </Box>
-
-            {/* Headline */}
-            <Typography
-              component="h1"
-              sx={{
-                fontFamily: "'Cabinet Grotesk', sans-serif",
-                fontWeight: 900,
-                fontSize: { xs: '2.1rem', sm: '3.2rem', md: '4.2rem' },
-                color: 'text.primary',
-                lineHeight: { xs: 1.15, sm: 1.05 },
-                letterSpacing: '-0.03em',
-                textAlign: { xs: 'center', md: 'left' },
-                mb: 2.5,
-              }}
-            >
-              Kerala PSC Topper
-              <Box component="span" sx={{ display: 'block', color: '#2E8B57' }}>
-                in Your Pocket
-              </Box>
-            </Typography>
-
-            {/* Sub-headline */}
-            <Typography sx={{
-              fontSize: { xs: '0.925rem', sm: '1.05rem', md: '1.2rem' },
-              color: 'text.secondary',
-              maxWidth: 520,
-              lineHeight: 1.6,
-              textAlign: { xs: 'center', md: 'left' },
-              mx: { xs: 'auto', md: 0 },
-              mb: 4.5,
-            }}>
-              Daily quiz, mock tests, current affairs, and AI doubt solving — free to start. Used by 47,000+ aspirants across Kerala.
-            </Typography>
-
-            {/* CTAs */}
-            <Stack
-              direction={{ xs: 'column', sm: 'row' }}
-              spacing={2}
-              sx={{ 
-                justifyContent: { xs: 'center', md: 'flex-start' }, 
-                alignItems: 'center',
-                mb: 5,
-                width: { xs: '100%', sm: 'auto' }
-              }}
-            >
-              <Box sx={{ width: { xs: '100%', sm: 'auto' } }}>
-                <Button
-                  variant="contained"
-                  size="large"
-                  onClick={() => router.push('/register')}
-                  endIcon={<ArrowForwardIcon />}
-                  fullWidth
-                  sx={{
-                    py: 1.6, px: 4, fontSize: '0.95rem',
-                    background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
-                    boxShadow: '0 8px 32px rgba(27,107,58,0.35)',
-                    borderRadius: 3
-                  }}
-                >
-                  Start Free — No Signup
-                </Button>
-              </Box>
-              <Box sx={{ width: { xs: '100%', sm: 'auto' } }}>
-                <Button
-                  variant="outlined"
-                  size="large"
-                  onClick={() => router.push('/institute/login')}
-                  fullWidth
-                  sx={{ py: 1.6, px: 4, fontSize: '0.95rem', borderRadius: 3 }}
-                >
-                  Join as Institute
-                </Button>
-              </Box>
-            </Stack>
-
-            {/* Responsive Social Proof Counter Strip */}
-            <Box sx={{
-              display: 'grid',
-              gridTemplateColumns: { xs: '1fr 1fr 1fr', sm: '1fr auto 1fr auto 1fr' },
-              gap: { xs: 1.5, sm: 3 },
-              alignItems: 'center',
-              justifyContent: 'center',
-              p: { xs: 2, sm: 3 }, 
-              borderRadius: '20px',
-              bgcolor: 'surface.card',
-              border: '1px solid',
-              borderColor: 'divider',
-              maxWidth: 520,
-              width: '100%',
-              mx: { xs: 'auto', md: 0 },
-            }}>
-              <StatCounter end="47,000+" label="Students" />
-              <Box sx={{ display: { xs: 'none', sm: 'block' }, width: '1px', height: '32px', bgcolor: 'divider' }} />
-              <StatCounter end="140+" label="Institutes" />
-              <Box sx={{ display: { xs: 'none', sm: 'block' }, width: '1px', height: '32px', bgcolor: 'divider' }} />
-              <StatCounter end="12 Lakh" label="Solved today" />
-            </Box>
-          </motion.div>
-        </Container>
+          </Box>
+        </Box>
 
         {/* Live ticker */}
-        <Box sx={{ width: '100%', minWidth: 0, overflow: 'hidden' }}>
+        <Box
+          sx={{
+            width: '100%',
+            minWidth: 0,
+            overflow: 'hidden',
+            mt: 3, // 👈 THIS FIXES THE GAP
+          }}
+        >
           <TickerStrip />
         </Box>
       </Box>
@@ -300,10 +442,10 @@ export default function PublicHomePage() {
           transition={{ duration: 0.6 }}
         >
           <Typography variant="h2" sx={{
-            fontFamily: "'Cabinet Grotesk'", 
+            fontFamily: "'Cabinet Grotesk'",
             fontWeight: 900,
-            textAlign: 'center', 
-            color: 'text.primary', 
+            textAlign: 'center',
+            color: 'text.primary',
             mb: 1.5,
             fontSize: { xs: '1.8rem', sm: '2.2rem', md: '2.8rem' },
             letterSpacing: '-0.02em'
@@ -327,25 +469,120 @@ export default function PublicHomePage() {
                 whileHover={{ y: -6 }}
                 style={{ height: '100%' }}
               >
-                <Box sx={{
-                  p: 3.5, 
-                  height: '100%',
-                  bgcolor: 'background.paper',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  borderRadius: '20px',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    border: `1px solid ${f.color}40`,
-                    boxShadow: `0 12px 36px ${f.color}15`,
-                  }
-                }}>
-                  <Typography sx={{ fontSize: '2rem', mb: 2 }}>{f.emoji}</Typography>
-                  <Typography sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, fontSize: '1.15rem', color: 'text.primary', mb: 1 }}>
+
+                <Box
+                  sx={{
+                    p: 4,
+                    height: '100%',
+                    borderRadius: '24px',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+
+                    // 🌈 Premium glass base
+                    backdropFilter: 'blur(14px)',
+                    WebkitBackdropFilter: 'blur(14px)',
+                    bgcolor: (theme) =>
+                      theme.palette.mode === 'dark'
+                        ? `${f.color}15`
+                        : `${f.color}08`,
+
+                    borderColor: `${f.color}30`,
+                    border: '1px solid',
+
+                    transition: 'all 0.45s cubic-bezier(0.22, 1, 0.36, 1)',
+
+                    // 🌟 soft gradient shine
+                    backgroundImage: `
+      linear-gradient(135deg, rgba(255,255,255,0.06), transparent 60%)
+    `,
+
+                    // ✨ glow aura
+                    '&::before': {
+                      content: '""',
+                      position: 'absolute',
+                      inset: 0,
+                      borderRadius: '24px',
+                      background: `radial-gradient(circle at 80% 0%, ${f.color}25, transparent 70%)`,
+                      opacity: 0,
+                      transition: 'opacity 0.5s ease',
+                    },
+
+                    // ✨ inner light
+                    '&::after': {
+                      content: '""',
+                      position: 'absolute',
+                      inset: 0,
+                      borderRadius: '24px',
+                      background:
+                        'radial-gradient(circle at 20% 10%, rgba(255,255,255,0.10), transparent 60%)',
+                      pointerEvents: 'none',
+                    },
+
+                    '&:hover::before': {
+                      opacity: 1,
+                    },
+
+                    // 🚀 premium hover
+                    '&:hover': {
+                      transform: 'translateY(-12px) scale(1.02)',
+                      borderColor: `${f.color}55`,
+                      boxShadow: `
+        0 15px 40px rgba(0,0,0,0.12),
+        0 25px 80px ${f.color}30
+      `,
+                    },
+                  }}
+                >
+                  {/* 🔥 PREMIUM ICON CONTAINER */}
+                  <Box
+                    sx={{
+                      width: 64,
+                      height: 64,
+                      borderRadius: '18px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mb: 2.5,
+
+                      // gradient icon bg
+                      background: `linear-gradient(135deg, ${f.color}, ${f.color}80)`,
+
+                      color: '#fff',
+
+                      boxShadow: `
+        0 8px 20px ${f.color}40,
+        inset 0 1px 0 rgba(255,255,255,0.3)
+      `,
+
+                      transition: 'all 0.4s ease',
+                    }}
+                  >
+                    {f.icon || <AutoAwesomeIcon sx={{ fontSize: 30 }} />}
+                  </Box>
+
+                  {/* 🧠 TITLE */}
+                  <Typography
+                    sx={{
+                      fontFamily: "'Cabinet Grotesk'",
+                      fontWeight: 800,
+                      fontSize: '1.2rem',
+                      color: 'text.primary',
+                      mb: 1.2,
+                      letterSpacing: '-0.2px',
+                    }}
+                  >
                     {f.title}
                   </Typography>
-                  <Typography sx={{ fontSize: '0.85rem', color: 'text.secondary', lineHeight: 1.6 }}>
+
+                  {/* ✍️ DESCRIPTION */}
+                  <Typography
+                    sx={{
+                      fontSize: '0.9rem',
+                      color: 'text.secondary',
+                      lineHeight: 1.7,
+                    }}
+                  >
                     {f.desc}
                   </Typography>
                 </Box>
@@ -399,7 +636,9 @@ export default function PublicHomePage() {
             textAlign: 'center',
             maxWidth: '100%',
           }}>
-            <Typography sx={{ fontSize: '2rem', mb: 1.5 }}>🏫</Typography>
+            <Typography sx={{ mb: 1.5 }}>
+              <SchoolIcon sx={{ fontSize: 34, color: '#1B6B3A' }} />
+            </Typography>
             <Typography variant="h3" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: 'text.primary', mb: 1, fontSize: { xs: '1.4rem', sm: '1.8rem', md: '2.2rem' } }}>
               Running a Coaching Center?
             </Typography>
@@ -411,7 +650,7 @@ export default function PublicHomePage() {
               size="large"
               onClick={() => router.push('/institute/login')}
               endIcon={<ArrowForwardIcon />}
-              sx={{ 
+              sx={{
                 background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
                 py: 1.5,
                 px: 4,
@@ -426,8 +665,22 @@ export default function PublicHomePage() {
 
       {/* ===== TESTIMONIALS ===== */}
       <Container id="testimonials" maxWidth="lg" sx={{ pb: { xs: 8, md: 12 } }}>
-        <Typography variant="h2" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, textAlign: 'center', color: 'text.primary', mb: 6, fontSize: { xs: '1.65rem', sm: '2rem', md: '2.5rem' }, letterSpacing: '-0.02em' }}>
-          Real Students, Real Results
+        <Typography
+          variant="h2"
+          sx={{
+            fontFamily: "'Cabinet Grotesk'",
+            fontWeight: 900,
+            textAlign: 'center',
+            color: 'text.primary',
+            mb: 6,
+            fontSize: { xs: '1.65rem', sm: '2rem', md: '2.5rem' },
+            letterSpacing: '-0.02em',
+          }}
+        >
+          Real Students,{" "}
+          <Box component="span" sx={{ color: '#2E8B57' }}>
+            Real Results
+          </Box>
         </Typography>
         <Grid container spacing={3}>
           {testimonials.map((t, i) => (
@@ -440,7 +693,7 @@ export default function PublicHomePage() {
                 style={{ height: '100%' }}
               >
                 <Box sx={{
-                  p: 4, 
+                  p: 4,
                   height: '100%',
                   bgcolor: 'background.paper',
                   border: '1px solid',
@@ -468,7 +721,7 @@ export default function PublicHomePage() {
           ))}
         </Grid>
       </Container>
- 
+
       {/* ===== CONTACT US ===== */}
       <Container id="contact" maxWidth="lg" sx={{ pb: { xs: 8, md: 12 } }}>
         <Typography variant="h2" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, textAlign: 'center', color: 'text.primary', mb: 1.5, fontSize: { xs: '1.65rem', sm: '2rem', md: '2.5rem' }, letterSpacing: '-0.02em' }}>
@@ -477,7 +730,7 @@ export default function PublicHomePage() {
         <Typography sx={{ textAlign: 'center', color: 'text.secondary', mb: 6, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
           Have any questions? Reach out to our support team and we will get back to you.
         </Typography>
-        
+
         <Grid container spacing={5} sx={{ alignItems: 'stretch' }}>
           {/* Contact Details */}
           <Grid size={{ xs: 12, md: 5 }}>
@@ -499,31 +752,64 @@ export default function PublicHomePage() {
                 <Typography sx={{ color: 'text.secondary', fontSize: '0.9rem', lineHeight: 1.6, mb: 4 }}>
                   Whether you are a student preparing for exams or an institute looking to use our platform, we're here to support you.
                 </Typography>
- 
+
                 <Stack spacing={3}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Box sx={{ width: 40, height: 40, bgcolor: 'rgba(27,107,58,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2E8B57' }}>
-                      ✉️
+                    <Box
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        bgcolor: 'rgba(27,107,58,0.1)',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#2E8B57',
+                      }}
+                    >
+                      <EmailOutlinedIcon sx={{ fontSize: 20 }} />
                     </Box>
                     <Box>
                       <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', fontWeight: 600 }}>Email Support</Typography>
                       <Typography sx={{ fontSize: '0.9rem', color: 'text.primary', fontWeight: 700 }}>support@kpscmaster.com</Typography>
                     </Box>
                   </Box>
- 
+
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Box sx={{ width: 40, height: 40, bgcolor: 'rgba(27,107,58,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2E8B57' }}>
-                      📞
+                    <Box
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        bgcolor: 'rgba(27,107,58,0.1)',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#2E8B57'
+                      }}
+                    >
+                      <PhoneOutlinedIcon fontSize="small" />
                     </Box>
                     <Box>
                       <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', fontWeight: 600 }}>Call Us</Typography>
                       <Typography sx={{ fontSize: '0.9rem', color: 'text.primary', fontWeight: 700 }}>+91 98765 43210</Typography>
                     </Box>
                   </Box>
- 
+
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <Box sx={{ width: 40, height: 40, bgcolor: 'rgba(27,107,58,0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#2E8B57' }}>
-                      📍
+                    <Box
+                      sx={{
+                        width: 40,
+                        height: 40,
+                        bgcolor: 'rgba(27,107,58,0.1)',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#2E8B57'
+                      }}
+                    >
+                      <LocationOnOutlinedIcon fontSize="small" />
                     </Box>
                     <Box>
                       <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', fontWeight: 600 }}>Location</Typography>
@@ -532,13 +818,13 @@ export default function PublicHomePage() {
                   </Box>
                 </Stack>
               </Box>
- 
+
               <Typography sx={{ color: 'text.disabled', fontSize: '0.75rem', mt: 4 }}>
                 Response time is typically under 12 hours.
               </Typography>
             </Box>
           </Grid>
- 
+
           {/* Contact Form */}
           <Grid size={{ xs: 12, md: 7 }}>
             <Box sx={{
@@ -619,7 +905,7 @@ export default function PublicHomePage() {
         <Container maxWidth="lg">
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2.5 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Image src="/logo.png" alt="KPSC Master Logo" width={24} height={24} style={{ objectFit: 'contain' }} />
+              <Image src="/KPSC MASTER.png" alt="KPSC Master Logo" width={30} height={30} style={{ objectFit: 'contain' }} />
               <Typography sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: 'text.primary', fontSize: '1.05rem' }}>
                 KPSC Master
               </Typography>
