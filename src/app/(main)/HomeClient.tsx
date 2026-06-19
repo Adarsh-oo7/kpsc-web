@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Box, Typography, Button, Container, Grid, Chip, Stack, Avatar, CircularProgress, TextField } from '@mui/material';
+import { Box, Typography, Button, Container, Grid, Chip, Stack, Avatar, CircularProgress, TextField, Link } from '@mui/material';
 import { motion } from 'framer-motion';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -911,7 +911,16 @@ export default function HomeClient() {
               </Typography>
             </Box>
             <Typography sx={{ color: 'text.disabled', fontSize: '0.775rem', fontWeight: 500 }}>
-              © 2026 KPSC Master. Kerala's #1 PSC Prep Platform.
+              © 2026 KPSC Master. Developed by{' '}
+              <Link
+                href="https://www.digitalproductsolutions.in/"
+                target="_blank"
+                rel="noopener noreferrer"
+                sx={{ color: '#2E8B57', textDecoration: 'none', fontWeight: 700, '&:hover': { textDecoration: 'underline' } }}
+              >
+                Digital Product Solutions
+              </Link>
+              . Kerala's #1 PSC Prep Platform.
             </Typography>
             <Stack direction="row" spacing={3.5}>
               {['Privacy', 'Terms', 'Contact'].map(item => (
