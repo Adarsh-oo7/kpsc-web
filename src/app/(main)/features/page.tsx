@@ -185,6 +185,7 @@ export default function FeaturesPage() {
           }}
         />
 
+
         {/* PROGRESS LINE */}
         <Box
           sx={{
