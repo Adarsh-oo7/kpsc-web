@@ -792,7 +792,7 @@ export default function HomeClient() {
                     </Box>
                     <Box>
                       <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', fontWeight: 600 }}>Call Us</Typography>
-                      <Typography sx={{ fontSize: '0.9rem', color: 'text.primary', fontWeight: 700 }}>+91 98765 43210</Typography>
+                      <Typography sx={{ fontSize: '0.9rem', color: 'text.primary', fontWeight: 700 }}>+91 94003 55185</Typography>
                     </Box>
                   </Box>
 
