@@ -205,9 +205,11 @@ export default async function BlogDetailPage({ params }: PageProps) {
     return (
       <Container maxWidth="md" sx={{ py: 12, textAlign: 'center' }}>
         <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold', color: 'text.primary' }}>Article Not Found</Typography>
-        <Button component={Link} href="/blog" variant="contained" startIcon={<ArrowBackIcon />}>
-          Back to Blog
-        </Button>
+        <Link href="/blog" style={{ textDecoration: 'none' }}>
+          <Button variant="contained" startIcon={<ArrowBackIcon />}>
+            Back to Blog
+          </Button>
+        </Link>
       </Container>
     );
   }
@@ -249,19 +251,19 @@ export default async function BlogDetailPage({ params }: PageProps) {
       />
 
       {/* Back button */}
-      <Button
-        component={Link}
-        href="/blog"
-        startIcon={<ArrowBackIcon />}
-        sx={{
-          color: 'text.secondary',
-          fontWeight: 700,
-          mb: 4,
-          '&:hover': { color: 'primary.main' }
-        }}
-      >
-        Back to Articles
-      </Button>
+      <Link href="/blog" style={{ textDecoration: 'none' }}>
+        <Button
+          startIcon={<ArrowBackIcon />}
+          sx={{
+            color: 'text.secondary',
+            fontWeight: 700,
+            mb: 4,
+            '&:hover': { color: 'primary.main' }
+          }}
+        >
+          Back to Articles
+        </Button>
+      </Link>
 
       {/* Main post container */}
       <Box>
@@ -366,38 +368,38 @@ export default async function BlogDetailPage({ params }: PageProps) {
             Don't just read about strategies. Log into KPSC Master, customize your focus exam, attempt daily quizzes, track your streak, and see your rank climb in real time.
           </Typography>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ justifyContent: 'center' }}>
-            <Button
-              component={Link}
-              href="/register"
-              variant="contained"
-              size="large"
-              endIcon={<ArrowForwardIcon />}
-              sx={{
-                py: 1.5,
-                px: 4,
-                borderRadius: '12px',
-                background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
-                fontWeight: 700,
-                fontSize: '0.875rem'
-              }}
-            >
-              Sign Up Free
-            </Button>
-            <Button
-              component={Link}
-              href="/login"
-              variant="outlined"
-              size="large"
-              sx={{
-                py: 1.5,
-                px: 4,
-                borderRadius: '12px',
-                fontWeight: 700,
-                fontSize: '0.875rem'
-              }}
-            >
-              Log In
-            </Button>
+            <Link href="/register" style={{ textDecoration: 'none' }}>
+              <Button
+                variant="contained"
+                size="large"
+                endIcon={<ArrowForwardIcon />}
+                sx={{
+                  py: 1.5,
+                  px: 4,
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
+                  fontWeight: 700,
+                  fontSize: '0.875rem'
+                }}
+              >
+                Sign Up Free
+              </Button>
+            </Link>
+            <Link href="/login" style={{ textDecoration: 'none' }}>
+              <Button
+                variant="outlined"
+                size="large"
+                sx={{
+                  py: 1.5,
+                  px: 4,
+                  borderRadius: '12px',
+                  fontWeight: 700,
+                  fontSize: '0.875rem'
+                }}
+              >
+                Log In
+              </Button>
+            </Link>
           </Stack>
         </Card>
       </Box>

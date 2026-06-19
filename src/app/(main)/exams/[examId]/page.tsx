@@ -112,9 +112,11 @@ export default async function ExamDetailPage({ params }: PageProps) {
     return (
       <Container maxWidth="md" sx={{ py: 12, textAlign: 'center' }}>
         <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold', color: 'white' }}>Mock Paper Not Found</Typography>
-        <Button component={Link} href="/exams" variant="contained">
-          Back to Mock Tests
-        </Button>
+        <Link href="/exams" style={{ textDecoration: 'none' }}>
+          <Button variant="contained">
+            Back to Mock Tests
+          </Button>
+        </Link>
       </Container>
     );
   }
@@ -241,26 +243,27 @@ export default async function ExamDetailPage({ params }: PageProps) {
           </Grid>
           
           <Grid size={{ xs: 12, md: 4 }} sx={{ textAlign: { md: 'right' } }}>
-            <Button
-              component={Link}
-              href={`/register`}
-              variant="contained"
-              sx={{
-                py: 2,
-                px: 4,
-                borderRadius: '12px',
-                background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
-                fontWeight: 850,
-                fontSize: '1rem',
-                textTransform: 'none',
-                boxShadow: '0 8px 24px rgba(27, 107, 58, 0.4)',
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #2E8B57, #3da068)',
-                }
-              }}
-            >
-              Start Free Mock Test
-            </Button>
+            <Link href={`/register`} style={{ textDecoration: 'none' }}>
+              <Button
+                variant="contained"
+                sx={{
+                  py: 2,
+                  px: 4,
+                  borderRadius: '12px',
+                  background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
+                  fontWeight: 850,
+                  fontSize: '1rem',
+                  textTransform: 'none',
+                  boxShadow: '0 8px 32px rgba(27,107,58,0.25)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
+                    filter: 'brightness(1.1)',
+                  }
+                }}
+              >
+                Start Free Mock Test — No Signup
+              </Button>
+            </Link>
           </Grid>
         </Grid>
       </Paper>
@@ -376,14 +379,14 @@ export default async function ExamDetailPage({ params }: PageProps) {
 
       {/* Footer CTA */}
       <Box sx={{ mt: 8, textAlign: 'center' }}>
-        <Button
-          component={Link}
-          href="/exams"
-          variant="outlined"
-          sx={{ py: 1.5, px: 4, borderRadius: '10px', fontWeight: 700 }}
-        >
-          View All Mock Exams
-        </Button>
+        <Link href="/exams" style={{ textDecoration: 'none' }}>
+          <Button
+            variant="outlined"
+            sx={{ py: 1.5, px: 4, borderRadius: '10px', fontWeight: 700 }}
+          >
+            View All Mock Exams
+          </Button>
+        </Link>
       </Box>
     </Container>
   );

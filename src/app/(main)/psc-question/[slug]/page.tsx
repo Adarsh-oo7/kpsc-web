@@ -57,9 +57,11 @@ export default async function QuestionSEOPage({ params }: PageProps) {
         <Typography variant="body1" sx={{ mb: 3, color: 'grey.400' }}>
           The question you are looking for does not exist or has been removed.
         </Typography>
-        <Button component={Link} href="/" variant="contained" startIcon={<ArrowBackIcon />}>
-          Back to Home
-        </Button>
+        <Link href="/" style={{ textDecoration: 'none' }}>
+          <Button variant="contained" startIcon={<ArrowBackIcon />}>
+            Back to Home
+          </Button>
+        </Link>
       </Box>
     );
   }
@@ -154,9 +156,11 @@ export default async function QuestionSEOPage({ params }: PageProps) {
       </Card>
 
       <Box sx={{ mt: 3, textAlign: 'center' }}>
-        <Button component={Link} href="/login" variant="contained" color="primary" size="large">
-          Join KPSC Master to practice more questions
-        </Button>
+        <Link href="/login" style={{ textDecoration: 'none' }}>
+          <Button variant="contained" color="primary" size="large">
+            Join KPSC Master to practice more questions
+          </Button>
+        </Link>
       </Box>
     </Box>
   );

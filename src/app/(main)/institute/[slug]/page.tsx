@@ -57,9 +57,11 @@ export default async function InstituteSEOPage({ params }: PageProps) {
         <Typography variant="body1" sx={{ mb: 3, color: 'grey.400' }}>
           The coaching center you are looking for does not exist or has been removed.
         </Typography>
-        <Button component={Link} href="/" variant="contained" startIcon={<ArrowBackIcon />}>
-          Back to Home
-        </Button>
+        <Link href="/" style={{ textDecoration: 'none' }}>
+          <Button variant="contained" startIcon={<ArrowBackIcon />}>
+            Back to Home
+          </Button>
+        </Link>
       </Box>
     );
   }
@@ -222,22 +224,22 @@ export default async function InstituteSEOPage({ params }: PageProps) {
             >
               Student Portal Login
             </Button>
-            <Button 
-              component={Link} 
-              href={`/register?institute=${inst.id}`} 
-              variant="outlined" 
-              size="large"
-              sx={{ 
-                color: 'white', 
-                borderColor: primaryColor,
-                '&:hover': {
+            <Link href={`/register?institute=${inst.id}`} style={{ textDecoration: 'none' }}>
+              <Button 
+                variant="outlined" 
+                size="large"
+                sx={{ 
+                  color: 'white', 
                   borderColor: primaryColor,
-                  bgcolor: 'rgba(255,255,255,0.05)'
-                }
-              }}
-            >
-              Request to Join Institute
-            </Button>
+                  '&:hover': {
+                    borderColor: primaryColor,
+                    bgcolor: 'rgba(255,255,255,0.05)'
+                  }
+                }}
+              >
+                Request to Join Institute
+              </Button>
+            </Link>
           </Box>
         </Stack>
       </Paper>
