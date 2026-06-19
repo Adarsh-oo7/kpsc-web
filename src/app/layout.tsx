@@ -13,6 +13,11 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'KPSC Master — Kerala PSC Topper in Your Pocket | Daily Quiz & Mock Tests',
   description: 'KPSC Master — Kerala PSC Topper in Your Pocket. Daily quiz, mock tests, current affairs, and AI doubt solving for Kerala PSC aspirants.',
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
 };
 
 export const viewport: Viewport = {
