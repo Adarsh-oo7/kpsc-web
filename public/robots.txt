@@ -1,3 +1,33 @@
 User-agent: *
 Allow: /
+Allow: /exams
+Allow: /current-affairs
+Allow: /blog
+Allow: /features
+Allow: /testimonials
+Allow: /contact
+Allow: /topics
+Allow: /previous-papers
+Allow: /psc-question
+Allow: /institutes
+
+# Block authenticated/private pages from indexing
+Disallow: /home
+Disallow: /quiz
+Disallow: /feed
+Disallow: /progress
+Disallow: /analytics
+Disallow: /goals
+Disallow: /saved
+Disallow: /wrong-answers
+Disallow: /notifications
+Disallow: /onboarding
+Disallow: /leaderboard
+Disallow: /profile
+Disallow: /community
+Disallow: /subscription
+Disallow: /login
+Disallow: /register
+
+# Sitemap location
 Sitemap: https://www.kpscmaster.in/sitemap.xml
