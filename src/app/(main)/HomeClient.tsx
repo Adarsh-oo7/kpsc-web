@@ -20,6 +20,7 @@ import SchoolIcon from '@mui/icons-material/School';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import PhoneOutlinedIcon from '@mui/icons-material/PhoneOutlined';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
+import AppBanner from '@/components/AppBanner';
 
 // Ticker messages
 const tickerMessages = [
@@ -593,7 +594,7 @@ export default function HomeClient() {
       </Container>
 
       {/* ===== EXAMS COVERED ===== */}
-      <Box id="exams" sx={{ py: { xs: 6, md: 8 }, borderTop: '1px solid', borderBottom: '1px solid', borderColor: 'divider' }}>
+      <Box id="exams" sx={{ py: { xs: 6, md: 8 }, borderTop: '1px solid',  borderColor: 'divider' }}>
         <Container maxWidth="lg">
           <Typography sx={{ textAlign: 'center', color: 'text.secondary', mb: 4, fontSize: '0.8rem', letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 800 }}>
             Exams Covered
@@ -620,6 +621,8 @@ export default function HomeClient() {
           </Box>
         </Container>
       </Box>
+
+      <AppBanner/>
 
       {/* ===== INSTITUTE CTA ===== */}
       <Container maxWidth="lg" sx={{ py: { xs: 8, md: 10 } }}>
