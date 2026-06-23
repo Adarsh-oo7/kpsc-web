@@ -71,6 +71,28 @@
 }
 
 /* =====================================================
+   Light Mode Overrides
+   ===================================================== */
+:root.light, :root[data-theme="light"] {
+  /* Surfaces — Light mode overrides */
+  --color-bg:             #F8FAFC;
+  --color-surface:        #ffffff;
+  --color-surface-2:      #F1F5F9;
+  --color-surface-3:      #E2E8F0;
+  --color-border:         rgba(0, 0, 0, 0.08);
+  --color-border-light:   rgba(0, 0, 0, 0.05);
+
+  /* Text */
+  --color-text:           #0F172A;
+  --color-text-muted:     #475569;
+  --color-text-faint:     #94A3B8;
+}
+
+.light .kpsc-glass, :root[data-theme="light"] .kpsc-glass {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* =====================================================
    Base Reset & Body
    ===================================================== */
 *, *::before, *::after {

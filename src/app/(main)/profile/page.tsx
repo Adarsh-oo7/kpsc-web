@@ -7,7 +7,7 @@ import {
   Box, Typography, TextField, Button, Alert, Card, CardContent,
   Select, MenuItem, InputLabel, FormControl, CircularProgress,
   Avatar, Input, Grid, Chip, Stack, Divider, Tab, Tabs, Tooltip,
-  Dialog, DialogContent, DialogTitle, IconButton, LinearProgress
+  Dialog, DialogContent, DialogTitle, IconButton, LinearProgress, useTheme
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
@@ -75,6 +75,8 @@ const DISTRICTS = [
 export default function ProfilePage() {
   const { user, fetcher, isLoading: isContextLoading } = useAppContext();
   const router = useRouter();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   
   const [activeTab, setActiveTab] = useState<'edit' | 'achievements'>('edit');
   const [showCert, setShowCert] = useState(false);
@@ -226,7 +228,9 @@ export default function ProfilePage() {
       
       {/* Header Info Block */}
       <Card sx={{
-        background: 'linear-gradient(135deg, #161B22 0%, #1C2230 100%)',
+        background: isDark 
+          ? 'linear-gradient(135deg, #161B22 0%, #1C2230 100%)' 
+          : 'linear-gradient(135deg, #ffffff 0%, #F1F5F9 100%)',
         border: '1px solid', borderColor: 'divider',
         borderRadius: '24px',
         mb: 4,
@@ -261,7 +265,8 @@ export default function ProfilePage() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                border: '2px solid #161B22',
+                border: '2px solid',
+                borderColor: 'background.paper',
                 fontFamily: "'JetBrains Mono'"
               }}>
                 {levelNum}
@@ -270,13 +275,13 @@ export default function ProfilePage() {
 
             {/* Title / Description */}
             <Box sx={{ flexGrow: 1, textAlign: { xs: 'center', sm: 'left' } }}>
-              <Typography variant="h5" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 950, color: '#F0F4F8' }}>
+              <Typography variant="h5" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 950, color: 'text.primary' }}>
                 {user?.username}
               </Typography>
               <Typography sx={{ color: '#2E8B57', fontSize: '0.85rem', fontWeight: 700, mt: 0.5 }}>
                 Level {levelNum}: {levelName}
               </Typography>
-              <Typography sx={{ color: '#8892A4', fontSize: '0.85rem', mt: 1, fontStyle: 'italic', maxWidth: 450 }}>
+              <Typography sx={{ color: 'text.secondary', fontSize: '0.85rem', mt: 1, fontStyle: 'italic', maxWidth: 450 }}>
                 {formData.bio || "No profile bio set yet. Tell other aspirants about your goals!"}
               </Typography>
             </Box>
@@ -286,24 +291,24 @@ export default function ProfilePage() {
               <Tooltip title="Total Study XP">
                 <Box sx={{ bgcolor: 'rgba(139, 92, 246, 0.08)', border: '1px solid rgba(139, 92, 246, 0.15)', px: 2, py: 1.5, borderRadius: '14px', textAlign: 'center', minWidth: 70 }}>
                   <BoltIcon sx={{ color: '#a78bfa', fontSize: 20, mb: 0.25 }} />
-                  <Typography sx={{ fontSize: '0.9rem', fontWeight: 900, color: '#F0F4F8', fontFamily: "'JetBrains Mono'" }}>{totalXp}</Typography>
-                  <Typography sx={{ fontSize: '0.6rem', color: '#8892A4', textTransform: 'uppercase' }}>XP</Typography>
+                  <Typography sx={{ fontSize: '0.9rem', fontWeight: 900, color: 'text.primary', fontFamily: "'JetBrains Mono'" }}>{totalXp}</Typography>
+                  <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', textTransform: 'uppercase' }}>XP</Typography>
                 </Box>
               </Tooltip>
 
               <Tooltip title="Current Streak">
                 <Box sx={{ bgcolor: 'rgba(255, 107, 43, 0.08)', border: '1px solid rgba(255, 107, 43, 0.15)', px: 2, py: 1.5, borderRadius: '14px', textAlign: 'center', minWidth: 70 }}>
                   <LocalFireDepartmentIcon sx={{ color: '#FF6B2B', fontSize: 20, mb: 0.25 }} />
-                  <Typography sx={{ fontSize: '0.9rem', fontWeight: 900, color: '#F0F4F8', fontFamily: "'JetBrains Mono'" }}>{profileData?.current_streak || 0}d</Typography>
-                  <Typography sx={{ fontSize: '0.6rem', color: '#8892A4', textTransform: 'uppercase' }}>Streak</Typography>
+                  <Typography sx={{ fontSize: '0.9rem', fontWeight: 900, color: 'text.primary', fontFamily: "'JetBrains Mono'" }}>{profileData?.current_streak || 0}d</Typography>
+                  <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', textTransform: 'uppercase' }}>Streak</Typography>
                 </Box>
               </Tooltip>
 
               <Tooltip title="Streak Freezes Remaining">
                 <Box sx={{ bgcolor: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.15)', px: 2, py: 1.5, borderRadius: '14px', textAlign: 'center', minWidth: 70 }}>
                   <AcUnitIcon sx={{ color: '#3B82F6', fontSize: 20, mb: 0.25 }} />
-                  <Typography sx={{ fontSize: '0.9rem', fontWeight: 900, color: '#F0F4F8', fontFamily: "'JetBrains Mono'" }}>{profileData?.streak_freeze_count || 0}</Typography>
-                  <Typography sx={{ fontSize: '0.6rem', color: '#8892A4', textTransform: 'uppercase' }}>Freezes</Typography>
+                  <Typography sx={{ fontSize: '0.9rem', fontWeight: 900, color: 'text.primary', fontFamily: "'JetBrains Mono'" }}>{profileData?.streak_freeze_count || 0}</Typography>
+                  <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary', textTransform: 'uppercase' }}>Freezes</Typography>
                 </Box>
               </Tooltip>
             </Stack>
@@ -312,7 +317,7 @@ export default function ProfilePage() {
       </Card>
 
       {/* Styled Navigation Tabs */}
-      <Box sx={{ borderBottom: '1px solid rgba(255, 255, 255, 0.08)', mb: 4, display: 'flex', gap: 4 }}>
+      <Box sx={{ borderBottom: '1px solid', borderColor: 'divider', mb: 4, display: 'flex', gap: 4 }}>
         <Typography
           onClick={() => setActiveTab('edit')}
           sx={{
@@ -321,9 +326,9 @@ export default function ProfilePage() {
             fontWeight: 800,
             cursor: 'pointer',
             borderBottom: activeTab === 'edit' ? '3px solid #2E8B57' : '3px solid transparent',
-            color: activeTab === 'edit' ? '#F0F4F8' : '#8892A4',
+            color: activeTab === 'edit' ? 'text.primary' : 'text.secondary',
             transition: 'all 0.2s',
-            '&:hover': { color: '#F0F4F8' }
+            '&:hover': { color: 'text.primary' }
           }}
         >
           Edit Profile Settings
@@ -336,9 +341,9 @@ export default function ProfilePage() {
             fontWeight: 800,
             cursor: 'pointer',
             borderBottom: activeTab === 'achievements' ? '3px solid #2E8B57' : '3px solid transparent',
-            color: activeTab === 'achievements' ? '#F0F4F8' : '#8892A4',
+            color: activeTab === 'achievements' ? 'text.primary' : 'text.secondary',
             transition: 'all 0.2s',
-            '&:hover': { color: '#F0F4F8' }
+            '&:hover': { color: 'text.primary' }
           }}
         >
           My Achievements
@@ -361,24 +366,24 @@ export default function ProfilePage() {
             <form onSubmit={handleSubmit}>
               <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px', mb: 3 }}>
                 <CardContent sx={{ p: 3 }}>
-                  <Typography variant="subtitle2" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: '#F0F4F8', mb: 3 }}>
+                  <Typography variant="subtitle2" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: 'text.primary', mb: 3 }}>
                     Personal Details
                   </Typography>
                   <Grid container spacing={3}>
                     {/* Avatar Upload */}
                     <Grid size={12} sx={{ display: 'flex', alignItems: 'center', gap: 2.5, mb: 1 }}>
-                      <Avatar src={preview || undefined} sx={{ width: 64, height: 64, border: '2px solid rgba(255,255,255,0.1)' }} />
+                      <Avatar src={preview || undefined} sx={{ width: 64, height: 64, border: '2px solid', borderColor: 'divider' }} />
                       <Box>
                         <Button variant="contained" component="label" sx={{
-                          background: 'rgba(255,255,255,0.06)',
-                          color: '#F0F4F8',
-                          '&:hover': { background: 'rgba(255,255,255,0.12)' },
+                          background: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
+                          color: 'text.primary',
+                          '&:hover': { background: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)' },
                           textTransform: 'none', fontWeight: 700, borderRadius: '8px', py: 0.75, px: 2
                         }}>
                           Choose New Photo
                           <Input type="file" hidden onChange={handleFileChange} inputProps={{ accept: 'image/*' }} />
                         </Button>
-                        <Typography sx={{ fontSize: '0.65rem', color: '#8892A4', mt: 0.75 }}>
+                        <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', mt: 0.75 }}>
                           Format: PNG, JPG (Max 5MB)
                         </Typography>
                       </Box>
@@ -395,14 +400,14 @@ export default function ProfilePage() {
                         value={formData.bio}
                         onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                         sx={{
-                          '& textarea': { color: '#F0F4F8' },
-                          '& .MuiInputLabel-root': { color: '#8892A4' },
+                          '& textarea': { color: 'text.primary' },
+                          '& .MuiInputLabel-root': { color: 'text.secondary' },
                           '& .MuiOutlinedInput-root': {
-                            '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-                            '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
+                            '& fieldset': { borderColor: 'divider' },
+                            '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' },
                             '&.Mui-focused fieldset': { borderColor: '#2E8B57' },
                           },
-                          bgcolor: 'rgba(255,255,255,0.01)',
+                          bgcolor: isDark ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.01)',
                           borderRadius: '12px'
                         }}
                       />
@@ -417,14 +422,14 @@ export default function ProfilePage() {
                         value={formData.qualifications}
                         onChange={(e) => setFormData({ ...formData, qualifications: e.target.value })}
                         sx={{
-                          '& input': { color: '#F0F4F8' },
-                          '& .MuiInputLabel-root': { color: '#8892A4' },
+                          '& input': { color: 'text.primary' },
+                          '& .MuiInputLabel-root': { color: 'text.secondary' },
                           '& .MuiOutlinedInput-root': {
-                            '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-                            '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
+                            '& fieldset': { borderColor: 'divider' },
+                            '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' },
                             '&.Mui-focused fieldset': { borderColor: '#2E8B57' },
                           },
-                          bgcolor: 'rgba(255,255,255,0.01)',
+                          bgcolor: isDark ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.01)',
                           borderRadius: '12px'
                         }}
                       />
@@ -440,14 +445,14 @@ export default function ProfilePage() {
                         onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
                         InputLabelProps={{ shrink: true }}
                         sx={{
-                          '& input': { color: '#F0F4F8' },
-                          '& .MuiInputLabel-root': { color: '#8892A4' },
+                          '& input': { color: 'text.primary' },
+                          '& .MuiInputLabel-root': { color: 'text.secondary' },
                           '& .MuiOutlinedInput-root': {
-                            '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-                            '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
+                            '& fieldset': { borderColor: 'divider' },
+                            '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' },
                             '&.Mui-focused fieldset': { borderColor: '#2E8B57' },
                           },
-                          bgcolor: 'rgba(255,255,255,0.01)',
+                          bgcolor: isDark ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.01)',
                           borderRadius: '12px'
                         }}
                       />
@@ -462,14 +467,14 @@ export default function ProfilePage() {
                         value={formData.place}
                         onChange={(e) => setFormData({ ...formData, place: e.target.value })}
                         sx={{
-                          '& input': { color: '#F0F4F8' },
-                          '& .MuiInputLabel-root': { color: '#8892A4' },
+                          '& input': { color: 'text.primary' },
+                          '& .MuiInputLabel-root': { color: 'text.secondary' },
                           '& .MuiOutlinedInput-root': {
-                            '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-                            '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
+                            '& fieldset': { borderColor: 'divider' },
+                            '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' },
                             '&.Mui-focused fieldset': { borderColor: '#2E8B57' },
                           },
-                          bgcolor: 'rgba(255,255,255,0.01)',
+                          bgcolor: isDark ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.01)',
                           borderRadius: '12px'
                         }}
                       />
@@ -478,13 +483,13 @@ export default function ProfilePage() {
                     {/* District Dropdown */}
                     <Grid size={{ xs: 12, sm: 6 }}>
                       <FormControl fullWidth sx={{
-                        '& .MuiInputLabel-root': { color: '#8892A4' },
+                        '& .MuiInputLabel-root': { color: 'text.secondary' },
                         '& .MuiOutlinedInput-root': {
-                          '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-                          '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
+                          '& fieldset': { borderColor: 'divider' },
+                          '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' },
                           '&.Mui-focused fieldset': { borderColor: '#2E8B57' },
                         },
-                        bgcolor: 'rgba(255,255,255,0.01)',
+                        bgcolor: isDark ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.01)',
                         borderRadius: '12px'
                       }}>
                         <InputLabel id="district-label">District (Kerala)</InputLabel>
@@ -492,7 +497,7 @@ export default function ProfilePage() {
                           labelId="district-label"
                           value={formData.district}
                           onChange={(e) => setFormData({ ...formData, district: e.target.value as string })}
-                          sx={{ color: '#F0F4F8' }}
+                          sx={{ color: 'text.primary' }}
                           label="District (Kerala)"
                         >
                           <MenuItem value=""><em>None</em></MenuItem>
@@ -509,20 +514,20 @@ export default function ProfilePage() {
               {/* Preferences Card */}
               <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px', mb: 4 }}>
                 <CardContent sx={{ p: 3 }}>
-                  <Typography variant="subtitle2" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: '#F0F4F8', mb: 3 }}>
+                  <Typography variant="subtitle2" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: 'text.primary', mb: 3 }}>
                     Target Exam & Study Topics
                   </Typography>
                   <Grid container spacing={3}>
                     {/* Focus Exams */}
                     <Grid size={12}>
                       <FormControl fullWidth sx={{
-                        '& .MuiInputLabel-root': { color: '#8892A4' },
+                        '& .MuiInputLabel-root': { color: 'text.secondary' },
                         '& .MuiOutlinedInput-root': {
-                          '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-                          '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
+                          '& fieldset': { borderColor: 'divider' },
+                          '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' },
                           '&.Mui-focused fieldset': { borderColor: '#2E8B57' },
                         },
-                        bgcolor: 'rgba(255,255,255,0.01)',
+                        bgcolor: isDark ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.01)',
                         borderRadius: '12px'
                       }}>
                         <InputLabel>Focus Exams (Select up to 3)</InputLabel>
@@ -533,7 +538,7 @@ export default function ProfilePage() {
                             const value = e.target.value as number[];
                             if (value.length <= 3) setFormData({ ...formData, preferred_exams_ids: value });
                           }}
-                          sx={{ color: '#F0F4F8' }}
+                          sx={{ color: 'text.primary' }}
                           renderValue={(selected) => (
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                               {examsData?.flatMap((c: any) => c.exams).filter((e: any) => selected.includes(e.id)).map((e: any) => (
@@ -552,13 +557,13 @@ export default function ProfilePage() {
                     {/* Preferred Topics */}
                     <Grid size={12}>
                       <FormControl fullWidth sx={{
-                        '& .MuiInputLabel-root': { color: '#8892A4' },
+                        '& .MuiInputLabel-root': { color: 'text.secondary' },
                         '& .MuiOutlinedInput-root': {
-                          '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-                          '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
+                          '& fieldset': { borderColor: 'divider' },
+                          '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' },
                           '&.Mui-focused fieldset': { borderColor: '#2E8B57' },
                         },
-                        bgcolor: 'rgba(255,255,255,0.01)',
+                        bgcolor: isDark ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.01)',
                         borderRadius: '12px'
                       }}>
                         <InputLabel>Preferred Topics</InputLabel>
@@ -566,7 +571,7 @@ export default function ProfilePage() {
                           multiple
                           value={formData.preferred_topics_ids}
                           onChange={(e) => setFormData({ ...formData, preferred_topics_ids: e.target.value as number[] })}
-                          sx={{ color: '#F0F4F8' }}
+                          sx={{ color: 'text.primary' }}
                           renderValue={(selected) => (
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                               {topics?.filter((t: any) => selected.includes(t.id)).map((t: any) => (
@@ -583,20 +588,20 @@ export default function ProfilePage() {
                     {/* Difficulty */}
                     <Grid size={12}>
                       <FormControl fullWidth sx={{
-                        '& .MuiInputLabel-root': { color: '#8892A4' },
+                        '& .MuiInputLabel-root': { color: 'text.secondary' },
                         '& .MuiOutlinedInput-root': {
-                          '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-                          '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
+                          '& fieldset': { borderColor: 'divider' },
+                          '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' },
                           '&.Mui-focused fieldset': { borderColor: '#2E8B57' },
                         },
-                        bgcolor: 'rgba(255,255,255,0.01)',
+                        bgcolor: isDark ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.01)',
                         borderRadius: '12px'
                       }}>
                         <InputLabel>Preferred Difficulty</InputLabel>
                         <Select
                           value={formData.preferred_difficulty}
                           onChange={(e) => setFormData({ ...formData, preferred_difficulty: e.target.value as string })}
-                          sx={{ color: '#F0F4F8' }}
+                          sx={{ color: 'text.primary' }}
                         >
                           <MenuItem value=""><em>None</em></MenuItem>
                           <MenuItem value="easy">Easy</MenuItem>
@@ -640,10 +645,10 @@ export default function ProfilePage() {
             <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px', mb: 4 }}>
               <CardContent sx={{ p: 3 }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-                  <Typography sx={{ fontWeight: 800, color: '#F0F4F8', display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography sx={{ fontWeight: 800, color: 'text.primary', display: 'flex', alignItems: 'center', gap: 1 }}>
                     <StarIcon sx={{ color: '#8B5CF6' }} /> Level Progression
                   </Typography>
-                  <Typography sx={{ fontSize: '0.8rem', color: '#8892A4', fontFamily: "'JetBrains Mono'" }}>
+                  <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary', fontFamily: "'JetBrains Mono'" }}>
                     {totalXp} / {nextXp} XP
                   </Typography>
                 </Stack>
@@ -655,7 +660,7 @@ export default function ProfilePage() {
                     sx={{
                       height: 12,
                       borderRadius: 6,
-                      bgcolor: 'rgba(255,255,255,0.06)',
+                      bgcolor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
                       '& .MuiLinearProgress-bar': {
                         background: 'linear-gradient(90deg, #8B5CF6, #c084fc)',
                         borderRadius: 6
@@ -665,7 +670,7 @@ export default function ProfilePage() {
                 </Box>
 
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
-                  <Typography sx={{ fontSize: '0.8rem', color: '#8892A4' }}>
+                  <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
                     Level {levelNum}: {levelName}
                   </Typography>
                   {levelNum < 10 ? (
@@ -684,12 +689,12 @@ export default function ProfilePage() {
             {/* Heatmap Card */}
             <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px', mb: 4 }}>
               <CardContent sx={{ p: 3 }}>
-                <Typography sx={{ fontWeight: 800, color: '#F0F4F8', display: 'flex', alignItems: 'center', gap: 1, mb: 2.5 }}>
+                <Typography sx={{ fontWeight: 800, color: 'text.primary', display: 'flex', alignItems: 'center', gap: 1, mb: 2.5 }}>
                   <LocalFireDepartmentIcon sx={{ color: '#2E8B57' }} /> Study Activity Heatmap
                 </Typography>
                 
                 <Box sx={{ display: 'flex', overflowX: 'auto', pb: 1, gap: '4px' }}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', pr: 1, py: '2px', height: '88px', fontSize: '0.65rem', color: '#8892A4' }}>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', pr: 1, py: '2px', height: '88px', fontSize: '0.65rem', color: 'text.secondary' }}>
                     <Typography sx={{ fontSize: 'inherit' }}>Sun</Typography>
                     <Typography sx={{ fontSize: 'inherit' }}>Tue</Typography>
                     <Typography sx={{ fontSize: 'inherit' }}>Thu</Typography>
@@ -703,20 +708,20 @@ export default function ProfilePage() {
                           const isToday = day.dateStr === new Date().toISOString().split('T')[0];
                           return (
                             <Tooltip
-                              key={dIdx}
-                              title={`${day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}: ${day.isActive ? 'Active Study Day' : 'No activity'}`}
-                              arrow
+                               key={dIdx}
+                               title={`${day.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}: ${day.isActive ? 'Active Study Day' : 'No activity'}`}
+                               arrow
                             >
                               <Box sx={{
                                 width: 10,
                                 height: 10,
                                 borderRadius: '2px',
-                                bgcolor: day.isActive ? '#2E8B57' : 'rgba(255, 255, 255, 0.06)',
+                                bgcolor: day.isActive ? '#2E8B57' : (isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)'),
                                 border: isToday ? '1px solid #8B5CF6' : 'none',
                                 transition: 'transform 0.1s',
                                 '&:hover': {
                                   transform: 'scale(1.3)',
-                                  bgcolor: day.isActive ? '#39D353' : 'rgba(255, 255, 255, 0.15)',
+                                  bgcolor: day.isActive ? '#39D353' : (isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)'),
                                   zIndex: 10
                                 }
                               }} />
@@ -729,17 +734,17 @@ export default function ProfilePage() {
                 </Box>
                 
                 <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center" sx={{ mt: 1.5 }}>
-                  <Typography sx={{ fontSize: '0.65rem', color: '#8892A4' }}>Less</Typography>
-                  <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: 'rgba(255, 255, 255, 0.06)' }} />
+                  <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary' }}>Less</Typography>
+                  <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)' }} />
                   <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: '#2E8B57' }} />
-                  <Typography sx={{ fontSize: '0.65rem', color: '#8892A4' }}>More</Typography>
+                  <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary' }}>More</Typography>
                 </Stack>
               </CardContent>
             </Card>
 
             {/* Badges Container */}
             <Box sx={{ mb: 4 }}>
-              <Typography variant="h6" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: '#F0F4F8', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="h6" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: 'text.primary', mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                 <EmojiEventsIcon sx={{ color: '#F59E0B' }} /> Earned Badges
               </Typography>
               
@@ -749,7 +754,7 @@ export default function ProfilePage() {
                   background: 'background.paper', borderRadius: '20px',
                   border: '1px solid', borderColor: 'divider'
                 }}>
-                  <Typography sx={{ color: '#8892A4', fontSize: '0.875rem' }}>
+                  <Typography sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
                     No achievement stats fetched yet. Start answering study card questions to unlock!
                   </Typography>
                 </Box>
@@ -759,8 +764,9 @@ export default function ProfilePage() {
                     <Grid size={{ xs: 6, sm: 3 }} key={badge.id}>
                       <Box sx={{
                         p: 2,
-                        background: badge.earned ? 'rgba(27, 107, 58, 0.08)' : 'rgba(255,255,255,0.02)',
-                        border: badge.earned ? '1px solid rgba(46, 139, 87, 0.25)' : '1px solid rgba(255,255,255,0.05)',
+                        background: badge.earned ? 'rgba(27, 107, 58, 0.08)' : (isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)'),
+                        border: badge.earned ? '1px solid rgba(46, 139, 87, 0.25)' : '1px solid',
+                        borderColor: 'divider',
                         borderRadius: '16px',
                         textAlign: 'center',
                         opacity: badge.earned ? 1 : 0.35,
@@ -773,10 +779,10 @@ export default function ProfilePage() {
                         alignItems: 'center'
                       }}>
                         <Typography sx={{ fontSize: '2.2rem', mb: 1 }}>{badge.icon}</Typography>
-                        <Typography sx={{ fontWeight: 800, fontSize: '0.8rem', color: '#F0F4F8' }}>
+                        <Typography sx={{ fontWeight: 800, fontSize: '0.8rem', color: 'text.primary' }}>
                           {badge.name}
                         </Typography>
-                        <Typography sx={{ fontSize: '0.65rem', color: '#8892A4', mt: 0.5, lineHeight: 1.3 }}>
+                        <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', mt: 0.5, lineHeight: 1.3 }}>
                           {badge.description}
                         </Typography>
                       </Box>
@@ -788,16 +794,18 @@ export default function ProfilePage() {
 
             {/* Certificate Award Nudge */}
             <Card sx={{
-              background: 'linear-gradient(135deg, rgba(27, 107, 58, 0.15) 0%, rgba(28, 34, 48, 0.5) 100%)',
+              background: isDark 
+                ? 'linear-gradient(135deg, rgba(27, 107, 58, 0.15) 0%, rgba(28, 34, 48, 0.5) 100%)' 
+                : 'linear-gradient(135deg, rgba(27, 107, 58, 0.08) 0%, rgba(248, 250, 252, 0.9) 100%)',
               border: '1px solid rgba(46, 139, 87, 0.3)',
               borderRadius: '20px'
             }}>
               <CardContent sx={{ p: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
                 <SchoolIcon sx={{ color: '#2E8B57', fontSize: 36, mb: 1.5 }} />
-                <Typography variant="h6" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: '#F0F4F8' }}>
+                <Typography variant="h6" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: 'text.primary' }}>
                   Milestone Study Credentials
                 </Typography>
-                <Typography sx={{ color: '#8892A4', fontSize: '0.8rem', mt: 0.5, mb: 2.5, maxWidth: 500 }}>
+                <Typography sx={{ color: 'text.secondary', fontSize: '0.8rem', mt: 0.5, mb: 2.5, maxWidth: 500 }}>
                   As you complete daily study streaks and level up, KPSC Master issues verified certificates to recognize your test preparation milestone.
                 </Typography>
                 <Button
@@ -829,7 +837,7 @@ export default function ProfilePage() {
         fullWidth
         PaperProps={{
           sx: {
-            bgcolor: '#0F1117',
+            bgcolor: 'background.default',
             borderRadius: '24px',
             border: '2px solid #F59E0B',
             boxShadow: '0 0 32px rgba(245, 158, 11, 0.15)'
@@ -837,7 +845,7 @@ export default function ProfilePage() {
         }}
       >
         <DialogTitle sx={{ display: 'flex', justifyContent: 'flex-end', p: 1.5 }}>
-          <IconButton onClick={() => setShowCert(false)} sx={{ color: '#8892A4' }}>
+          <IconButton onClick={() => setShowCert(false)} sx={{ color: 'text.secondary' }}>
             <CloseIcon />
           </IconButton>
         </DialogTitle>
@@ -864,7 +872,7 @@ export default function ProfilePage() {
               userSelect: 'none',
               pointerEvents: 'none',
               whiteSpace: 'nowrap',
-              color: '#F0F4F8'
+              color: 'text.primary'
             }}>
               KPSC MASTER
             </Typography>
@@ -873,32 +881,32 @@ export default function ProfilePage() {
               Kerala State PSC Master Academy
             </Typography>
 
-            <Typography variant="h3" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 950, color: '#F0F4F8', mb: 1.5, fontSize: { xs: '1.8rem', md: '2.5rem' } }}>
+            <Typography variant="h3" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 950, color: 'text.primary', mb: 1.5, fontSize: { xs: '1.8rem', md: '2.5rem' } }}>
               CERTIFICATE OF MILESTONE
             </Typography>
 
-            <Typography sx={{ color: '#8892A4', fontSize: '0.85rem', mb: 4 }}>
+            <Typography sx={{ color: 'text.secondary', fontSize: '0.85rem', mb: 4 }}>
               This is officially awarded to recognize study performance and consistency.
             </Typography>
 
-            <Typography sx={{ color: '#8892A4', fontSize: '0.8rem', fontStyle: 'italic', mb: 1 }}>
+            <Typography sx={{ color: 'text.secondary', fontSize: '0.8rem', fontStyle: 'italic', mb: 1 }}>
               Proudly presented to
             </Typography>
 
-            <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 950, color: '#2E8B57', borderBottom: '1px solid rgba(255,255,255,0.1)', pb: 1, px: 2, display: 'inline-block', minWidth: 250, mb: 3 }}>
+            <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 950, color: '#2E8B57', borderBottom: '1px solid', borderColor: 'divider', pb: 1, px: 2, display: 'inline-block', minWidth: 250, mb: 3 }}>
               {user?.username}
             </Typography>
 
-            <Typography sx={{ color: '#8892A4', fontSize: '0.85rem', lineHeight: 1.6, maxWidth: 520, mx: 'auto', mb: 5 }}>
+            <Typography sx={{ color: 'text.secondary', fontSize: '0.85rem', lineHeight: 1.6, maxWidth: 520, mx: 'auto', mb: 5 }}>
               For successfully achieving <strong>Level {levelNum}: {levelName}</strong> credentials with a accumulated record of <strong>{totalXp} XP</strong> and dedication to Kerala PSC civil services exam syllabus.
             </Typography>
 
             <Grid container spacing={3} justifyContent="space-between" alignItems="flex-end" sx={{ mt: 2 }}>
               <Grid size={{ xs: 6, sm: 4 }} sx={{ textAlign: 'left' }}>
-                <Typography sx={{ fontFamily: "'JetBrains Mono'", fontSize: '0.75rem', color: '#F0F4F8', fontWeight: 700 }}>
+                <Typography sx={{ fontFamily: "'JetBrains Mono'", fontSize: '0.75rem', color: 'text.primary', fontWeight: 700 }}>
                   Date: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </Typography>
-                <Typography sx={{ fontSize: '0.65rem', color: '#8892A4' }}>Issue Date</Typography>
+                <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary' }}>Issue Date</Typography>
               </Grid>
 
               <Grid size={{ xs: 12, sm: 4 }} sx={{ display: { xs: 'none', sm: 'block' } }}>
@@ -906,10 +914,10 @@ export default function ProfilePage() {
               </Grid>
 
               <Grid size={{ xs: 6, sm: 4 }} sx={{ textAlign: 'right' }}>
-                <Typography sx={{ fontFamily: "'Satoshi'", fontSize: '0.75rem', color: '#F0F4F8', fontWeight: 800 }}>
+                <Typography sx={{ fontFamily: "'Satoshi'", fontSize: '0.75rem', color: 'text.primary', fontWeight: 800 }}>
                   Academic Board
                 </Typography>
-                <Typography sx={{ fontSize: '0.65rem', color: '#8892A4' }}>KPSC Master Verified</Typography>
+                <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary' }}>KPSC Master Verified</Typography>
               </Grid>
             </Grid>
           </Box>

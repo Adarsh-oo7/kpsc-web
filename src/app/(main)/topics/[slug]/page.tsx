@@ -58,18 +58,20 @@ const getTopicVisuals = (topicName: string) => {
 
 // Accuracy radial progress gauge component
 function TopicAccuracyGauge({ accuracy }: { accuracy: number }) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   const radius = 64;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference * (1 - accuracy / 100);
-  const color = accuracy >= 70 ? '#22c55e' : accuracy >= 50 ? '#F59E0B' : accuracy > 0 ? '#EF4444' : '#4A5568';
+  const color = accuracy >= 70 ? '#22c55e' : accuracy >= 50 ? '#F59E0B' : accuracy > 0 ? '#EF4444' : 'text.disabled';
 
   return (
     <Box sx={{ position: 'relative', width: 150, height: 150, mx: 'auto' }}>
       <svg width="150" height="150" viewBox="0 0 150 150">
-        <circle cx="75" cy="75" r={radius} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="10" />
+        <circle cx="75" cy="75" r={radius} fill="none" stroke={isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"} strokeWidth="10" />
         <circle
           cx="75" cy="75" r={radius} fill="none"
-          stroke={color} strokeWidth="10"
+          stroke={color === 'text.disabled' ? theme.palette.text.disabled : color} strokeWidth="10"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="round"
@@ -77,10 +79,10 @@ function TopicAccuracyGauge({ accuracy }: { accuracy: number }) {
         />
       </svg>
       <Box sx={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyItems: 'center', justifyContent: 'center' }}>
-        <Typography sx={{ fontFamily: "'JetBrains Mono'", fontWeight: 900, fontSize: '2.2rem', color, lineHeight: 1 }}>
+        <Typography sx={{ fontFamily: "'JetBrains Mono'", fontWeight: 900, fontSize: '2.2rem', color: color === 'text.disabled' ? 'text.disabled' : color, lineHeight: 1 }}>
           {Math.round(accuracy)}%
         </Typography>
-        <Typography sx={{ fontSize: '0.65rem', color: '#8892A4', fontWeight: 650, mt: 0.5 }}>ACCURACY</Typography>
+        <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', fontWeight: 650, mt: 0.5 }}>ACCURACY</Typography>
       </Box>
     </Box>
   );
@@ -90,6 +92,8 @@ export default function TopicStudyPage() {
   const { slug } = useParams() as { slug: string };
   const { user, fetcher, isLoading: ctxLoading } = useAppContext();
   const router = useRouter();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
 
   // Redirect to login if user profile context not loaded
   useEffect(() => {
@@ -331,16 +335,16 @@ export default function TopicStudyPage() {
                 <CardContent sx={{ p: 4, textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
                   <TopicAccuracyGauge accuracy={topicSummary.accuracy} />
                   
-                  <Divider sx={{ borderColor: 'rgba(255,255,255,0.05)', my: 3 }} />
+                  <Divider sx={{ my: 3 }} />
 
                   <Stack spacing={2} sx={{ textAlign: 'left' }}>
                     <Stack direction="row" justifyContent="space-between">
-                      <Typography sx={{ color: '#8892A4', fontSize: '0.85rem' }}>Questions Solved</Typography>
-                      <Typography sx={{ color: '#F0F4F8', fontWeight: 750, fontSize: '0.85rem', fontFamily: "'JetBrains Mono'" }}>{topicSummary.total_attempted}</Typography>
+                      <Typography sx={{ color: 'text.secondary', fontSize: '0.85rem' }}>Questions Solved</Typography>
+                      <Typography sx={{ color: 'text.primary', fontWeight: 750, fontSize: '0.85rem', fontFamily: "'JetBrains Mono'" }}>{topicSummary.total_attempted}</Typography>
                     </Stack>
                     <Stack direction="row" justifyContent="space-between">
-                      <Typography sx={{ color: '#8892A4', fontSize: '0.85rem' }}>Last Practiced</Typography>
-                      <Typography sx={{ color: '#F0F4F8', fontWeight: 700, fontSize: '0.85rem' }}>
+                      <Typography sx={{ color: 'text.secondary', fontSize: '0.85rem' }}>Last Practiced</Typography>
+                      <Typography sx={{ color: 'text.primary', fontWeight: 700, fontSize: '0.85rem' }}>
                         {topicSummary.last_practiced 
                           ? new Date(topicSummary.last_practiced).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
                           : 'Never'}
@@ -394,20 +398,20 @@ export default function TopicStudyPage() {
             <Grid size={12}>
               <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px', mt: 1 }}>
                 <CardContent sx={{ p: 4 }}>
-                  <Typography variant="subtitle2" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: '#F0F4F8', mb: 3 }}>
+                  <Typography variant="subtitle2" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: 'text.primary', mb: 3 }}>
                     Structured Study Practice
                   </Typography>
 
                   <Grid container spacing={3} alignItems="center">
                     <Grid size={{ xs: 12, sm: 4 }}>
                       <FormControl fullWidth sx={{
-                        '& .MuiInputLabel-root': { color: '#8892A4' },
+                        '& .MuiInputLabel-root': { color: 'text.secondary' },
                         '& .MuiOutlinedInput-root': {
-                          '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-                          '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
+                          '& fieldset': { borderColor: 'divider' },
+                          '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' },
                           '&.Mui-focused fieldset': { borderColor: '#2E8B57' },
                         },
-                        bgcolor: 'rgba(255,255,255,0.01)',
+                        bgcolor: isDark ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.01)',
                         borderRadius: '12px'
                       }}>
                         <InputLabel id="count-label">Question Count</InputLabel>
@@ -415,7 +419,7 @@ export default function TopicStudyPage() {
                           labelId="count-label"
                           value={practiceCount}
                           onChange={(e) => setPracticeCount(e.target.value as number)}
-                          sx={{ color: '#F0F4F8' }}
+                          sx={{ color: 'text.primary' }}
                           label="Question Count"
                         >
                           <MenuItem value={5}>5 Questions</MenuItem>
@@ -428,13 +432,13 @@ export default function TopicStudyPage() {
 
                     <Grid size={{ xs: 12, sm: 4 }}>
                       <FormControl fullWidth sx={{
-                        '& .MuiInputLabel-root': { color: '#8892A4' },
+                        '& .MuiInputLabel-root': { color: 'text.secondary' },
                         '& .MuiOutlinedInput-root': {
-                          '& fieldset': { borderColor: 'rgba(255,255,255,0.1)' },
-                          '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
+                          '& fieldset': { borderColor: 'divider' },
+                          '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' },
                           '&.Mui-focused fieldset': { borderColor: '#2E8B57' },
                         },
-                        bgcolor: 'rgba(255,255,255,0.01)',
+                        bgcolor: isDark ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.01)',
                         borderRadius: '12px'
                       }}>
                         <InputLabel id="difficulty-label">Difficulty Filter</InputLabel>
@@ -442,7 +446,7 @@ export default function TopicStudyPage() {
                           labelId="difficulty-label"
                           value={practiceDifficulty}
                           onChange={(e) => setPracticeDifficulty(e.target.value as any)}
-                          sx={{ color: '#F0F4F8' }}
+                          sx={{ color: 'text.primary' }}
                           label="Difficulty Filter"
                         >
                           <MenuItem value="">Mixed Difficulty</MenuItem>
@@ -489,24 +493,24 @@ export default function TopicStudyPage() {
           <Box sx={{
             position: 'sticky', top: 64, zIndex: 10, mb: 3,
             p: 2, borderRadius: '16px',
-            background: 'rgba(22, 27, 34, 0.95)',
+            background: isDark ? 'rgba(22, 27, 34, 0.95)' : 'rgba(255, 255, 255, 0.95)',
             backdropFilter: 'blur(16px)',
             border: '1px solid', borderColor: 'divider',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+            boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.06)',
           }}>
             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
-              <Typography sx={{ fontSize: '0.8rem', color: '#8892A4', fontWeight: 600 }}>
+              <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary', fontWeight: 600 }}>
                 Question {currentIdx + 1} of {questions.length}
               </Typography>
               
               <Stack direction="row" spacing={1.5} alignItems="center">
                 <Stack direction="row" spacing={0.5} alignItems="center" sx={{
                   px: 1.5, py: 0.4, borderRadius: '16px',
-                  background: 'rgba(255,255,255,0.03)',
+                  background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
                   border: '1px solid', borderColor: 'divider'
                 }}>
-                  <TimerIcon sx={{ fontSize: 14, color: '#8892A4' }} />
-                  <Typography sx={{ fontFamily: "'JetBrains Mono'", fontSize: '0.8rem', fontWeight: 700, color: '#D0D8E0' }}>
+                  <TimerIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
+                  <Typography sx={{ fontFamily: "'JetBrains Mono'", fontSize: '0.8rem', fontWeight: 700, color: 'text.primary' }}>
                     {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
                   </Typography>
                 </Stack>
@@ -565,8 +569,8 @@ export default function TopicStudyPage() {
                   {Object.entries(questions[currentIdx].options).map(([key, val]) => {
                     const isCorrect = key === questions[currentIdx].correct_answer;
                     const isSelected = key === selectedOpt;
-                    let borderStyle = '1px solid rgba(255,255,255,0.08)';
-                    let bgStyle = '#1C2230';
+                    let borderStyle = isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)';
+                    let bgStyle = theme.palette.surface.card;
 
                     if (isIdxAnswered) {
                       if (isCorrect) {
@@ -576,12 +580,12 @@ export default function TopicStudyPage() {
                         borderStyle = '1px solid #EF4444';
                         bgStyle = 'rgba(239,68,68,0.08)';
                       } else {
-                        bgStyle = '#161B22';
-                        borderStyle = '1px solid rgba(255,255,255,0.03)';
+                        bgStyle = theme.palette.surface.main;
+                        borderStyle = isDark ? '1px solid rgba(255,255,255,0.03)' : '1px solid rgba(0,0,0,0.03)';
                       }
                     } else if (isSelected) {
                       borderStyle = '1px solid #2E8B57';
-                      bgStyle = 'rgba(27,107,58,0.1)';
+                      bgStyle = 'rgba(27,107,58,0.15)';
                     }
 
                     return (
@@ -708,15 +712,15 @@ export default function TopicStudyPage() {
                 ))}
               </Stack>
             </Stack>
-            <Divider sx={{ borderColor: 'rgba(255,255,255,0.06)', mb: 2 }} />
+            <Divider sx={{ mb: 2 }} />
             {aiLoading ? (
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
                 <CircularProgress color="warning" size={28} sx={{ mb: 1.5 }} />
-                <Typography sx={{ color: '#8892A4', fontSize: '0.85rem' }}>Analyzing question...</Typography>
+                <Typography sx={{ color: 'text.secondary', fontSize: '0.85rem' }}>Analyzing question...</Typography>
               </Box>
             ) : (
               <Box sx={{ overflowY: 'auto', maxHeight: '40vh', pr: 1 }}>
-                <Typography sx={{ color: '#8892A4', lineHeight: 1.8, fontSize: '0.9rem', whiteSpace: 'pre-wrap' }}>
+                <Typography sx={{ color: 'text.secondary', lineHeight: 1.8, fontSize: '0.9rem', whiteSpace: 'pre-wrap' }}>
                   {aiText || 'No explanation generated.'}
                 </Typography>
               </Box>
@@ -737,7 +741,7 @@ export default function TopicStudyPage() {
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
             <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '24px', p: 4, mb: 4, textAlign: 'center' }}>
               <EmojiEventsIcon sx={{ fontSize: 48, color: '#F59E0B', mb: 1.5 }} />
-              <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 950, color: '#F0F4F8', mb: 3 }}>
+              <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 950, color: 'text.primary', mb: 3 }}>
                 Practice Complete!
               </Typography>
               
@@ -747,14 +751,14 @@ export default function TopicStudyPage() {
 
               <Grid container spacing={2} sx={{ mt: 2 }}>
                 <Grid size={6}>
-                  <Box sx={{ bgcolor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', p: 2, borderRadius: '12px' }}>
-                    <Typography sx={{ color: '#8892A4', fontSize: '0.75rem', textTransform: 'uppercase' }}>XP EARNED</Typography>
+                  <Box sx={{ bgcolor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)', border: '1px solid', borderColor: 'divider', p: 2, borderRadius: '12px' }}>
+                    <Typography sx={{ color: 'text.secondary', fontSize: '0.75rem', textTransform: 'uppercase' }}>XP EARNED</Typography>
                     <Typography sx={{ color: '#8B5CF6', fontWeight: 800, fontSize: '1.4rem', fontFamily: "'JetBrains Mono'", mt: 0.5 }}>+{sessionXpEarned} XP</Typography>
                   </Box>
                 </Grid>
                 <Grid size={6}>
-                  <Box sx={{ bgcolor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', p: 2, borderRadius: '12px' }}>
-                    <Typography sx={{ color: '#8892A4', fontSize: '0.75rem', textTransform: 'uppercase' }}>TIME TAKEN</Typography>
+                  <Box sx={{ bgcolor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)', border: '1px solid', borderColor: 'divider', p: 2, borderRadius: '12px' }}>
+                    <Typography sx={{ color: 'text.secondary', fontSize: '0.75rem', textTransform: 'uppercase' }}>TIME TAKEN</Typography>
                     <Typography sx={{ color: '#2E8B57', fontWeight: 800, fontSize: '1.4rem', fontFamily: "'JetBrains Mono'", mt: 0.5 }}>
                       {Math.floor(totalTimeRef.current / 60)}m {totalTimeRef.current % 60}s
                     </Typography>
@@ -798,7 +802,7 @@ export default function TopicStudyPage() {
                   borderRadius: '16px',
                   p: 3
                 }}>
-                  <Typography sx={{ fontWeight: 650, color: '#F0F4F8', mb: 2, fontSize: '0.9rem', lineHeight: 1.5 }}>
+                  <Typography sx={{ fontWeight: 650, color: 'text.primary', mb: 2, fontSize: '0.9rem', lineHeight: 1.5 }}>
                     {idx + 1}. {qData.text}
                   </Typography>
 
@@ -808,16 +812,16 @@ export default function TopicStudyPage() {
                       const isSelectedOpt = optKey === selected;
                       let bg = 'transparent';
                       let border = '1px solid transparent';
-                      let textColor = '#8892A4';
+                      let textColor = theme.palette.text.secondary;
 
                       if (isCorrectOpt) {
                         bg = 'rgba(34,197,94,0.06)';
                         border = '1px solid rgba(34,197,94,0.2)';
-                        textColor = '#86efac';
+                        textColor = isDark ? '#86efac' : '#145228';
                       } else if (isSelectedOpt) {
                         bg = 'rgba(239,68,68,0.06)';
                         border = '1px solid rgba(239,68,68,0.2)';
-                        textColor = '#fca5a5';
+                        textColor = isDark ? '#fca5a5' : '#EF4444';
                       }
 
                       return (

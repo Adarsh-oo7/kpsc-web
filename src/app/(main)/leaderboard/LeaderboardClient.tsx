@@ -6,7 +6,7 @@ import useSWR from 'swr';
 import {
   Box, Typography, CircularProgress, Stack, Tab, Tabs, Avatar, Divider, Chip,
   Grid, Button, Dialog, DialogTitle, DialogContent, TextField, IconButton,
-  InputAdornment, List, ListItem, ListItemAvatar, ListItemText, ListItemSecondaryAction
+  InputAdornment, List, ListItem, ListItemAvatar, ListItemText, ListItemSecondaryAction, useTheme
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
@@ -26,6 +26,8 @@ export default function LeaderboardClient() {
   const { user, fetcher, isLoading: ctxLoading } = useAppContext();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState(0);
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
 
   // Friends Modal State
   const [showFriendsModal, setShowFriendsModal] = useState(false);
@@ -168,7 +170,7 @@ export default function LeaderboardClient() {
           <Typography sx={{ fontSize: '0.8rem', color: '#8B5CF6', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             Leaderboard 🏆
           </Typography>
-          <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: '#F0F4F8', mt: 0.5 }}>
+          <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: 'text.primary', mt: 0.5 }}>
             Top Aspirants
           </Typography>
         </Box>
@@ -192,7 +194,7 @@ export default function LeaderboardClient() {
         </Button>
       </Stack>
 
-      <Typography sx={{ color: '#8892A4', fontSize: '0.9rem', mb: 3.5 }}>
+      <Typography sx={{ color: 'text.secondary', fontSize: '0.9rem', mb: 3.5 }}>
         Compare progress with Kerala's brightest and stay ahead of the curve.
       </Typography>
 
@@ -203,7 +205,7 @@ export default function LeaderboardClient() {
         variant="fullWidth"
         sx={{
           mb: 4,
-          background: 'rgba(255,255,255,0.02)',
+          background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
           borderRadius: '12px',
           border: '1px solid', borderColor: 'divider',
           p: 0.5,
@@ -218,14 +220,14 @@ export default function LeaderboardClient() {
             fontFamily: "'Satoshi', sans-serif",
             fontWeight: 700,
             fontSize: '0.825rem',
-            color: '#8892A4',
+            color: 'text.secondary',
             zIndex: 1,
             borderRadius: '8px',
             transition: 'color 0.2s ease',
             minWidth: 0,
             px: 1,
             '&.Mui-selected': {
-              color: '#F0F4F8',
+              color: 'text.primary',
             }
           }
         }}
@@ -243,10 +245,10 @@ export default function LeaderboardClient() {
           border: '1px solid', borderColor: 'divider'
         }}>
           <Typography sx={{ fontSize: '2.5rem', mb: 1 }}>🏆</Typography>
-          <Typography sx={{ fontWeight: 700, color: '#F0F4F8', fontFamily: "'Cabinet Grotesk'", mb: 0.5 }}>
+          <Typography sx={{ fontWeight: 700, color: 'text.primary', fontFamily: "'Cabinet Grotesk'", mb: 0.5 }}>
             No Leaderboard Activity
           </Typography>
-          <Typography sx={{ color: '#8892A4', fontSize: '0.875rem' }}>
+          <Typography sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
             {activeTab === 3 
               ? "Add study partners via the 'Manage Friends' button to see them on your Friends leaderboard!"
               : "Answer 10 questions to enter the ranking and unlock this board!"}
@@ -273,15 +275,16 @@ export default function LeaderboardClient() {
                     <Box sx={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                       p: 2,
-                      background: isCurrentUser ? 'rgba(27, 107, 58, 0.12)' : '#161B22',
-                      border: isCurrentUser ? '1px solid rgba(46, 139, 87, 0.4)' : '1px solid rgba(255,255,255,0.05)',
+                      background: isCurrentUser ? 'rgba(27, 107, 58, 0.12)' : 'background.paper',
+                      border: isCurrentUser ? '1px solid rgba(46, 139, 87, 0.4)' : '1px solid',
+                      borderColor: 'divider',
                       borderRadius: '14px',
                       transition: 'transform 0.2s',
                       '&:hover': { transform: 'translateX(4px)' }
                     }}>
                       <Stack direction="row" alignItems="center" spacing={2}>
                         <Typography sx={{
-                          fontFamily: "'JetBrains Mono'", fontWeight: 700, color: '#8892A4',
+                          fontFamily: "'JetBrains Mono'", fontWeight: 700, color: 'text.secondary',
                           width: 24, fontSize: '0.9rem', textAlign: 'center'
                         }}>
                           {p.rank}
@@ -290,20 +293,20 @@ export default function LeaderboardClient() {
                           src={p.avatar || undefined}
                           sx={{
                             width: 38, height: 38,
-                            bgcolor: isCurrentUser ? '#1B6B3A' : '#1C2230',
+                            bgcolor: isCurrentUser ? '#1B6B3A' : 'surface.card',
                             border: '1px solid', borderColor: 'divider',
-                            fontWeight: 700, fontSize: '0.9rem', color: '#F0F4F8'
+                            fontWeight: 700, fontSize: '0.9rem', color: 'text.primary'
                           }}
                         >
                           {p.username[0].toUpperCase()}
                         </Avatar>
                         <Box>
-                          <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: '#F0F4F8' }}>
+                          <Typography sx={{ fontWeight: 700, fontSize: '0.9rem', color: 'text.primary' }}>
                             {p.username}
                           </Typography>
                           <Stack direction="row" alignItems="center" spacing={0.5} sx={{ mt: 0.25 }}>
-                            <PlaceIcon sx={{ fontSize: 12, color: '#8892A4' }} />
-                            <Typography sx={{ fontSize: '0.7rem', color: '#8892A4' }}>
+                            <PlaceIcon sx={{ fontSize: 12, color: 'text.secondary' }} />
+                            <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>
                               {p.place}
                             </Typography>
                             <Chip
@@ -311,7 +314,7 @@ export default function LeaderboardClient() {
                               size="small"
                               sx={{
                                 height: 16, fontSize: '0.65rem', fontWeight: 700,
-                                bgcolor: 'rgba(255,255,255,0.04)', color: '#8892A4',
+                                bgcolor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)', color: 'text.secondary',
                                 border: '1px solid', borderColor: 'divider', ml: 1
                               }}
                             />
@@ -349,12 +352,12 @@ export default function LeaderboardClient() {
           bottom: 0,
           left: { lg: 272 }, // matching sidebar width
           right: 0,
-          background: 'rgba(22, 27, 34, 0.95)',
+          background: isDark ? 'rgba(22, 27, 34, 0.95)' : 'rgba(255, 255, 255, 0.95)',
           backdropFilter: 'blur(12px)',
           borderTop: '1px solid rgba(27, 107, 58, 0.4)',
           p: 2,
           zIndex: 10,
-          boxShadow: '0 -8px 24px rgba(0,0,0,0.4)'
+          boxShadow: isDark ? '0 -8px 24px rgba(0,0,0,0.4)' : '0 -8px 24px rgba(0,0,0,0.08)'
         }}>
           <Box sx={{ maxWidth: 650, mx: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <Stack direction="row" alignItems="center" spacing={2}>
@@ -367,7 +370,7 @@ export default function LeaderboardClient() {
                 #{userPos.rank}
               </Typography>
               <Box>
-                <Typography sx={{ fontWeight: 800, fontSize: '0.9rem', color: '#F0F4F8', display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography sx={{ fontWeight: 800, fontSize: '0.9rem', color: 'text.primary', display: 'flex', alignItems: 'center', gap: 1 }}>
                   Your Position
                   <Chip
                     size="small"
@@ -379,7 +382,7 @@ export default function LeaderboardClient() {
                     }}
                   />
                 </Typography>
-                <Typography sx={{ fontSize: '0.75rem', color: '#8892A4', mt: 0.25 }}>
+                <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', mt: 0.25 }}>
                   Keep answering questions to push past next rank!
                 </Typography>
               </Box>
@@ -419,15 +422,15 @@ export default function LeaderboardClient() {
         }}
       >
         <DialogTitle sx={{ m: 0, p: 2.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="h6" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: '#F0F4F8' }}>
+          <Typography variant="h6" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: 'text.primary' }}>
             Manage Study Partners
           </Typography>
-          <IconButton onClick={() => setShowFriendsModal(false)} sx={{ color: '#8892A4' }}>
+          <IconButton onClick={() => setShowFriendsModal(false)} sx={{ color: 'text.secondary' }}>
             <CloseIcon />
           </IconButton>
         </DialogTitle>
 
-        <DialogContent dividers sx={{ borderColor: 'rgba(255,255,255,0.06)', p: 2.5, pb: 4 }}>
+        <DialogContent dividers sx={{ borderColor: 'divider', p: 2.5, pb: 4 }}>
           {/* User Search Form */}
           <form onSubmit={handleSearch} style={{ marginBottom: '24px' }}>
             <Stack direction="row" spacing={1.5}>
@@ -440,16 +443,16 @@ export default function LeaderboardClient() {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <SearchIcon sx={{ color: '#8892A4', fontSize: 20 }} />
+                      <SearchIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
                     </InputAdornment>
                   )
                 }}
                 sx={{
-                  '& input': { color: '#F0F4F8' },
-                  '& fieldset': { borderColor: 'rgba(255,255,255,0.08)' },
-                  '&:hover fieldset': { borderColor: 'rgba(255,255,255,0.15)' },
+                  '& input': { color: 'text.primary' },
+                  '& fieldset': { borderColor: 'divider' },
+                  '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)' },
                   '&.Mui-focused fieldset': { borderColor: '#2E8B57' },
-                  bgcolor: 'rgba(255,255,255,0.01)',
+                  bgcolor: isDark ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.01)',
                   borderRadius: '10px'
                 }}
               />
@@ -484,8 +487,8 @@ export default function LeaderboardClient() {
                     disableGutters
                     sx={{
                       p: 1.5,
-                      bgcolor: 'rgba(255,255,255,0.01)',
-                      border: '1px solid rgba(255,255,255,0.04)',
+                      bgcolor: isDark ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.01)',
+                      border: '1px solid', borderColor: 'divider',
                       borderRadius: '12px',
                       mb: 1
                     }}
@@ -496,8 +499,8 @@ export default function LeaderboardClient() {
                       </Avatar>
                     </ListItemAvatar>
                     <ListItemText
-                      primary={<Typography sx={{ color: '#F0F4F8', fontWeight: 700, fontSize: '0.9rem' }}>{u.username}</Typography>}
-                      secondary={<Typography sx={{ color: '#8892A4', fontSize: '0.75rem' }}>{u.district_display || 'Kerala'}</Typography>}
+                      primary={<Typography sx={{ color: 'text.primary', fontWeight: 700, fontSize: '0.9rem' }}>{u.username}</Typography>}
+                      secondary={<Typography sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>{u.district_display || 'Kerala'}</Typography>}
                     />
                     <ListItemSecondaryAction>
                       {u.is_friend ? (
@@ -528,7 +531,7 @@ export default function LeaderboardClient() {
 
           {/* Current Friends List */}
           <Box>
-            <Typography sx={{ fontSize: '0.75rem', fontWeight: 800, color: '#8892A4', textTransform: 'uppercase', letterSpacing: '0.05em', mb: 1.5 }}>
+            <Typography sx={{ fontSize: '0.75rem', fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.05em', mb: 1.5 }}>
               Current Friends ({modalFriends.length})
             </Typography>
 
@@ -537,7 +540,7 @@ export default function LeaderboardClient() {
                 <CircularProgress size={20} sx={{ color: '#2E8B57' }} />
               </Box>
             ) : modalFriends.length === 0 ? (
-              <Typography sx={{ color: '#8892A4', fontSize: '0.8rem', fontStyle: 'italic', textAlign: 'center', py: 2 }}>
+              <Typography sx={{ color: 'text.secondary', fontSize: '0.8rem', fontStyle: 'italic', textAlign: 'center', py: 2 }}>
                 You haven't added any study partners yet.
               </Typography>
             ) : (
@@ -548,8 +551,8 @@ export default function LeaderboardClient() {
                     disableGutters
                     sx={{
                       p: 1.5,
-                      bgcolor: 'rgba(255,255,255,0.01)',
-                      border: '1px solid rgba(255,255,255,0.04)',
+                      bgcolor: isDark ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.01)',
+                      border: '1px solid', borderColor: 'divider',
                       borderRadius: '12px',
                       mb: 1
                     }}
@@ -560,8 +563,8 @@ export default function LeaderboardClient() {
                       </Avatar>
                     </ListItemAvatar>
                     <ListItemText
-                      primary={<Typography sx={{ color: '#F0F4F8', fontWeight: 700, fontSize: '0.9rem' }}>{f.username}</Typography>}
-                      secondary={<Typography sx={{ color: '#8892A4', fontSize: '0.75rem' }}>{f.district_display || 'Kerala'} • {f.xp} XP</Typography>}
+                      primary={<Typography sx={{ color: 'text.primary', fontWeight: 700, fontSize: '0.9rem' }}>{f.username}</Typography>}
+                      secondary={<Typography sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>{f.district_display || 'Kerala'} • {f.xp} XP</Typography>}
                     />
                     <ListItemSecondaryAction>
                       <IconButton
@@ -585,6 +588,8 @@ export default function LeaderboardClient() {
 }
 
 function GridPodium({ topThree, getRankBadge }: any) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   if (topThree.length === 0) return null;
 
   // Re-order to: [2nd, 1st, 3rd] for classic podium display
@@ -605,8 +610,8 @@ function GridPodium({ topThree, getRankBadge }: any) {
       {podiumOrder.map((p) => {
         let height = 120;
         let scale = 0.9;
-        let ringColor = 'rgba(255,255,255,0.06)';
-        let badgeBg = 'rgba(255,255,255,0.1)';
+        let ringColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+        let badgeBg = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
         let emoji = '🥈';
 
         if (p.isFirst) {
@@ -646,7 +651,7 @@ function GridPodium({ topThree, getRankBadge }: any) {
                     width: p.isFirst ? 64 : 52,
                     height: p.isFirst ? 64 : 52,
                     border: `2px solid ${ringColor}`,
-                    background: '#1C2230',
+                    background: 'surface.card',
                     fontSize: p.isFirst ? '1.5rem' : '1.2rem',
                     fontWeight: 700,
                   }}
@@ -667,10 +672,10 @@ function GridPodium({ topThree, getRankBadge }: any) {
                 </Box>
               </Box>
 
-              <Typography noWrap sx={{ fontWeight: 800, fontSize: p.isFirst ? '0.95rem' : '0.85rem', color: '#F0F4F8' }}>
+              <Typography noWrap sx={{ fontWeight: 800, fontSize: p.isFirst ? '0.95rem' : '0.85rem', color: 'text.primary' }}>
                 {p.username}
               </Typography>
-              <Typography sx={{ fontSize: '0.65rem', color: '#8892A4', mb: 1 }}>
+              <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', mb: 1 }}>
                 {p.place}
               </Typography>
 
