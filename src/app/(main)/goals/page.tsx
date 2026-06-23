@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import {
-  Box, Typography, CircularProgress, Stack, LinearProgress, Button, Grid, MenuItem, TextField, Select, InputLabel, FormControl, Divider
+  Box, Typography, CircularProgress, Stack, LinearProgress, Button, Grid, MenuItem, TextField, Select, InputLabel, FormControl, Divider, useTheme
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -19,6 +19,8 @@ import apiClient from '@/lib/apiClient';
 export default function GoalsPage() {
   const { user, fetcher, isLoading: ctxLoading } = useAppContext();
   const router = useRouter();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
 
   // Monthly Goal state
   const [selectedExam, setSelectedExam] = useState('');
@@ -69,10 +71,10 @@ export default function GoalsPage() {
         <Typography sx={{ fontSize: '0.8rem', color: '#FF6B2B', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
           Missions & Goals 🎯
         </Typography>
-        <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: '#F0F4F8', mt: 0.5 }}>
+        <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: 'text.primary', mt: 0.5 }}>
           Weekly Study Missions
         </Typography>
-        <Typography sx={{ color: '#8892A4', fontSize: '0.9rem', mt: 0.5 }}>
+        <Typography sx={{ color: 'text.secondary', fontSize: '0.9rem', mt: 0.5 }}>
           Complete these Duolingo-style study milestones to earn double XP and keep your habit strong.
         </Typography>
       </Box>
@@ -90,8 +92,9 @@ export default function GoalsPage() {
             >
               <Box sx={{
                 p: 2.5,
-                background: mission.completed ? 'rgba(27, 107, 58, 0.08)' : '#161B22',
-                border: mission.completed ? '1px solid rgba(46, 139, 87, 0.3)' : '1px solid rgba(255,255,255,0.06)',
+                background: mission.completed ? 'rgba(27, 107, 58, 0.08)' : 'background.paper',
+                border: mission.completed ? '1px solid rgba(46, 139, 87, 0.3)' : '1px solid',
+                borderColor: 'divider',
                 borderRadius: '16px',
                 position: 'relative',
                 overflow: 'hidden',
@@ -101,21 +104,21 @@ export default function GoalsPage() {
                     {mission.completed ? (
                       <CheckCircleIcon sx={{ color: '#2E8B57', fontSize: 24 }} />
                     ) : (
-                      <RadioButtonUncheckedIcon sx={{ color: '#4A5568', fontSize: 24 }} />
+                      <RadioButtonUncheckedIcon sx={{ color: 'text.disabled', fontSize: 24 }} />
                     )}
                   </Box>
                   <Box sx={{ flexGrow: 1 }}>
                     <Typography sx={{
                       fontWeight: 800,
                       fontSize: '0.95rem',
-                      color: mission.completed ? '#F0F4F8' : '#F0F4F8',
+                      color: 'text.primary',
                       textDecoration: mission.completed ? 'line-through' : 'none',
                       opacity: mission.completed ? 0.7 : 1,
                       fontFamily: "'Satoshi', sans-serif"
                     }}>
                       {mission.text}
                     </Typography>
-                    <Typography sx={{ fontSize: '0.75rem', color: '#8892A4', mt: 0.5 }}>
+                    <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', mt: 0.5 }}>
                       Progress: {mission.progress} / {mission.target}
                     </Typography>
                   </Box>
@@ -142,7 +145,7 @@ export default function GoalsPage() {
                   value={pct}
                   sx={{
                     height: 6, borderRadius: 3,
-                    bgcolor: 'rgba(255,255,255,0.06)',
+                    bgcolor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',
                     '& .MuiLinearProgress-bar': {
                       background: mission.completed ? '#2E8B57' : 'linear-gradient(90deg, #1B6B3A, #2E8B57)',
                       borderRadius: 3
@@ -155,41 +158,41 @@ export default function GoalsPage() {
         })}
       </Stack>
 
-      <Divider sx={{ borderColor: 'rgba(255,255,255,0.06)', my: 4 }} />
+      <Divider sx={{ my: 4 }} />
 
       {/* Monthly Goal Setting */}
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
         <Box sx={{
           p: 3,
-          background: 'linear-gradient(135deg, #161B22 0%, #1C2230 100%)',
+          background: isDark ? 'linear-gradient(135deg, #161B22 0%, #1C2230 100%)' : 'linear-gradient(135deg, #ffffff 0%, #F1F5F9 100%)',
           borderRadius: '20px',
           border: '1px solid', borderColor: 'divider'
         }}>
           <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
             <TrackChangesIcon sx={{ color: '#FF6B2B', fontSize: 24 }} />
-            <Typography variant="h6" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: '#F0F4F8' }}>
+            <Typography variant="h6" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: 'text.primary' }}>
               Target Exam Calendar
             </Typography>
           </Stack>
           
-          <Typography sx={{ color: '#8892A4', fontSize: '0.85rem', mb: 3 }}>
+          <Typography sx={{ color: 'text.secondary', fontSize: '0.85rem', mb: 3 }}>
             Select your target exam and date. We will calculate the daily question answering speed you need to comfortably complete the syllabus.
           </Typography>
 
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth size="small">
-                <InputLabel id="exam-select-label" sx={{ color: '#8892A4', fontSize: '0.85rem' }}>Select Exam</InputLabel>
+                <InputLabel id="exam-select-label" sx={{ color: 'text.secondary', fontSize: '0.85rem' }}>Select Exam</InputLabel>
                 <Select
                   labelId="exam-select-label"
                   value={selectedExam}
                   label="Select Exam"
                   onChange={(e) => setSelectedExam(e.target.value)}
                   sx={{
-                    color: '#F0F4F8',
-                    bgcolor: 'rgba(255,255,255,0.02)',
-                    '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.1)' },
-                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' },
+                    color: 'text.primary',
+                    bgcolor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
+                    '& .MuiOutlinedInput-notchedOutline': { borderColor: 'divider' },
+                    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' },
                   }}
                 >
                   {preferredExams.length > 0 ? (
@@ -215,9 +218,9 @@ export default function GoalsPage() {
                 onChange={(e) => setTargetMonth(e.target.value)}
                 InputLabelProps={{ shrink: true }}
                 sx={{
-                  '& input': { color: '#F0F4F8' },
-                  bgcolor: 'rgba(255,255,255,0.02)',
-                  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.1)' },
+                  '& input': { color: 'text.primary' },
+                  bgcolor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
+                  '& .MuiOutlinedInput-notchedOutline': { borderColor: 'divider' },
                 }}
               />
             </Grid>
@@ -249,14 +252,14 @@ export default function GoalsPage() {
             }}>
               <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>
                 <SportsScoreIcon sx={{ color: '#FF6B2B' }} />
-                <Typography sx={{ fontWeight: 800, color: '#F0F4F8', fontSize: '0.95rem' }}>
+                <Typography sx={{ fontWeight: 800, color: 'text.primary', fontSize: '0.95rem' }}>
                   Your Personalized Roadmap:
                 </Typography>
               </Stack>
               <Typography variant="h4" sx={{ fontFamily: "'JetBrains Mono'", fontWeight: 900, color: '#FF6B2B', my: 1.5 }}>
                 {dailyRequirement} Questions/Day
               </Typography>
-              <Typography sx={{ color: '#8892A4', fontSize: '0.75rem', lineHeight: 1.5 }}>
+              <Typography sx={{ color: 'text.secondary', fontSize: '0.75rem', lineHeight: 1.5 }}>
                 To reach peak readiness for <strong>{selectedExam}</strong> by <strong>{targetMonth}</strong>, aim to complete at least {dailyRequirement} questions on your study feed every single day.
               </Typography>
             </Box>

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import {
   Box, Typography, Button, CircularProgress, Grid,
-  LinearProgress, Stack, Chip, Avatar, IconButton
+  LinearProgress, Stack, Chip, Avatar, IconButton, useTheme
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
@@ -175,6 +175,8 @@ const motivationalQuotes = [
 // Main Component
 // ============================================================
 export default function HomePage() {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   const { profile, fetcher, user, isLoading: ctxLoading } = useAppContext();
   const router = useRouter();
   const [heroIndex, setHeroIndex] = useState(0);
@@ -412,7 +414,7 @@ export default function HomePage() {
             <IconButton
               size="small"
               onClick={() => setHeroIndex(prev => (prev - 1 + heroCards.length) % heroCards.length)}
-              sx={{ color: '#4A5568', '&:hover': { color: '#8892A4' } }}
+              sx={{ color: isDark ? '#A0AEC0' : '#4A5568', '&:hover': { color: isDark ? '#E2E8F0' : '#718096' } }}
             >
               <ArrowBackIosNewIcon sx={{ fontSize: 12 }} />
             </IconButton>
@@ -423,7 +425,7 @@ export default function HomePage() {
                 sx={{
                   width: i === heroIndex ? 20 : 6, height: 6,
                   borderRadius: '3px',
-                  bgcolor: i === heroIndex ? '#2E8B57' : '#252D3D',
+                  bgcolor: i === heroIndex ? '#2E8B57' : (isDark ? '#252D3D' : '#E2E8F0'),
                   transition: 'all 0.3s ease',
                   cursor: 'pointer',
                 }}
@@ -432,7 +434,7 @@ export default function HomePage() {
             <IconButton
               size="small"
               onClick={() => setHeroIndex(prev => (prev + 1) % heroCards.length)}
-              sx={{ color: '#4A5568', '&:hover': { color: '#8892A4' } }}
+              sx={{ color: isDark ? '#A0AEC0' : '#4A5568', '&:hover': { color: isDark ? '#E2E8F0' : '#718096' } }}
             >
               <ArrowForwardIosIcon sx={{ fontSize: 12 }} />
             </IconButton>

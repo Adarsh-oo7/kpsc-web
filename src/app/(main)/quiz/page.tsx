@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import {
   Box, Typography, Button, CircularProgress, Stack,
-  LinearProgress, Chip, Alert, SwipeableDrawer, Divider
+  LinearProgress, Chip, Alert, SwipeableDrawer, Divider, useTheme
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
@@ -41,6 +41,8 @@ const difficultyColor: Record<string, string> = {
 // Score Gauge SVG
 // ───────────────────────────────────────────────
 function ScoreGauge({ score, total }: { score: number; total: number }) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   const scorePercent = Math.max(0, Math.min(100, Math.round((score / total) * 100)));
   const [displayVal, setDisplayVal] = useState(0);
   const radius = 70;
@@ -68,7 +70,7 @@ function ScoreGauge({ score, total }: { score: number; total: number }) {
   return (
     <Box sx={{ position: 'relative', width: 180, height: 180, mx: 'auto' }}>
       <svg width="180" height="180" viewBox="0 0 180 180">
-        <circle cx="90" cy="90" r={radius} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="14" />
+        <circle cx="90" cy="90" r={radius} fill="none" stroke={isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"} strokeWidth="14" />
         <circle
           cx="90" cy="90" r={radius} fill="none"
           stroke={color} strokeWidth="14"
@@ -82,7 +84,7 @@ function ScoreGauge({ score, total }: { score: number; total: number }) {
         <Typography sx={{ fontFamily: "'JetBrains Mono'", fontWeight: 900, fontSize: '2.4rem', color, lineHeight: 1 }}>
           {score.toFixed(2).replace(/\.00$/, '')}
         </Typography>
-        <Typography sx={{ fontSize: '0.65rem', color: '#8892A4', fontWeight: 700, mt: 0.5 }}>/ {total} MARKS</Typography>
+        <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', fontWeight: 700, mt: 0.5 }}>/ {total} MARKS</Typography>
       </Box>
     </Box>
   );
@@ -92,6 +94,8 @@ function ScoreGauge({ score, total }: { score: number; total: number }) {
 // Results Screen
 // ───────────────────────────────────────────────
 function ResultsScreen({ resultData, answers, onRetry }: { resultData: ResultData; answers: UserAnswers; onRetry: () => void }) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   const router = useRouter();
   const { results, questions, timeTaken } = resultData;
   const scorePercent = Math.max(0, Math.min(100, Math.round((results.score / results.total) * 100)));
@@ -104,11 +108,11 @@ function ResultsScreen({ resultData, answers, onRetry }: { resultData: ResultDat
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <Box sx={{ textAlign: 'center', mb: 4, p: 4, borderRadius: '24px', background: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
           <EmojiEventsIcon sx={{ fontSize: 40, color: '#F59E0B', mb: 1 }} />
-          <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: '#F0F4F8', mb: 3 }}>
+          <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: 'text.primary', mb: 3 }}>
             Quiz Complete!
           </Typography>
           <ScoreGauge score={results.score} total={results.total} />
-          <Typography sx={{ color: '#8892A4', mt: 2, fontSize: '0.875rem' }}>
+          <Typography sx={{ color: 'text.secondary', mt: 2, fontSize: '0.875rem' }}>
             You beat {Math.max(0, Math.round(100 - scorePercent + 15))}% of students today
           </Typography>
         </Box>
@@ -116,8 +120,8 @@ function ResultsScreen({ resultData, answers, onRetry }: { resultData: ResultDat
 
       {/* Marking Details Alert */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-        <Alert severity="info" variant="outlined" sx={{ mb: 3, borderRadius: '16px', borderColor: 'rgba(59,130,246,0.3)', bgcolor: 'rgba(59,130,246,0.02)' }}>
-          <Typography variant="body2" sx={{ color: '#93c5fd', fontSize: '0.85rem', lineHeight: 1.6 }}>
+        <Alert severity="info" variant="outlined" sx={{ mb: 3, borderRadius: '16px', borderColor: isDark ? 'rgba(59,130,246,0.3)' : 'rgba(59,130,246,0.15)', bgcolor: 'rgba(59,130,246,0.02)' }}>
+          <Typography variant="body2" sx={{ color: isDark ? '#93c5fd' : '#2563EB', fontSize: '0.85rem', lineHeight: 1.6 }}>
             <strong>Kerala PSC Marking System Applied:</strong><br />
             • Correct answers: <strong>+{results.correct} marks</strong> (+1.00 each)<br />
             • Incorrect answers: <strong>-{(results.wrong * 0.33).toFixed(2)} marks</strong> (-0.33 each)<br />
@@ -133,12 +137,12 @@ function ResultsScreen({ resultData, answers, onRetry }: { resultData: ResultDat
           {[
             { label: 'Correct', val: results.correct, color: '#22c55e' },
             { label: 'Wrong', val: results.wrong, color: '#EF4444' },
-            { label: 'Skipped', val: results.unanswered, color: '#8892A4' },
+            { label: 'Skipped', val: results.unanswered, color: 'text.secondary' },
             { label: 'Time', val: `${mins}m${secs}s`, color: '#3B82F6' },
           ].map(s => (
             <Box key={s.label} sx={{ p: 2, textAlign: 'center', borderRadius: '12px', background: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
-              <Typography sx={{ fontFamily: "'JetBrains Mono'", fontWeight: 700, fontSize: '1.25rem', color: s.color }}>{s.val}</Typography>
-              <Typography sx={{ fontSize: '0.7rem', color: '#8892A4' }}>{s.label}</Typography>
+              <Typography sx={{ fontFamily: "'JetBrains Mono'", fontWeight: 700, fontSize: '1.25rem', color: s.color === 'text.secondary' ? theme.palette.text.secondary : s.color }}>{s.val}</Typography>
+              <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>{s.label}</Typography>
             </Box>
           ))}
         </Box>
@@ -152,7 +156,7 @@ function ResultsScreen({ resultData, answers, onRetry }: { resultData: ResultDat
       </Stack>
 
       {/* Review */}
-      <Typography sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, fontSize: '1.1rem', color: '#F0F4F8', mb: 2 }}>
+      <Typography sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, fontSize: '1.1rem', color: 'text.primary', mb: 2 }}>
         Review Your Answers
       </Typography>
       <Stack spacing={2}>
@@ -162,7 +166,7 @@ function ResultsScreen({ resultData, answers, onRetry }: { resultData: ResultDat
           return (
             <motion.div key={q.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}>
               <Box sx={{ p: 3, borderRadius: '16px', background: 'background.paper', border: `1px solid ${correct ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.15)'}` }}>
-                <Typography sx={{ fontWeight: 600, color: '#F0F4F8', mb: 2, fontSize: '0.9rem', lineHeight: 1.5 }}>
+                <Typography sx={{ fontWeight: 600, color: 'text.primary', mb: 2, fontSize: '0.9rem', lineHeight: 1.5 }}>
                   {idx + 1}. {q.text}
                 </Typography>
                 <Stack spacing={0.75}>
@@ -175,7 +179,7 @@ function ResultsScreen({ resultData, answers, onRetry }: { resultData: ResultDat
                         background: isCorrectOpt ? 'rgba(34,197,94,0.08)' : isUserAns ? 'rgba(239,68,68,0.08)' : 'transparent',
                         border: isCorrectOpt ? '1px solid rgba(34,197,94,0.25)' : isUserAns ? '1px solid rgba(239,68,68,0.2)' : '1px solid transparent',
                       }}>
-                        <Typography sx={{ fontSize: '0.8rem', color: isCorrectOpt ? '#86efac' : isUserAns ? '#fca5a5' : '#8892A4' }}>
+                        <Typography sx={{ fontSize: '0.8rem', color: isCorrectOpt ? (isDark ? '#86efac' : '#145228') : isUserAns ? (isDark ? '#fca5a5' : '#EF4444') : 'text.secondary' }}>
                           <strong>{key}.</strong> {val}
                         </Typography>
                         {isCorrectOpt && <CheckCircleIcon sx={{ fontSize: 16, color: '#22c55e' }} />}
@@ -186,8 +190,8 @@ function ResultsScreen({ resultData, answers, onRetry }: { resultData: ResultDat
                 </Stack>
                 {!userAns && <Alert severity="warning" sx={{ mt: 1.5, py: 0 }}>Not answered</Alert>}
                 {q.explanation && (
-                  <Box sx={{ mt: 1.5, p: 1.5, borderRadius: '8px', background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.15)' }}>
-                    <Typography sx={{ fontSize: '0.8rem', color: '#93c5fd', lineHeight: 1.6 }}>
+                  <Box sx={{ mt: 1.5, p: 1.5, borderRadius: '8px', background: isDark ? 'rgba(59,130,246,0.08)' : 'rgba(59,130,246,0.04)', border: '1px solid', borderColor: 'divider' }}>
+                    <Typography sx={{ fontSize: '0.8rem', color: isDark ? '#93c5fd' : '#1E40AF', lineHeight: 1.6 }}>
                       <strong>💡</strong> {q.explanation}
                     </Typography>
                   </Box>
@@ -208,6 +212,8 @@ function QuizContent() {
   const { fetcher, user, isLoading: ctxLoading } = useAppContext();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
 
   useEffect(() => {
     if (!ctxLoading && !user) router.push('/login');
@@ -403,17 +409,17 @@ function QuizContent() {
     if (isMockExam) {
       const isSelected = answers[q.id] === key;
       return {
-        border: `2px solid ${isSelected ? '#2E8B57' : 'rgba(255,255,255,0.08)'}`,
-        background: isSelected ? 'rgba(27,107,58,0.15)' : '#1C2230',
+        border: `2px solid ${isSelected ? '#2E8B57' : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)')}`,
+        background: isSelected ? 'rgba(27,107,58,0.15)' : (isDark ? '#1C2230' : '#F1F5F9'),
       };
     }
     if (!isAnswered) return {
-      border: `2px solid ${selectedOption === key ? '#2E8B57' : 'rgba(255,255,255,0.08)'}`,
-      background: selectedOption === key ? 'rgba(27,107,58,0.15)' : '#1C2230',
+      border: `2px solid ${selectedOption === key ? '#2E8B57' : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)')}`,
+      background: selectedOption === key ? 'rgba(27,107,58,0.15)' : (isDark ? '#1C2230' : '#F1F5F9'),
     };
     if (key === q.correct_answer) return { border: '2px solid #22c55e', background: 'rgba(34,197,94,0.1)', animation: 'correctPulse 0.6s ease' };
     if (key === selectedOption) return { border: '2px solid #EF4444', background: 'rgba(239,68,68,0.1)', animation: 'shakeWrong 0.5s ease' };
-    return { border: '2px solid rgba(255,255,255,0.04)', background: '#1C2230', opacity: 0.55 };
+    return { border: isDark ? '2px solid rgba(255,255,255,0.04)' : '2px solid rgba(0,0,0,0.04)', background: isDark ? '#1C2230' : '#F1F5F9', opacity: 0.55 };
   };
 
   return (
@@ -422,17 +428,17 @@ function QuizContent() {
       <Box sx={{
         position: 'sticky', top: 64, zIndex: 10, mb: 3,
         p: 2, borderRadius: '16px',
-        background: 'rgba(22, 27, 34, 0.95)',
+        background: isDark ? 'rgba(22, 27, 34, 0.95)' : 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(16px)',
         border: '1px solid', borderColor: 'divider',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+        boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.06)',
       }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
           <Stack spacing={0.25}>
-            <Typography sx={{ fontSize: '0.9rem', color: '#F0F4F8', fontWeight: 800 }}>
+            <Typography sx={{ fontSize: '0.9rem', color: 'text.primary', fontWeight: 800 }}>
               {quizTitle}
             </Typography>
-            <Typography sx={{ fontSize: '0.75rem', color: '#8892A4', fontWeight: 600 }}>
+            <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', fontWeight: 600 }}>
               Question {currentQ + 1} of {questions.length}
             </Typography>
           </Stack>
@@ -460,7 +466,7 @@ function QuizContent() {
         <LinearProgress
           variant="determinate"
           value={progress}
-          sx={{ height: 4, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.06)', '& .MuiLinearProgress-bar': { background: 'linear-gradient(90deg, #1B6B3A, #2E8B57)', borderRadius: 2 } }}
+          sx={{ height: 4, borderRadius: 2, bgcolor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)', '& .MuiLinearProgress-bar': { background: 'linear-gradient(90deg, #1B6B3A, #2E8B57)', borderRadius: 2 } }}
         />
       </Box>
 
@@ -487,7 +493,7 @@ function QuizContent() {
             </Box>
 
             {/* Question text */}
-            <Typography sx={{ fontWeight: 600, fontSize: '1.05rem', color: '#F0F4F8', lineHeight: 1.6, mb: 3 }}>
+            <Typography sx={{ fontWeight: 600, fontSize: '1.05rem', color: 'text.primary', lineHeight: 1.6, mb: 3 }}>
               {q.text}
             </Typography>
 
@@ -510,14 +516,14 @@ function QuizContent() {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                     <Box sx={{
                       width: 28, height: 28, borderRadius: '8px', flexShrink: 0,
-                      background: (isMockExam ? answers[q.id] === key : selectedOption === key && !isAnswered) ? 'rgba(46,139,87,0.2)' : 'rgba(255,255,255,0.06)',
+                      background: (isMockExam ? answers[q.id] === key : selectedOption === key && !isAnswered) ? 'rgba(46,139,87,0.2)' : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'),
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontFamily: "'JetBrains Mono'", fontWeight: 700, fontSize: '0.8rem',
-                      color: (isMockExam ? answers[q.id] === key : selectedOption === key && !isAnswered) ? '#2E8B57' : '#8892A4',
+                      color: (isMockExam ? answers[q.id] === key : selectedOption === key && !isAnswered) ? '#2E8B57' : 'text.secondary',
                     }}>
                       {key}
                     </Box>
-                    <Typography sx={{ fontSize: '0.9rem', color: '#F0F4F8', lineHeight: 1.4 }}>{val as string}</Typography>
+                    <Typography sx={{ fontSize: '0.9rem', color: 'text.primary', lineHeight: 1.4 }}>{val as string}</Typography>
                   </Box>
                   {isAnswered && key === q.correct_answer && <CheckCircleIcon sx={{ fontSize: 20, color: '#22c55e', flexShrink: 0 }} />}
                   {isAnswered && key === selectedOption && key !== q.correct_answer && <CancelIcon sx={{ fontSize: 20, color: '#EF4444', flexShrink: 0 }} />}
@@ -528,11 +534,15 @@ function QuizContent() {
             {/* Inline explanation after answering */}
             {isAnswered && q.explanation && (
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-                <Box sx={{ mt: 2.5, p: 2, borderRadius: '10px', background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.15)' }}>
-                  <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: '#60a5fa', mb: 0.5, letterSpacing: '0.04em' }}>
+                <Box sx={{
+                  mt: 2.5, p: 2, borderRadius: '10px',
+                  background: isDark ? 'rgba(59,130,246,0.08)' : 'rgba(59,130,246,0.04)',
+                  border: '1px solid', borderColor: isDark ? 'rgba(59,130,246,0.15)' : 'rgba(59,130,246,0.1)'
+                }}>
+                  <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: isDark ? '#60a5fa' : '#1e40af', mb: 0.5, letterSpacing: '0.04em' }}>
                     EXPLANATION
                   </Typography>
-                  <Typography sx={{ fontSize: '0.875rem', color: '#93c5fd', lineHeight: 1.7 }}>
+                  <Typography sx={{ fontSize: '0.875rem', color: isDark ? '#93c5fd' : '#1e3a8a', lineHeight: 1.7 }}>
                     {q.explanation}
                   </Typography>
                 </Box>
@@ -547,7 +557,7 @@ function QuizContent() {
                 variant="outlined"
                 disabled={currentQ === 0}
                 onClick={() => setCurrentQ(prev => prev - 1)}
-                sx={{ flex: 1, py: 1.5, fontSize: '0.9rem', color: '#8892A4', borderColor: 'rgba(255,255,255,0.08)', '&:hover': { borderColor: 'rgba(255,255,255,0.2)' } }}
+                sx={{ flex: 1, py: 1.5, fontSize: '0.9rem', color: 'text.secondary', borderColor: 'divider', '&:hover': { borderColor: 'text.secondary' } }}
               >
                 Previous
               </Button>
@@ -617,15 +627,15 @@ function QuizContent() {
 
       {/* Clickable 10-column Grid representing questions 1 to questions.length */}
       {isMockExam && (
-        <Box sx={{ mt: 4, p: 3, borderRadius: '20px', background: 'background.paper', border: '1px solid', borderColor: 'divider', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+        <Box sx={{ mt: 4, p: 3, borderRadius: '20px', background: 'background.paper', border: '1px solid', borderColor: 'divider', boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.06)' }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, fontSize: '1rem', color: '#F0F4F8' }}>
+            <Typography sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, fontSize: '1rem', color: 'text.primary' }}>
               Exam Navigation Grid
             </Typography>
             <Chip
               label={`${Object.keys(answers).length} / ${questions.length} Answered`}
               size="small"
-              sx={{ bgcolor: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', color: '#22c55e', fontWeight: 700 }}
+              sx={{ bgcolor: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', color: isDark ? '#22c55e' : '#145228', fontWeight: 700 }}
             />
           </Box>
           <Box sx={{
@@ -637,25 +647,25 @@ function QuizContent() {
             pr: 0.5,
             // Custom scrollbar
             '&::-webkit-scrollbar': { width: '6px' },
-            '&::-webkit-scrollbar-track': { background: 'rgba(255,255,255,0.02)' },
-            '&::-webkit-scrollbar-thumb': { background: 'rgba(255,255,255,0.1)', borderRadius: '4px' },
+            '&::-webkit-scrollbar-track': { background: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)' },
+            '&::-webkit-scrollbar-thumb': { background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)', borderRadius: '4px' },
           }}>
             {questions.map((question, idx) => {
               const isSelected = currentQ === idx;
               const isAnswered = answers[question.id] !== undefined;
               
-              let bgColor = 'rgba(255,255,255,0.03)';
-              let border = '1px solid rgba(255,255,255,0.08)';
-              let color = '#8892A4';
+              let bgColor = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)';
+              let border = isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)';
+              let color = theme.palette.text.secondary;
               
               if (isSelected) {
                 bgColor = 'rgba(59, 130, 246, 0.15)';
                 border = '2px solid #3b82f6';
-                color = '#fff';
+                color = isDark ? '#fff' : '#1e3a8a';
               } else if (isAnswered) {
                 bgColor = 'rgba(34, 197, 94, 0.15)';
                 border = '1px solid rgba(34, 197, 94, 0.4)';
-                color = '#22c55e';
+                color = isDark ? '#22c55e' : '#1b6b3a';
               }
               
               return (
@@ -678,8 +688,8 @@ function QuizContent() {
                     transition: 'all 0.15s ease-in-out',
                     '&:hover': {
                       transform: 'scale(1.08)',
-                      background: isSelected ? 'rgba(59, 130, 246, 0.25)' : isAnswered ? 'rgba(34, 197, 94, 0.25)' : 'rgba(255,255,255,0.08)',
-                      borderColor: isSelected ? '#3b82f6' : isAnswered ? '#22c55e' : 'rgba(255,255,255,0.2)',
+                      background: isSelected ? 'rgba(59, 130, 246, 0.25)' : isAnswered ? 'rgba(34, 197, 94, 0.25)' : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'),
+                      borderColor: isSelected ? '#3b82f6' : isAnswered ? '#22c55e' : (isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'),
                     }
                   }}
                 >
@@ -691,15 +701,15 @@ function QuizContent() {
           <Stack direction="row" spacing={2} sx={{ mt: 2.5, justifyContent: 'center' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(34, 197, 94, 0.4)' }} />
-              <Typography sx={{ fontSize: '0.65rem', color: '#8892A4', fontWeight: 600 }}>Answered</Typography>
+              <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', fontWeight: 600 }}>Answered</Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: 'rgba(59, 130, 246, 0.15)', border: '2px solid #3b82f6' }} />
-              <Typography sx={{ fontSize: '0.65rem', color: '#8892A4', fontWeight: 600 }}>Current</Typography>
+              <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', fontWeight: 600 }}>Current</Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: 'rgba(255,255,255,0.03)', border: '1px solid', borderColor: 'divider' }} />
-              <Typography sx={{ fontSize: '0.65rem', color: '#8892A4', fontWeight: 600 }}>Unanswered</Typography>
+              <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)', border: '1px solid', borderColor: 'divider' }} />
+              <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', fontWeight: 600 }}>Unanswered</Typography>
             </Box>
           </Stack>
         </Box>
@@ -720,11 +730,11 @@ function QuizContent() {
           }
         }}
       >
-        <Box sx={{ width: 40, height: 4, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.1)', mx: 'auto', mb: 3 }} />
+        <Box sx={{ width: 40, height: 4, borderRadius: 2, bgcolor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)', mx: 'auto', mb: 3 }} />
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <AutoAwesomeIcon sx={{ color: '#F59E0B', fontSize: 18 }} />
-            <Typography sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 700, color: '#F0F4F8', fontSize: '0.95rem' }}>
+            <Typography sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 700, color: 'text.primary', fontSize: '0.95rem' }}>
               AI Explanation ({aiLang === 'ml' ? 'Malayalam' : 'English'})
             </Typography>
           </Box>
@@ -736,15 +746,15 @@ function QuizContent() {
             ))}
           </Stack>
         </Stack>
-        <Divider sx={{ borderColor: 'rgba(255,255,255,0.06)', mb: 2 }} />
+        <Divider sx={{ mb: 2 }} />
         {aiLoading ? (
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4 }}>
             <CircularProgress color="warning" size={28} sx={{ mb: 1.5 }} />
-            <Typography sx={{ color: '#8892A4', fontSize: '0.85rem' }}>Generating explanation...</Typography>
+            <Typography sx={{ color: 'text.secondary', fontSize: '0.85rem' }}>Generating explanation...</Typography>
           </Box>
         ) : (
           <Box sx={{ overflowY: 'auto', maxHeight: '40vh', pr: 1 }}>
-            <Typography sx={{ color: '#8892A4', lineHeight: 1.8, fontSize: '0.9rem', whiteSpace: 'pre-wrap' }}>
+            <Typography sx={{ color: 'text.secondary', lineHeight: 1.8, fontSize: '0.9rem', whiteSpace: 'pre-wrap' }}>
               {aiText || '...'}
             </Typography>
           </Box>
