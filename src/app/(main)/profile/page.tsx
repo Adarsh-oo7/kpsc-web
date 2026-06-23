@@ -227,7 +227,7 @@ export default function ProfilePage() {
       {/* Header Info Block */}
       <Card sx={{
         background: 'linear-gradient(135deg, #161B22 0%, #1C2230 100%)',
-        border: '1px solid rgba(255,255,255,0.06)',
+        border: '1px solid', borderColor: 'divider',
         borderRadius: '24px',
         mb: 4,
         overflow: 'hidden',
@@ -359,7 +359,7 @@ export default function ProfilePage() {
             {success && <Alert severity="success" sx={{ mb: 3, borderRadius: '12px' }}>{success}</Alert>}
 
             <form onSubmit={handleSubmit}>
-              <Card sx={{ background: '#161B22', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', mb: 3 }}>
+              <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px', mb: 3 }}>
                 <CardContent sx={{ p: 3 }}>
                   <Typography variant="subtitle2" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: '#F0F4F8', mb: 3 }}>
                     Personal Details
@@ -507,7 +507,7 @@ export default function ProfilePage() {
               </Card>
 
               {/* Preferences Card */}
-              <Card sx={{ background: '#161B22', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', mb: 4 }}>
+              <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px', mb: 4 }}>
                 <CardContent sx={{ p: 3 }}>
                   <Typography variant="subtitle2" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: '#F0F4F8', mb: 3 }}>
                     Target Exam & Study Topics
@@ -637,7 +637,7 @@ export default function ProfilePage() {
             transition={{ duration: 0.15 }}
           >
             {/* Level & XP Progression Block */}
-            <Card sx={{ background: '#161B22', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', mb: 4 }}>
+            <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px', mb: 4 }}>
               <CardContent sx={{ p: 3 }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
                   <Typography sx={{ fontWeight: 800, color: '#F0F4F8', display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -682,7 +682,7 @@ export default function ProfilePage() {
             </Card>
 
             {/* Heatmap Card */}
-            <Card sx={{ background: '#161B22', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', mb: 4 }}>
+            <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px', mb: 4 }}>
               <CardContent sx={{ p: 3 }}>
                 <Typography sx={{ fontWeight: 800, color: '#F0F4F8', display: 'flex', alignItems: 'center', gap: 1, mb: 2.5 }}>
                   <LocalFireDepartmentIcon sx={{ color: '#2E8B57' }} /> Study Activity Heatmap
@@ -746,8 +746,8 @@ export default function ProfilePage() {
               {badges.length === 0 ? (
                 <Box sx={{
                   textAlign: 'center', py: 5, px: 3,
-                  background: '#161B22', borderRadius: '20px',
-                  border: '1px solid rgba(255,255,255,0.06)'
+                  background: 'background.paper', borderRadius: '20px',
+                  border: '1px solid', borderColor: 'divider'
                 }}>
                   <Typography sx={{ color: '#8892A4', fontSize: '0.875rem' }}>
                     No achievement stats fetched yet. Start answering study card questions to unlock!
@@ -847,7 +847,7 @@ export default function ProfilePage() {
             border: '3px double #F59E0B',
             borderRadius: '16px',
             p: { xs: 3, md: 5 },
-            bgcolor: '#161B22',
+            bgcolor: 'background.paper',
             textAlign: 'center',
             position: 'relative',
             overflow: 'hidden'

@@ -166,7 +166,7 @@ export default function CurrentAffairsClient() {
               >
                 <Box sx={{
                   p: 3,
-                  background: '#161B22',
+                  background: 'background.paper',
                   border: isHighChance ? '1px solid rgba(245, 158, 11, 0.25)' : '1px solid rgba(255,255,255,0.06)',
                   borderRadius: '20px',
                   position: 'relative'
@@ -179,7 +179,7 @@ export default function CurrentAffairsClient() {
                       sx={{
                         fontSize: '0.7rem', fontWeight: 800,
                         bgcolor: 'rgba(255,255,255,0.04)', color: '#8892A4',
-                        border: '1px solid rgba(255,255,255,0.08)'
+                        border: '1px solid', borderColor: 'divider'
                       }}
                     />
                     <Stack direction="row" alignItems="center" spacing={1}>
@@ -237,8 +237,8 @@ export default function CurrentAffairsClient() {
         onClose={() => setActiveMcqNews(null)}
         PaperProps={{
           sx: {
-            background: '#161B22',
-            border: '1px solid rgba(255,255,255,0.08)',
+            background: 'background.paper',
+            border: '1px solid', borderColor: 'divider',
             borderRadius: '20px',
             maxWidth: 500,
             p: 2

@@ -102,7 +102,7 @@ export default async function QuestionSEOPage({ params }: PageProps) {
       </Box>
 
       {/* Main Question Card */}
-      <Card sx={{ bgcolor: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(10px)', color: 'white', borderRadius: 4, border: '1px solid rgba(255,255,255,0.1)' }}>
+      <Card sx={{ bgcolor: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(10px)', color: 'white', borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
         <CardContent sx={{ p: 4 }}>
           <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
             <HelpOutlineIcon color="primary" />

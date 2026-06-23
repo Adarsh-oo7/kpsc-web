@@ -218,8 +218,8 @@ export default function CommunityClient() {
 
       {/* Publish Form Card */}
       <Card sx={{
-        background: '#161B22',
-        border: '1px solid rgba(255,255,255,0.06)',
+        background: 'background.paper',
+        border: '1px solid', borderColor: 'divider',
         borderRadius: '20px',
         mb: 4,
         overflow: 'visible'
@@ -340,7 +340,7 @@ export default function CommunityClient() {
       {/* Feed List */}
       <Stack spacing={3}>
         {postsList.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 8, px: 3, background: '#161B22', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <Box sx={{ textAlign: 'center', py: 8, px: 3, background: 'background.paper', borderRadius: '20px', border: '1px solid', borderColor: 'divider' }}>
             <CircularProgress size={24} sx={{ color: '#2E8B57', mb: 2 }} />
             <Typography sx={{ color: '#8892A4', fontSize: '0.9rem' }}>
               No community updates yet. Be the first to share a post!
@@ -356,8 +356,8 @@ export default function CommunityClient() {
             return (
               <motion.div key={post.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
                 <Card sx={{
-                  background: '#161B22',
-                  border: '1px solid rgba(255,255,255,0.06)',
+                  background: 'background.paper',
+                  border: '1px solid', borderColor: 'divider',
                   borderRadius: '20px',
                   overflow: 'hidden'
                 }}>
@@ -384,7 +384,7 @@ export default function CommunityClient() {
 
                     {/* Content attachment */}
                     {post.file && (
-                      <Box sx={{ mb: 2, borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      <Box sx={{ mb: 2, borderRadius: '12px', overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
                         {post.file.match(/\.(jpeg|jpg|gif|png|webp)/i) ? (
                           <img
                             src={post.file}

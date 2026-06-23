@@ -193,7 +193,7 @@ export default async function ExamDetailPage({ params }: PageProps) {
           borderRadius: 6,
           background: 'linear-gradient(135deg, rgba(27, 107, 58, 0.25) 0%, rgba(22, 27, 34, 0.8) 100%)',
           backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255,255,255,0.06)',
+          border: '1px solid', borderColor: 'divider',
           boxShadow: '0 20px 40px rgba(0,0,0,0.25)',
           mb: 5
         }}

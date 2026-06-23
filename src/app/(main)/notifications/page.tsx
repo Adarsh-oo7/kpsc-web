@@ -64,8 +64,8 @@ export default function NotificationsPage() {
       {allMessages.length === 0 ? (
         <Box sx={{
           textAlign: 'center', py: 8, px: 3,
-          background: '#161B22', borderRadius: '20px',
-          border: '1px solid rgba(255,255,255,0.06)'
+          background: 'background.paper', borderRadius: '20px',
+          border: '1px solid', borderColor: 'divider'
         }}>
           <Typography sx={{ fontSize: '2.5rem', mb: 1.5 }}>🔔</Typography>
           <Typography sx={{ fontWeight: 800, color: '#F0F4F8', fontFamily: "'Cabinet Grotesk'", mb: 0.5 }}>
@@ -76,7 +76,7 @@ export default function NotificationsPage() {
           </Typography>
         </Box>
       ) : (
-        <List disablePadding sx={{ background: '#161B22', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+        <List disablePadding sx={{ background: 'background.paper', borderRadius: '20px', border: '1px solid', borderColor: 'divider', overflow: 'hidden' }}>
           <AnimatePresence mode="popLayout">
             {allMessages.map((msg: any, i: number) => {
               const isRead = msg.read_by?.includes(user?.id);

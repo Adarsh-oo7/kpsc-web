@@ -29,6 +29,8 @@ const loadRazorpayScript = () => {
 export default function SubscriptionClient() {
   const { user, fetcher, isLoading: ctxLoading } = useAppContext();
   const router = useRouter();
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   const [checkoutLoading, setCheckoutLoading] = useState<number | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
@@ -138,7 +140,7 @@ export default function SubscriptionClient() {
   const getPlanBadge = (slug: string) => {
     if (slug === 'pro-yearly') return <Chip label="Best Value" size="small" sx={{ bgcolor: '#F59E0B', color: '#0F1117', fontWeight: 900, borderRadius: '6px' }} />;
     if (slug === 'pro-monthly') return <Chip label="Most Popular" size="small" sx={{ bgcolor: '#8B5CF6', color: 'white', fontWeight: 800, borderRadius: '6px' }} />;
-    return <Chip label="Free Tier" size="small" variant="outlined" sx={{ color: '#8892A4', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '6px' }} />;
+    return <Chip label="Free Tier" size="small" variant="outlined" sx={{ color: 'text.secondary', borderColor: theme.palette.divider, borderRadius: '6px' }} />;
   };
 
   const getFeaturesList = (slug: string) => {
@@ -171,10 +173,10 @@ export default function SubscriptionClient() {
     <Box sx={{ maxWidth: 960, mx: 'auto', pb: 8, px: 2 }}>
       {/* Title */}
       <Box sx={{ textAlign: 'center', mb: 5 }}>
-        <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 950, color: '#F0F4F8', mb: 1 }}>
+        <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 950, color: 'text.primary', mb: 1 }}>
           Choose Your Preparation Power
         </Typography>
-        <Typography sx={{ color: '#8892A4', fontSize: '0.95rem' }}>
+        <Typography sx={{ color: 'text.secondary', fontSize: '0.95rem' }}>
           Select the subscription level that matches your Kerala PSC exam goals.
         </Typography>
       </Box>
@@ -188,7 +190,9 @@ export default function SubscriptionClient() {
       {/* Current Subscription Status */}
       {subData && subData.status === 'active' && (
         <Card sx={{
-          background: 'linear-gradient(135deg, rgba(27, 107, 58, 0.15) 0%, rgba(28, 34, 48, 0.5) 100%)',
+          background: isDark 
+            ? 'linear-gradient(135deg, rgba(27, 107, 58, 0.15) 0%, rgba(28, 34, 48, 0.5) 100%)' 
+            : 'linear-gradient(135deg, rgba(27, 107, 58, 0.08) 0%, rgba(248, 250, 252, 0.9) 100%)',
           border: '1px solid rgba(46, 139, 87, 0.3)',
           borderRadius: '20px',
           mb: 5
@@ -198,15 +202,15 @@ export default function SubscriptionClient() {
               <Typography sx={{ color: '#2E8B57', fontWeight: 800, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                 CURRENT SUBSCRIPTION
               </Typography>
-              <Typography variant="h6" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: '#F0F4F8', mt: 0.5 }}>
+              <Typography variant="h6" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: 'text.primary', mt: 0.5 }}>
                 {subData.plan_name} Active Plan 💎
               </Typography>
             </Box>
             <Box sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
-              <Typography sx={{ color: '#8892A4', fontSize: '0.8rem' }}>
+              <Typography sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>
                 Subscription Ends
               </Typography>
-              <Typography sx={{ color: '#F0F4F8', fontWeight: 700, fontSize: '0.9rem', fontFamily: "'JetBrains Mono'" }}>
+              <Typography sx={{ color: 'text.primary', fontWeight: 700, fontSize: '0.9rem', fontFamily: "'JetBrains Mono'" }}>
                 {new Date(subData.end_date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
               </Typography>
             </Box>
@@ -223,8 +227,10 @@ export default function SubscriptionClient() {
             return (
               <Grid size={{ xs: 12, md: 4 }} key={plan.id}>
                 <Card sx={{
-                  background: isCurrent ? 'linear-gradient(180deg, #111A16 0%, #0F1219 100%)' : '#161B22',
-                  border: isCurrent ? '2px solid #2E8B57' : '1px solid rgba(255,255,255,0.06)',
+                  background: isCurrent 
+                    ? (isDark ? 'linear-gradient(180deg, #111A16 0%, #0F1219 100%)' : 'linear-gradient(180deg, #E8F5E9 0%, #FFFFFF 100%)')
+                    : 'background.paper',
+                  border: isCurrent ? '2px solid #2E8B57' : `1px solid ${theme.palette.divider}`,
                   borderRadius: '24px',
                   height: '100%',
                   display: 'flex',
@@ -243,28 +249,28 @@ export default function SubscriptionClient() {
                       {getPlanBadge(plan.slug)}
                     </Stack>
 
-                    <Typography variant="h5" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: '#F0F4F8', mb: 1 }}>
+                    <Typography variant="h5" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: 'text.primary', mb: 1 }}>
                       {plan.name}
                     </Typography>
 
                     {/* Price */}
                     <Box sx={{ display: 'flex', alignItems: 'baseline', mb: 3 }}>
-                      <Typography variant="h4" sx={{ fontFamily: "'JetBrains Mono'", fontWeight: 900, color: '#F0F4F8' }}>
+                      <Typography variant="h4" sx={{ fontFamily: "'JetBrains Mono'", fontWeight: 900, color: 'text.primary' }}>
                         ₹{parseInt(plan.price)}
                       </Typography>
-                      <Typography sx={{ color: '#8892A4', ml: 0.5, fontSize: '0.85rem' }}>
+                      <Typography sx={{ color: 'text.secondary', ml: 0.5, fontSize: '0.85rem' }}>
                         /{plan.interval === 'month' ? 'month' : plan.interval === 'year' ? 'year' : 'forever'}
                       </Typography>
                     </Box>
 
-                    <Divider sx={{ borderColor: 'rgba(255,255,255,0.06)', mb: 3 }} />
+                    <Divider sx={{ borderColor: 'divider', mb: 3 }} />
 
                     {/* Feature List */}
                     <Stack spacing={2} sx={{ flexGrow: 1, mb: 4 }}>
                       {features.map((feat, fIdx) => (
                         <Stack key={fIdx} direction="row" spacing={1.5} alignItems="flex-start">
-                          <CheckIcon sx={{ color: plan.slug === 'free' ? '#8892A4' : '#2E8B57', fontSize: 18, mt: 0.2 }} />
-                          <Typography sx={{ color: '#D0D8E0', fontSize: '0.85rem', lineHeight: 1.4 }}>
+                          <CheckIcon sx={{ color: plan.slug === 'free' ? 'text.secondary' : '#2E8B57', fontSize: 18, mt: 0.2 }} />
+                          <Typography sx={{ color: 'text.primary', fontSize: '0.85rem', lineHeight: 1.4 }}>
                             {feat}
                           </Typography>
                         </Stack>
@@ -278,8 +284,8 @@ export default function SubscriptionClient() {
                         fullWidth
                         disabled
                         sx={{
-                          borderColor: 'rgba(255,255,255,0.1)',
-                          color: '#8892A4',
+                          borderColor: 'divider',
+                          color: 'text.disabled',
                           textTransform: 'none',
                           borderRadius: '12px',
                           fontWeight: 700,

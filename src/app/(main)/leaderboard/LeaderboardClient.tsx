@@ -205,7 +205,7 @@ export default function LeaderboardClient() {
           mb: 4,
           background: 'rgba(255,255,255,0.02)',
           borderRadius: '12px',
-          border: '1px solid rgba(255,255,255,0.06)',
+          border: '1px solid', borderColor: 'divider',
           p: 0.5,
           '& .MuiTabs-indicator': {
             background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
@@ -239,8 +239,8 @@ export default function LeaderboardClient() {
       {currentList.length === 0 ? (
         <Box sx={{
           textAlign: 'center', py: 8, px: 3,
-          background: '#161B22', borderRadius: '16px',
-          border: '1px solid rgba(255,255,255,0.06)'
+          background: 'background.paper', borderRadius: '16px',
+          border: '1px solid', borderColor: 'divider'
         }}>
           <Typography sx={{ fontSize: '2.5rem', mb: 1 }}>🏆</Typography>
           <Typography sx={{ fontWeight: 700, color: '#F0F4F8', fontFamily: "'Cabinet Grotesk'", mb: 0.5 }}>
@@ -291,7 +291,7 @@ export default function LeaderboardClient() {
                           sx={{
                             width: 38, height: 38,
                             bgcolor: isCurrentUser ? '#1B6B3A' : '#1C2230',
-                            border: '1px solid rgba(255,255,255,0.08)',
+                            border: '1px solid', borderColor: 'divider',
                             fontWeight: 700, fontSize: '0.9rem', color: '#F0F4F8'
                           }}
                         >
@@ -312,7 +312,7 @@ export default function LeaderboardClient() {
                               sx={{
                                 height: 16, fontSize: '0.65rem', fontWeight: 700,
                                 bgcolor: 'rgba(255,255,255,0.04)', color: '#8892A4',
-                                border: '1px solid rgba(255,255,255,0.08)', ml: 1
+                                border: '1px solid', borderColor: 'divider', ml: 1
                               }}
                             />
                           </Stack>
@@ -411,10 +411,10 @@ export default function LeaderboardClient() {
         fullWidth
         PaperProps={{
           sx: {
-            bgcolor: '#161B22',
+            bgcolor: 'background.paper',
             backgroundImage: 'none',
             borderRadius: '20px',
-            border: '1px solid rgba(255,255,255,0.08)'
+            border: '1px solid', borderColor: 'divider'
           }
         }}
       >
@@ -656,7 +656,7 @@ function GridPodium({ topThree, getRankBadge }: any) {
                 <Box sx={{
                   position: 'absolute',
                   bottom: -8, left: '50%', transform: 'translateX(-50%)',
-                  background: '#161B22',
+                  background: 'background.paper',
                   border: `1px solid ${ringColor}`,
                   borderRadius: '50%',
                   width: 22, height: 22,

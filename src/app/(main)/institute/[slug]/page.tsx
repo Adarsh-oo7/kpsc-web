@@ -102,7 +102,7 @@ export default async function InstituteSEOPage({ params }: PageProps) {
           position: 'relative',
           overflow: 'hidden',
           background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)',
-          border: '1px solid rgba(255,255,255,0.1)',
+          border: '1px solid', borderColor: 'divider',
           backdropFilter: 'blur(10px)'
         }}
       >

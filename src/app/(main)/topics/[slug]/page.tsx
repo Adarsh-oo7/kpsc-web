@@ -327,7 +327,7 @@ export default function TopicStudyPage() {
           <Grid container spacing={3}>
             {/* Left Column - Gauge and Info */}
             <Grid size={{ xs: 12, md: 5 }}>
-              <Card sx={{ background: '#161B22', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', height: '100%' }}>
+              <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px', height: '100%' }}>
                 <CardContent sx={{ p: 4, textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
                   <TopicAccuracyGauge accuracy={topicSummary.accuracy} />
                   
@@ -353,7 +353,7 @@ export default function TopicStudyPage() {
 
             {/* Right Column - Difficulty Bars */}
             <Grid size={{ xs: 12, md: 7 }}>
-              <Card sx={{ background: '#161B22', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', height: '100%' }}>
+              <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px', height: '100%' }}>
                 <CardContent sx={{ p: 4 }}>
                   <Typography variant="subtitle2" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: '#F0F4F8', mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
                     <BarChartIcon sx={{ color: '#2E8B57' }} /> Difficulty Analysis
@@ -392,7 +392,7 @@ export default function TopicStudyPage() {
 
             {/* Bottom - Practice Config & Launch Card */}
             <Grid size={12}>
-              <Card sx={{ background: '#161B22', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', mt: 1 }}>
+              <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px', mt: 1 }}>
                 <CardContent sx={{ p: 4 }}>
                   <Typography variant="subtitle2" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: '#F0F4F8', mb: 3 }}>
                     Structured Study Practice
@@ -491,7 +491,7 @@ export default function TopicStudyPage() {
             p: 2, borderRadius: '16px',
             background: 'rgba(22, 27, 34, 0.95)',
             backdropFilter: 'blur(16px)',
-            border: '1px solid rgba(255,255,255,0.08)',
+            border: '1px solid', borderColor: 'divider',
             boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
           }}>
             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.5 }}>
@@ -503,7 +503,7 @@ export default function TopicStudyPage() {
                 <Stack direction="row" spacing={0.5} alignItems="center" sx={{
                   px: 1.5, py: 0.4, borderRadius: '16px',
                   background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.06)'
+                  border: '1px solid', borderColor: 'divider'
                 }}>
                   <TimerIcon sx={{ fontSize: 14, color: '#8892A4' }} />
                   <Typography sx={{ fontFamily: "'JetBrains Mono'", fontSize: '0.8rem', fontWeight: 700, color: '#D0D8E0' }}>
@@ -541,7 +541,7 @@ export default function TopicStudyPage() {
               exit={{ opacity: 0, x: -25 }}
               transition={{ duration: 0.2 }}
             >
-              <Card sx={{ background: '#161B22', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '20px', p: 3, mb: 3 }}>
+              <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px', p: 3, mb: 3 }}>
                 <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap' }}>
                   <Chip
                     label={questions[currentIdx].difficulty?.toUpperCase() || 'MIXED'}
@@ -686,8 +686,8 @@ export default function TopicStudyPage() {
             sx={{
               '& .MuiDrawer-paper': {
                 borderTopLeftRadius: 24, borderTopRightRadius: 24,
-                background: '#161B22',
-                border: '1px solid rgba(255,255,255,0.08)',
+                background: 'background.paper',
+                border: '1px solid', borderColor: 'divider',
                 p: 3, maxHeight: '70vh'
               }
             }}
@@ -735,7 +735,7 @@ export default function TopicStudyPage() {
       {studyState === 'results' && (
         <Box sx={{ maxWidth: 620, mx: 'auto' }}>
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-            <Card sx={{ background: '#161B22', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '24px', p: 4, mb: 4, textAlign: 'center' }}>
+            <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '24px', p: 4, mb: 4, textAlign: 'center' }}>
               <EmojiEventsIcon sx={{ fontSize: 48, color: '#F59E0B', mb: 1.5 }} />
               <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 950, color: '#F0F4F8', mb: 3 }}>
                 Practice Complete!
@@ -793,7 +793,7 @@ export default function TopicStudyPage() {
 
               return (
                 <Card key={idx} sx={{
-                  background: '#161B22',
+                  background: 'background.paper',
                   border: isCorrect ? '1px solid rgba(34,197,94,0.15)' : '1px solid rgba(239,68,68,0.15)',
                   borderRadius: '16px',
                   p: 3
