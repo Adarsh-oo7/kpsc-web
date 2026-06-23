@@ -102,7 +102,7 @@ function ResultsScreen({ resultData, answers, onRetry }: { resultData: ResultDat
     <Box sx={{ maxWidth: 600, mx: 'auto', py: 2 }}>
       {/* Score */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <Box sx={{ textAlign: 'center', mb: 4, p: 4, borderRadius: '24px', background: '#161B22', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <Box sx={{ textAlign: 'center', mb: 4, p: 4, borderRadius: '24px', background: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
           <EmojiEventsIcon sx={{ fontSize: 40, color: '#F59E0B', mb: 1 }} />
           <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: '#F0F4F8', mb: 3 }}>
             Quiz Complete!
@@ -136,7 +136,7 @@ function ResultsScreen({ resultData, answers, onRetry }: { resultData: ResultDat
             { label: 'Skipped', val: results.unanswered, color: '#8892A4' },
             { label: 'Time', val: `${mins}m${secs}s`, color: '#3B82F6' },
           ].map(s => (
-            <Box key={s.label} sx={{ p: 2, textAlign: 'center', borderRadius: '12px', background: '#161B22', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <Box key={s.label} sx={{ p: 2, textAlign: 'center', borderRadius: '12px', background: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
               <Typography sx={{ fontFamily: "'JetBrains Mono'", fontWeight: 700, fontSize: '1.25rem', color: s.color }}>{s.val}</Typography>
               <Typography sx={{ fontSize: '0.7rem', color: '#8892A4' }}>{s.label}</Typography>
             </Box>
@@ -161,7 +161,7 @@ function ResultsScreen({ resultData, answers, onRetry }: { resultData: ResultDat
           const correct = userAns === q.correct_answer;
           return (
             <motion.div key={q.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}>
-              <Box sx={{ p: 3, borderRadius: '16px', background: '#161B22', border: `1px solid ${correct ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.15)'}` }}>
+              <Box sx={{ p: 3, borderRadius: '16px', background: 'background.paper', border: `1px solid ${correct ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.15)'}` }}>
                 <Typography sx={{ fontWeight: 600, color: '#F0F4F8', mb: 2, fontSize: '0.9rem', lineHeight: 1.5 }}>
                   {idx + 1}. {q.text}
                 </Typography>
@@ -424,7 +424,7 @@ function QuizContent() {
         p: 2, borderRadius: '16px',
         background: 'rgba(22, 27, 34, 0.95)',
         backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(255,255,255,0.08)',
+        border: '1px solid', borderColor: 'divider',
         boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
       }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
@@ -473,7 +473,7 @@ function QuizContent() {
           exit={{ opacity: 0, x: -30 }}
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
         >
-          <Box sx={{ borderRadius: '20px', background: '#161B22', border: '1px solid rgba(255,255,255,0.08)', p: 3, mb: 3 }}>
+          <Box sx={{ borderRadius: '20px', background: 'background.paper', border: '1px solid', borderColor: 'divider', p: 3, mb: 3 }}>
             {/* Tags */}
             <Box sx={{ display: 'flex', gap: 1, mb: 2.5, flexWrap: 'wrap' }}>
               {q.topic?.name && (
@@ -617,7 +617,7 @@ function QuizContent() {
 
       {/* Clickable 10-column Grid representing questions 1 to questions.length */}
       {isMockExam && (
-        <Box sx={{ mt: 4, p: 3, borderRadius: '20px', background: '#161B22', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+        <Box sx={{ mt: 4, p: 3, borderRadius: '20px', background: 'background.paper', border: '1px solid', borderColor: 'divider', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
             <Typography sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, fontSize: '1rem', color: '#F0F4F8' }}>
               Exam Navigation Grid
@@ -698,7 +698,7 @@ function QuizContent() {
               <Typography sx={{ fontSize: '0.65rem', color: '#8892A4', fontWeight: 600 }}>Current</Typography>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-              <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }} />
+              <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: 'rgba(255,255,255,0.03)', border: '1px solid', borderColor: 'divider' }} />
               <Typography sx={{ fontSize: '0.65rem', color: '#8892A4', fontWeight: 600 }}>Unanswered</Typography>
             </Box>
           </Stack>
@@ -714,8 +714,8 @@ function QuizContent() {
         sx={{
           '& .MuiDrawer-paper': {
             borderTopLeftRadius: 24, borderTopRightRadius: 24,
-            background: '#161B22',
-            border: '1px solid rgba(255,255,255,0.08)',
+            background: 'background.paper',
+            border: '1px solid', borderColor: 'divider',
             p: 3, maxHeight: '70vh',
           }
         }}

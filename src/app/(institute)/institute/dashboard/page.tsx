@@ -107,7 +107,7 @@ export default function InstituteDashboard() {
       </Grid>
 
       {/* Quick Action Bar */}
-      <Card sx={{ background: '#161B22', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', mb: 4 }}>
+      <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px', mb: 4 }}>
         <CardContent sx={{ p: 3 }}>
           <Typography variant="subtitle2" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: '#F0F4F8', mb: 2 }}>
             Management Actions
@@ -132,7 +132,7 @@ export default function InstituteDashboard() {
       {/* Chart + Feed Row */}
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 7 }}>
-          <Card sx={{ background: '#161B22', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', height: '100%' }}>
+          <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px', height: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="subtitle2" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: '#F0F4F8', mb: 2.5 }}>
                 Batch Performance Comparison
@@ -145,7 +145,7 @@ export default function InstituteDashboard() {
         </Grid>
 
         <Grid size={{ xs: 12, md: 5 }}>
-          <Card sx={{ background: '#161B22', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', height: '100%' }}>
+          <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px', height: '100%' }}>
             <CardContent sx={{ p: 3 }}>
               <Typography variant="subtitle2" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: '#F0F4F8', mb: 2 }}>
                 Real-Time Student Activity
@@ -169,7 +169,7 @@ export default function InstituteDashboard() {
 
 function KpiCard({ title, value, label, icon, bgColor }: any) {
   return (
-    <Card sx={{ background: '#161B22', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', height: '100%' }}>
+    <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px', height: '100%' }}>
       <CardContent sx={{ p: 3 }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
           <Typography sx={{ fontSize: '0.75rem', fontWeight: 800, color: '#8892A4', textTransform: 'uppercase', letterSpacing: '0.04em' }}>

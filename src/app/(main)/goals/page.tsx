@@ -163,7 +163,7 @@ export default function GoalsPage() {
           p: 3,
           background: 'linear-gradient(135deg, #161B22 0%, #1C2230 100%)',
           borderRadius: '20px',
-          border: '1px solid rgba(255,255,255,0.06)'
+          border: '1px solid', borderColor: 'divider'
         }}>
           <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
             <TrackChangesIcon sx={{ color: '#FF6B2B', fontSize: 24 }} />

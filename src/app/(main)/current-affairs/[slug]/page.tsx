@@ -54,9 +54,11 @@ export default async function CurrentAffairSEOPage({ params }: PageProps) {
         <Typography variant="body1" sx={{ mb: 3, color: 'grey.400' }}>
           The article you are looking for does not exist or has been removed.
         </Typography>
-        <Button component={Link} href="/" variant="contained" startIcon={<ArrowBackIcon />}>
-          Back to Home
-        </Button>
+        <Link href="/" style={{ textDecoration: 'none' }}>
+          <Button variant="contained" startIcon={<ArrowBackIcon />}>
+            Back to Home
+          </Button>
+        </Link>
       </Box>
     );
   }
@@ -93,7 +95,7 @@ export default async function CurrentAffairSEOPage({ params }: PageProps) {
       </Box>
 
       {/* Article Container */}
-      <Card sx={{ bgcolor: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(10px)', color: 'white', borderRadius: 4, border: '1px solid rgba(255,255,255,0.1)' }}>
+      <Card sx={{ bgcolor: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(10px)', color: 'white', borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
         <CardContent sx={{ p: 4 }}>
           {/* Tags / Metadata */}
           <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 3 }} useFlexGap flexWrap="wrap">
@@ -142,12 +144,16 @@ export default async function CurrentAffairSEOPage({ params }: PageProps) {
       </Card>
 
       <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Button component={Link} href="/" variant="outlined" sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.2)' }}>
-          Back to Home
-        </Button>
-        <Button component={Link} href="/register" variant="contained">
-          Subscribe for Daily AI Summaries
-        </Button>
+        <Link href="/" style={{ textDecoration: 'none' }}>
+          <Button variant="outlined" sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.2)' }}>
+            Back to Home
+          </Button>
+        </Link>
+        <Link href="/register" style={{ textDecoration: 'none' }}>
+          <Button variant="contained">
+            Subscribe for Daily AI Summaries
+          </Button>
+        </Link>
       </Box>
     </Box>
   );

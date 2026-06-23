@@ -70,7 +70,7 @@ export default function GeneralFeesDashboard() {
       {/* KPI Cards Grid */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid size={{ xs: 12, sm: 4 }}>
-          <Card sx={{ background: '#161B22', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px' }}>
+          <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px' }}>
             <CardContent sx={{ p: 3 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
                 <Typography sx={{ fontSize: '0.75rem', fontWeight: 800, color: '#8892A4', textTransform: 'uppercase' }}>
@@ -87,7 +87,7 @@ export default function GeneralFeesDashboard() {
           </Card>
         </Grid>
         <Grid size={{ xs: 12, sm: 4 }}>
-          <Card sx={{ background: '#161B22', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px' }}>
+          <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px' }}>
             <CardContent sx={{ p: 3 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
                 <Typography sx={{ fontSize: '0.75rem', fontWeight: 800, color: '#8892A4', textTransform: 'uppercase' }}>
@@ -104,7 +104,7 @@ export default function GeneralFeesDashboard() {
           </Card>
         </Grid>
         <Grid size={{ xs: 12, sm: 4 }}>
-          <Card sx={{ background: '#161B22', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px' }}>
+          <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px' }}>
             <CardContent sx={{ p: 3 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
                 <Typography sx={{ fontSize: '0.75rem', fontWeight: 800, color: '#8892A4', textTransform: 'uppercase' }}>
