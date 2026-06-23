@@ -40,25 +40,30 @@ const difficultyColor: Record<string, string> = {
 // ───────────────────────────────────────────────
 // Score Gauge SVG
 // ───────────────────────────────────────────────
-function ScoreGauge({ score }: { score: number }) {
-  const [display, setDisplay] = useState(0);
+function ScoreGauge({ score, total }: { score: number; total: number }) {
+  const scorePercent = Math.max(0, Math.min(100, Math.round((score / total) * 100)));
+  const [displayVal, setDisplayVal] = useState(0);
   const radius = 70;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference * (1 - display / 100);
+  const offset = circumference * (1 - displayVal / 100);
 
   useEffect(() => {
     let start = 0;
-    const end = Math.round(score);
-    const step = end / 60;
+    const end = scorePercent;
+    if (end === 0) {
+      setDisplayVal(0);
+      return;
+    }
+    const step = end / 60 || 1;
     const id = setInterval(() => {
       start = Math.min(start + step, end);
-      setDisplay(Math.round(start));
+      setDisplayVal(start);
       if (start >= end) clearInterval(id);
     }, 20);
     return () => clearInterval(id);
-  }, [score]);
+  }, [scorePercent]);
 
-  const color = score >= 70 ? '#22c55e' : score >= 50 ? '#F59E0B' : '#EF4444';
+  const color = scorePercent >= 70 ? '#22c55e' : scorePercent >= 50 ? '#F59E0B' : '#EF4444';
 
   return (
     <Box sx={{ position: 'relative', width: 180, height: 180, mx: 'auto' }}>
@@ -74,10 +79,10 @@ function ScoreGauge({ score }: { score: number }) {
         />
       </svg>
       <Box sx={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <Typography sx={{ fontFamily: "'JetBrains Mono'", fontWeight: 900, fontSize: '2.5rem', color, lineHeight: 1 }}>
-          {display}
+        <Typography sx={{ fontFamily: "'JetBrains Mono'", fontWeight: 900, fontSize: '2.4rem', color, lineHeight: 1 }}>
+          {score.toFixed(2).replace(/\.00$/, '')}
         </Typography>
-        <Typography sx={{ fontSize: '0.7rem', color: '#8892A4', fontWeight: 600 }}>/ 100</Typography>
+        <Typography sx={{ fontSize: '0.65rem', color: '#8892A4', fontWeight: 700, mt: 0.5 }}>/ {total} MARKS</Typography>
       </Box>
     </Box>
   );
@@ -89,7 +94,7 @@ function ScoreGauge({ score }: { score: number }) {
 function ResultsScreen({ resultData, answers, onRetry }: { resultData: ResultData; answers: UserAnswers; onRetry: () => void }) {
   const router = useRouter();
   const { results, questions, timeTaken } = resultData;
-  const scorePercent = Math.round((results.correct / results.total) * 100);
+  const scorePercent = Math.max(0, Math.min(100, Math.round((results.score / results.total) * 100)));
   const mins = Math.floor(timeTaken / 60);
   const secs = timeTaken % 60;
 
@@ -102,11 +107,24 @@ function ResultsScreen({ resultData, answers, onRetry }: { resultData: ResultDat
           <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: '#F0F4F8', mb: 3 }}>
             Quiz Complete!
           </Typography>
-          <ScoreGauge score={scorePercent} />
+          <ScoreGauge score={results.score} total={results.total} />
           <Typography sx={{ color: '#8892A4', mt: 2, fontSize: '0.875rem' }}>
             You beat {Math.max(0, Math.round(100 - scorePercent + 15))}% of students today
           </Typography>
         </Box>
+      </motion.div>
+
+      {/* Marking Details Alert */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+        <Alert severity="info" variant="outlined" sx={{ mb: 3, borderRadius: '16px', borderColor: 'rgba(59,130,246,0.3)', bgcolor: 'rgba(59,130,246,0.02)' }}>
+          <Typography variant="body2" sx={{ color: '#93c5fd', fontSize: '0.85rem', lineHeight: 1.6 }}>
+            <strong>Kerala PSC Marking System Applied:</strong><br />
+            • Correct answers: <strong>+{results.correct} marks</strong> (+1.00 each)<br />
+            • Incorrect answers: <strong>-{(results.wrong * 0.33).toFixed(2)} marks</strong> (-0.33 each)<br />
+            • Skipped questions: <strong>0.00 marks</strong><br />
+            • Net Score: <strong>{results.score.toFixed(2).replace(/\.00$/, '')} / {results.total} marks</strong>
+          </Typography>
+        </Alert>
       </motion.div>
 
       {/* Stats */}
@@ -202,24 +220,75 @@ function QuizContent() {
   const [isFinished, setIsFinished] = useState(false);
   const [resultData, setResultData] = useState<ResultData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(QUIZ_DURATION);
+
+  const examId = searchParams.get('exam_id');
+  const topicId = searchParams.get('topic_id');
+  const limitParam = searchParams.get('limit');
+
+  const isMockExam = !!examId && !limitParam;
+  const isPracticeQuiz = !!examId && !!limitParam;
+  const isTopicPractice = !!topicId;
+  const isDailyQuiz = !examId && !topicId;
+
+  const [timeLeft, setTimeLeft] = useState(15 * 60);
+  const [hasInitializedTime, setHasInitializedTime] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
   const [aiLang, setAiLang] = useState<'en' | 'ml'>('en');
   const [aiText, setAiText] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
 
   const apiUrl = useMemo(() => {
-    const exam = searchParams.get('exam_id');
-    const topic = searchParams.get('topic_id');
-    if (!exam && !topic) return null;
-    const p = new URLSearchParams();
-    if (exam) p.append('exam_id', exam);
-    if (topic) p.append('topic_id', topic);
-    p.append('limit', '15');
-    return `/questions/?${p}`;
-  }, [searchParams]);
+    if (isMockExam) {
+      return `/generate-mock-exam/${examId}/`;
+    }
+    if (isPracticeQuiz) {
+      return `/questions/?exam_id=${examId}&limit=${limitParam}`;
+    }
+    if (isTopicPractice) {
+      return `/questions/?topic_id=${topicId}&limit=${limitParam || '15'}`;
+    }
+    return `/questions/daily-quiz/?limit=10`;
+  }, [isMockExam, isPracticeQuiz, isTopicPractice, examId, topicId, limitParam]);
 
-  const { data: questions, error, isLoading } = useSWR(apiUrl, fetcher, { revalidateOnFocus: false });
+  const { data: rawQuizData, error, isLoading } = useSWR(apiUrl, fetcher, { revalidateOnFocus: false });
+
+  const questions = useMemo(() => {
+    if (!rawQuizData) return [];
+    if (isMockExam) {
+      return (rawQuizData.questions || []) as Question[];
+    }
+    return rawQuizData as Question[];
+  }, [rawQuizData, isMockExam]);
+
+  const examDuration = useMemo(() => {
+    if (isMockExam && rawQuizData && rawQuizData.duration_minutes) {
+      return rawQuizData.duration_minutes * 60;
+    }
+    if (isDailyQuiz) {
+      return 10 * 60; // 10 minutes for daily quiz
+    }
+    return 15 * 60; // 15 minutes default for practice
+  }, [rawQuizData, isMockExam, isDailyQuiz]);
+
+  const quizTitle = useMemo(() => {
+    if (isMockExam && rawQuizData && rawQuizData.exam_name) {
+      return rawQuizData.exam_name;
+    }
+    if (isPracticeQuiz && questions.length > 0) {
+      return "Practice Quiz";
+    }
+    if (isTopicPractice && questions.length > 0 && questions[0]?.topic?.name) {
+      return `${questions[0].topic.name} Practice`;
+    }
+    return "Daily Quiz";
+  }, [isMockExam, isPracticeQuiz, isTopicPractice, rawQuizData, questions]);
+
+  useEffect(() => {
+    if (rawQuizData && !hasInitializedTime) {
+      setTimeLeft(examDuration);
+      setHasInitializedTime(true);
+    }
+  }, [rawQuizData, examDuration, hasInitializedTime]);
 
   // Reset answer when question changes
   useEffect(() => { setSelectedOption(''); setIsAnswered(false); }, [currentQ]);
@@ -228,7 +297,7 @@ function QuizContent() {
     if (isFinished) return;
     if (!window.confirm('Submit this quiz?')) return;
     setIsSubmitting(true);
-    const timeTaken = QUIZ_DURATION - timeLeft;
+    const timeTaken = examDuration - timeLeft;
     try {
       const res = await apiClient.post('/submit-exam/', {
         answers,
@@ -240,15 +309,15 @@ function QuizContent() {
       alert('Error submitting quiz.');
       setIsSubmitting(false);
     }
-  }, [answers, timeLeft, isFinished, questions]);
+  }, [answers, timeLeft, isFinished, questions, examDuration]);
 
   // Timer
   useEffect(() => {
-    if (isLoading || isFinished) return;
+    if (isLoading || isFinished || !hasInitializedTime) return;
     if (timeLeft <= 0) { handleFinish(); return; }
     const id = setInterval(() => setTimeLeft(t => t > 0 ? t - 1 : 0), 1000);
     return () => clearInterval(id);
-  }, [isLoading, isFinished, timeLeft, handleFinish]);
+  }, [isLoading, isFinished, timeLeft, handleFinish, hasInitializedTime]);
 
   const handleAI = async (lang: 'en' | 'ml') => {
     setAiLang(lang);
@@ -304,7 +373,7 @@ function QuizContent() {
   }
 
   if (isFinished && resultData) {
-    return <ResultsScreen resultData={resultData} answers={answers} onRetry={() => { setAnswers({}); setCurrentQ(0); setIsFinished(false); setResultData(null); setTimeLeft(QUIZ_DURATION); }} />;
+    return <ResultsScreen resultData={resultData} answers={answers} onRetry={() => { setAnswers({}); setCurrentQ(0); setIsFinished(false); setResultData(null); setTimeLeft(examDuration); setHasInitializedTime(false); }} />;
   }
 
   // ── Pre-quiz screen ──
@@ -338,9 +407,14 @@ function QuizContent() {
         boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
       }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
-          <Typography sx={{ fontSize: '0.8rem', color: '#8892A4', fontWeight: 600 }}>
-            Question {currentQ + 1} of {questions.length}
-          </Typography>
+          <Stack spacing={0.25}>
+            <Typography sx={{ fontSize: '0.9rem', color: '#F0F4F8', fontWeight: 800 }}>
+              {quizTitle}
+            </Typography>
+            <Typography sx={{ fontSize: '0.75rem', color: '#8892A4', fontWeight: 600 }}>
+              Question {currentQ + 1} of {questions.length}
+            </Typography>
+          </Stack>
           <Box sx={{
             display: 'flex', alignItems: 'center', gap: 0.75,
             px: 2, py: 0.5, borderRadius: '20px',
