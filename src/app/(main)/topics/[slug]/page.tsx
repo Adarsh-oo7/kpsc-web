@@ -611,8 +611,8 @@ export default function TopicStudyPage() {
                           }}>
                             {key}
                           </Box>
-                          <Typography sx={{ fontSize: '0.9rem', color: isIdxAnswered && !isCorrect && !isSelected ? '#8892A4' : '#F0F4F8' }}>
-                            {val}
+                           <Typography sx={{ fontSize: '0.9rem', color: isIdxAnswered && !isCorrect && !isSelected ? '#8892A4' : '#F0F4F8' }}>
+                            {val as string}
                           </Typography>
                         </Stack>
 
