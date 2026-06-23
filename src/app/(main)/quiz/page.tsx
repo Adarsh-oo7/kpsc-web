@@ -293,9 +293,9 @@ function QuizContent() {
   // Reset answer when question changes
   useEffect(() => { setSelectedOption(''); setIsAnswered(false); }, [currentQ]);
 
-  const handleFinish = useCallback(async () => {
+  const handleFinish = useCallback(async (autoSubmit = false) => {
     if (isFinished) return;
-    if (!window.confirm('Submit this quiz?')) return;
+    if (!autoSubmit && !window.confirm('Submit this quiz?')) return;
     setIsSubmitting(true);
     const timeTaken = examDuration - timeLeft;
     try {
@@ -314,7 +314,7 @@ function QuizContent() {
   // Timer
   useEffect(() => {
     if (isLoading || isFinished || !hasInitializedTime) return;
-    if (timeLeft <= 0) { handleFinish(); return; }
+    if (timeLeft <= 0) { handleFinish(true); return; }
     const id = setInterval(() => setTimeLeft(t => t > 0 ? t - 1 : 0), 1000);
     return () => clearInterval(id);
   }, [isLoading, isFinished, timeLeft, handleFinish, hasInitializedTime]);
@@ -337,6 +337,20 @@ function QuizContent() {
   };
 
   const handleSelectAnswer = (key: string) => {
+    if (isMockExam) {
+      const currentQuestion = questions[currentQ];
+      if (!currentQuestion) return;
+      setAnswers(prev => {
+        const next = { ...prev };
+        if (next[currentQuestion.id] === key) {
+          delete next[currentQuestion.id];
+        } else {
+          next[currentQuestion.id] = key;
+        }
+        return next;
+      });
+      return;
+    }
     if (isAnswered) return;
     setSelectedOption(key);
   };
@@ -386,6 +400,13 @@ function QuizContent() {
   const timerColor = timeLeft < 60 ? '#EF4444' : timeLeft < 300 ? '#F59E0B' : '#2E8B57';
 
   const getOptionStyle = (key: string) => {
+    if (isMockExam) {
+      const isSelected = answers[q.id] === key;
+      return {
+        border: `2px solid ${isSelected ? '#2E8B57' : 'rgba(255,255,255,0.08)'}`,
+        background: isSelected ? 'rgba(27,107,58,0.15)' : '#1C2230',
+      };
+    }
     if (!isAnswered) return {
       border: `2px solid ${selectedOption === key ? '#2E8B57' : 'rgba(255,255,255,0.08)'}`,
       background: selectedOption === key ? 'rgba(27,107,58,0.15)' : '#1C2230',
@@ -429,7 +450,7 @@ function QuizContent() {
           <Button
             size="small"
             variant="outlined"
-            onClick={handleFinish}
+            onClick={() => handleFinish(false)}
             disabled={isSubmitting}
             sx={{ fontSize: '0.75rem', py: 0.4, px: 1.5, color: '#EF4444', borderColor: 'rgba(239,68,68,0.4)' }}
           >
@@ -480,7 +501,7 @@ function QuizContent() {
                     minHeight: 52, px: 2, py: 1.5,
                     borderRadius: '12px',
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    cursor: isAnswered ? 'default' : 'pointer',
+                    cursor: isMockExam ? 'pointer' : (isAnswered ? 'default' : 'pointer'),
                     transition: 'all 0.2s ease',
                     userSelect: 'none',
                     ...getOptionStyle(key),
@@ -489,10 +510,10 @@ function QuizContent() {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                     <Box sx={{
                       width: 28, height: 28, borderRadius: '8px', flexShrink: 0,
-                      background: selectedOption === key && !isAnswered ? 'rgba(46,139,87,0.2)' : 'rgba(255,255,255,0.06)',
+                      background: (isMockExam ? answers[q.id] === key : selectedOption === key && !isAnswered) ? 'rgba(46,139,87,0.2)' : 'rgba(255,255,255,0.06)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontFamily: "'JetBrains Mono'", fontWeight: 700, fontSize: '0.8rem',
-                      color: selectedOption === key && !isAnswered ? '#2E8B57' : '#8892A4',
+                      color: (isMockExam ? answers[q.id] === key : selectedOption === key && !isAnswered) ? '#2E8B57' : '#8892A4',
                     }}>
                       {key}
                     </Box>
@@ -520,7 +541,40 @@ function QuizContent() {
           </Box>
 
           {/* Action buttons */}
-          {!isAnswered ? (
+          {isMockExam ? (
+            <Stack direction="row" spacing={1.5}>
+              <Button
+                variant="outlined"
+                disabled={currentQ === 0}
+                onClick={() => setCurrentQ(prev => prev - 1)}
+                sx={{ flex: 1, py: 1.5, fontSize: '0.9rem', color: '#8892A4', borderColor: 'rgba(255,255,255,0.08)', '&:hover': { borderColor: 'rgba(255,255,255,0.2)' } }}
+              >
+                Previous
+              </Button>
+              {answers[q.id] && (
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    setAnswers(prev => {
+                      const next = { ...prev };
+                      delete next[q.id];
+                      return next;
+                    });
+                  }}
+                  sx={{ py: 1.5, fontSize: '0.9rem', px: 2, color: '#EF4444', borderColor: 'rgba(239,68,68,0.2)', '&:hover': { borderColor: 'rgba(239,68,68,0.4)', bgcolor: 'rgba(239,68,68,0.04)' } }}
+                >
+                  Clear
+                </Button>
+              )}
+              <Button
+                variant="contained"
+                onClick={handleNext}
+                sx={{ flex: 1.5, py: 1.5, fontSize: '0.9rem' }}
+              >
+                {currentQ < questions.length - 1 ? (answers[q.id] ? 'Next' : 'Skip') : 'Finish Test'}
+              </Button>
+            </Stack>
+          ) : !isAnswered ? (
             <Button
               variant="contained"
               fullWidth
@@ -560,6 +614,96 @@ function QuizContent() {
           )}
         </motion.div>
       </AnimatePresence>
+
+      {/* Clickable 10-column Grid representing questions 1 to questions.length */}
+      {isMockExam && (
+        <Box sx={{ mt: 4, p: 3, borderRadius: '20px', background: '#161B22', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, fontSize: '1rem', color: '#F0F4F8' }}>
+              Exam Navigation Grid
+            </Typography>
+            <Chip
+              label={`${Object.keys(answers).length} / ${questions.length} Answered`}
+              size="small"
+              sx={{ bgcolor: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', color: '#22c55e', fontWeight: 700 }}
+            />
+          </Box>
+          <Box sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(10, 1fr)',
+            gap: 1.25,
+            maxHeight: 250,
+            overflowY: 'auto',
+            pr: 0.5,
+            // Custom scrollbar
+            '&::-webkit-scrollbar': { width: '6px' },
+            '&::-webkit-scrollbar-track': { background: 'rgba(255,255,255,0.02)' },
+            '&::-webkit-scrollbar-thumb': { background: 'rgba(255,255,255,0.1)', borderRadius: '4px' },
+          }}>
+            {questions.map((question, idx) => {
+              const isSelected = currentQ === idx;
+              const isAnswered = answers[question.id] !== undefined;
+              
+              let bgColor = 'rgba(255,255,255,0.03)';
+              let border = '1px solid rgba(255,255,255,0.08)';
+              let color = '#8892A4';
+              
+              if (isSelected) {
+                bgColor = 'rgba(59, 130, 246, 0.15)';
+                border = '2px solid #3b82f6';
+                color = '#fff';
+              } else if (isAnswered) {
+                bgColor = 'rgba(34, 197, 94, 0.15)';
+                border = '1px solid rgba(34, 197, 94, 0.4)';
+                color = '#22c55e';
+              }
+              
+              return (
+                <Box
+                  key={question.id}
+                  onClick={() => setCurrentQ(idx)}
+                  sx={{
+                    aspectRatio: '1',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                    fontSize: '0.8rem',
+                    fontFamily: "'JetBrains Mono'",
+                    background: bgColor,
+                    border: border,
+                    color: color,
+                    transition: 'all 0.15s ease-in-out',
+                    '&:hover': {
+                      transform: 'scale(1.08)',
+                      background: isSelected ? 'rgba(59, 130, 246, 0.25)' : isAnswered ? 'rgba(34, 197, 94, 0.25)' : 'rgba(255,255,255,0.08)',
+                      borderColor: isSelected ? '#3b82f6' : isAnswered ? '#22c55e' : 'rgba(255,255,255,0.2)',
+                    }
+                  }}
+                >
+                  {idx + 1}
+                </Box>
+              );
+            })}
+          </Box>
+          <Stack direction="row" spacing={2} sx={{ mt: 2.5, justifyContent: 'center' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(34, 197, 94, 0.4)' }} />
+              <Typography sx={{ fontSize: '0.65rem', color: '#8892A4', fontWeight: 600 }}>Answered</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: 'rgba(59, 130, 246, 0.15)', border: '2px solid #3b82f6' }} />
+              <Typography sx={{ fontSize: '0.65rem', color: '#8892A4', fontWeight: 600 }}>Current</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Box sx={{ width: 10, height: 10, borderRadius: '2px', bgcolor: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }} />
+              <Typography sx={{ fontSize: '0.65rem', color: '#8892A4', fontWeight: 600 }}>Unanswered</Typography>
+            </Box>
+          </Stack>
+        </Box>
+      )}
 
       {/* AI Explanation Drawer */}
       <SwipeableDrawer

@@ -28,7 +28,7 @@ export default function InstituteHeader({ onDrawerToggle }: InstituteHeaderProps
     >
       <Toolbar sx={{ minHeight: { xs: 64, sm: 64 } }}>
         {/* Mobile hamburger + logo */}
-        <Box sx={{ display: { lg: 'none' }, alignItems: 'center', gap: 1.5, mr: 2, display: 'flex' }}>
+        <Box sx={{ display: { lg: 'none', xs: 'flex' }, alignItems: 'center', gap: 1.5, mr: 2 }}>
           <IconButton
             color="inherit"
             aria-label="open drawer"
