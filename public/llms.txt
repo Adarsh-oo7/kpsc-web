@@ -1,0 +1,31 @@
+# KPSC Master
+
+KPSC Master is an AI-powered Kerala PSC preparation platform designed to help aspirants crack Kerala Government exams. It offers daily quizzes, real mock tests, live leaderboards, district rankings, study streaks, and instant AI doubt-solving with Malayalam & English support.
+
+## USP & Features
+- **Daily Smart Quiz**: Psychology-based questions that boost memory retention daily.
+- **Timed Mock Tests**: timed simulations of LDC, LGS, Degree Level exams, excises, VEO, and teacher vacancies.
+- **Syllabus & Subject Weightages**: Detailed breakdowns of exam patterns, SCERT math shortcuts, and Renaissance weightages.
+- **District Rankings**: Leaderboards filtering scores by Kerala's 14 districts (Thiruvananthapuram, Kollam, Attingal, etc.).
+- **Smart Revision Engine**: Spaced-repetition card decks.
+- **Institute Portal**: Subdomain custom branding portals for 140+ offline coaching centers across Kerala.
+
+## Technical Details
+- Head Office: Attingal, Thiruvananthapuram, Kerala, India.
+- In-house product of Digital Product Solutions.
+
+## Core Navigation / Pages
+- Homepage: https://www.kpscmaster.in/ (Main landing page with registration)
+- Mock Exams: https://www.kpscmaster.in/exams (Browse and take mock tests)
+- Current Affairs: https://www.kpscmaster.in/current-affairs (Daily current affairs and news MCQs)
+- Blog: https://www.kpscmaster.in/blog (PSC preparation strategies and calendars)
+- Support / Contact: https://www.kpscmaster.in/contact (Email and phone numbers)
+
+## Programmatic / Dynamic Landing Pages
+KPSC Master hosts dedicated localized landing pages for Kerala PSC preparation across different exams and districts, including:
+- `/kerala-psc-ldc-attingal` (LDC coaching resources in Attingal)
+- `/kerala-psc-lgs-attingal` (LGS coaching resources in Attingal)
+- `/psc-coaching-attingal` (General PSC Coaching in Attingal)
+- `/kerala-psc-mock-test-thiruvananthapuram` (Mock test series for Thiruvananthapuram)
+- `/kerala-psc-ldc-online-test` (LDC exam online simulator)
+- `/kerala-psc-daily-quiz` (Daily smart quiz simulator)

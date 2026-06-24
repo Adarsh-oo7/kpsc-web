@@ -473,11 +473,13 @@ export default function HomeClient() {
 
               }}
             >
-              <Box
-                component="img"
+              <Image
                 src="/hero-light.png"
-                alt="Hero"
-                sx={{
+                alt="KPSC Master Hero Banner"
+                width={600}
+                height={600}
+                priority
+                style={{
                   width: '100%',
                   maxWidth: '600px',
                   height: 'auto',

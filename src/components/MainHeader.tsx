@@ -71,6 +71,7 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
             <IconButton
               onClick={() => setVisitorDrawerOpen(true)}
               edge="start"
+              aria-label="Open mobile menu"
               sx={{ display: { lg: 'none' }, color: themeMode === 'dark' ? '#8892A4' : '#64748B' }}
             >
               <MenuIcon />
@@ -137,7 +138,7 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
           {/* Right: Actions */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Tooltip title={themeMode === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
-              <IconButton onClick={toggleThemeMode} sx={{ color: 'text.secondary' }}>
+              <IconButton onClick={toggleThemeMode} aria-label="Toggle theme" sx={{ color: 'text.secondary' }}>
                 {themeMode === 'dark' ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
               </IconButton>
             </Tooltip>
@@ -300,6 +301,7 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
           <IconButton
             onClick={onDrawerToggle}
             edge="start"
+            aria-label="Open sidebar menu"
             sx={{ display: { lg: 'none' }, color: themeMode === 'dark' ? '#8892A4' : '#64748B' }}
           >
             <MenuIcon />
@@ -384,6 +386,7 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
             <Tooltip title="Notifications">
               <IconButton
                 onClick={(e) => setNotifAnchor(e.currentTarget)}
+                aria-label="View notifications"
                 sx={{ color: themeMode === 'dark' ? '#8892A4' : '#64748B', '&:hover': { color: themeMode === 'dark' ? '#F0F4F8' : '#0F172A' } }}
               >
                 <Badge badgeContent={unreadCount || 0} color="error" max={9}>
@@ -397,6 +400,7 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
           <Tooltip title={themeMode === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
             <IconButton
               onClick={toggleThemeMode}
+              aria-label="Toggle theme"
               sx={{ color: themeMode === 'dark' ? '#8892A4' : '#64748B', '&:hover': { color: themeMode === 'dark' ? '#F0F4F8' : '#0F172A' } }}
             >
               {themeMode === 'dark' ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
@@ -406,7 +410,7 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
           {/* User Avatar */}
           {user ? (
             <Tooltip title={profile?.user?.username || user.username}>
-              <IconButton onClick={(e) => setProfileAnchor(e.currentTarget)} sx={{ p: 0 }}>
+              <IconButton onClick={(e) => setProfileAnchor(e.currentTarget)} aria-label="Open profile settings" sx={{ p: 0 }}>
                 <Avatar
                   src={profile?.profile_photo || undefined}
                   alt={user.username}
