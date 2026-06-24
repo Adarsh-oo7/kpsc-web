@@ -78,11 +78,13 @@ export const metadata: Metadata = {
   // Browser Tab & PWA icons — all sizes
   icons: {
     icon: [
-      { url: '/logo.png', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-48x48.png', sizes: '48x48', type: 'image/png' },
+      { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
       { url: '/favicon.ico', sizes: 'any' },
     ],
     shortcut: '/favicon.ico',
-    apple: [{ url: '/logo.png', sizes: '180x180', type: 'image/png' }],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
     other: [
       { rel: 'mask-icon', url: '/logo.png', color: '#16a34a' },
     ],

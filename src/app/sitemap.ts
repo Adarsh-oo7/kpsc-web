@@ -22,6 +22,76 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: path === '' ? 1.0 : 0.8,
   }));
 
+  // 1.5 Programmatic SEO Pages
+  const locations = [
+    'attingal', 'thiruvananthapuram', 'varkala', 'kilimanoor', 'chirayinkeezhu',
+    'kazhakkoottam', 'nedumangad', 'neyyattinkara', 'kollam', 'pathanamthitta', 'kerala'
+  ];
+  const examsList = [
+    'ldc', 'lgs', 'degree-level', 'veo', 'ld-typist', 'secretariat-assistant',
+    'police-constable', 'fire-and-rescue', 'lp-teacher', 'up-teacher', 'clerk',
+    'company-board', 'water-authority', 'university-assistant', 'assistant-prison-officer',
+    'excise-officer', 'civil-excise-officer'
+  ];
+
+  // 1.5.1 Exam + Location (187 pages)
+  examsList.forEach((exam) => {
+    locations.forEach((loc) => {
+      sitemapEntries.push({
+        url: `${baseUrl}/kerala-psc-${exam}-${loc}`,
+        lastModified: new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.6,
+      });
+    });
+  });
+
+  // 1.5.2 Mock Test + Location (11 pages)
+  locations.forEach((loc) => {
+    sitemapEntries.push({
+      url: `${baseUrl}/kerala-psc-mock-test-${loc}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    });
+  });
+
+  // 1.5.3 Coaching + Location (11 pages)
+  locations.forEach((loc) => {
+    sitemapEntries.push({
+      url: `${baseUrl}/psc-coaching-${loc}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    });
+  });
+
+  // 1.5.4 Online Coaching + Location (11 pages)
+  locations.forEach((loc) => {
+    sitemapEntries.push({
+      url: `${baseUrl}/psc-online-coaching-${loc}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    });
+  });
+
+  // 1.5.5 High-Intent Generic (4 pages)
+  const genericPaths = [
+    '/kerala-psc-ldc-online-test',
+    '/kerala-psc-lgs-online-test',
+    '/kerala-psc-degree-level-online-test',
+    '/kerala-psc-daily-quiz'
+  ];
+  genericPaths.forEach((path) => {
+    sitemapEntries.push({
+      url: `${baseUrl}${path}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    });
+  });
+
   // 2. Blog Posts (Statically defined in code)
   blogPosts.forEach((post) => {
     sitemapEntries.push({

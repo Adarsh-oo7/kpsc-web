@@ -75,10 +75,47 @@ const features = [
 const exams = ['LDC', 'LGS', 'Degree Level', 'VEO', 'LD Typist', 'LP/UP Teacher', 'Police Constable', 'Fire & Rescue', 'PSC Secretariat', 'KPSC Clerk', 'Company Board', 'Water Authority'];
 
 const testimonials = [
-  { name: 'Rahul Krishnan', place: 'Thrissur', rank: '#1 LDC 2025', text: 'KPSC Master\'s daily quiz kept me on track for 6 months. The streak mechanic genuinely worked — I couldn\'t let go of my 90-day streak!', avatar: 'R' },
-  { name: 'Priya Menon', place: 'Kozhikode', rank: 'Qualified LGS', text: 'The AI Malayalam explanations are a game-changer. Understood every concept without needing a tutor. Scored 87/100 in my mock test.', avatar: 'P' },
-  { name: 'Amal Thomas', place: 'Ernakulam', rank: 'District Topper', text: 'The leaderboard kept me competitive. When I saw I was #47, I studied 3 more hours to reach #40. This app understands psychology.', avatar: 'A' },
+  { name: 'Hari Kumar', place: 'Attingal', rank: '#1 LDC 2025 Topper', text: 'KPSC Master\'s daily quiz kept me on track for 6 months. The streak mechanic genuinely worked — I couldn\'t let go of my 90-day streak!', avatar: 'H' },
+  { name: 'Anjali S.', place: 'Thiruvananthapuram', rank: 'Qualified LGS', text: 'The AI Malayalam explanations are a game-changer. Understood every concept without needing a tutor. Scored 87/100 in my mock test.', avatar: 'A' },
+  { name: 'Rahul Krishnan', place: 'Kollam', rank: 'District Topper', text: 'The leaderboard kept me competitive. When I saw I was #47, I studied 3 more hours to reach #40. This app understands psychology.', avatar: 'R' },
 ];
+
+const faqItems = [
+  {
+    q: 'Does KPSC Master support offline coaching centers in Attingal and Thiruvananthapuram?',
+    a: 'Yes! KPSC Master is an in-house product of Digital Product Solutions and features a dedicated Institute Portal. Over 140+ coaching institutes across Kerala, including Attingal and Thiruvananthapuram, use our custom subdomains and branded portals to manage syllabus trackers, fee collection, student attendance, and mock tests.'
+  },
+  {
+    q: 'Is the Daily Smart Quiz available in both Malayalam and English?',
+    a: 'Absolutely. All quizzes, mock tests, and questions come with detailed explanations in both Malayalam and English (മലയാളം + English Support) to cater to aspirants from all educational backgrounds across Kerala.'
+  },
+  {
+    q: 'Can I track my ranking specifically for Thiruvananthapuram or other Kerala districts?',
+    a: 'Yes, KPSC Master features district-wise rankings. Aspirants can filter the live leaderboard to compare their scores against competitors in Thiruvananthapuram, Kollam, Pathanamthitta, or any of the 14 districts in Kerala.'
+  },
+  {
+    q: 'Are the LDC and LGS mock tests based on the latest 2026 Kerala PSC exam patterns?',
+    a: 'Yes, our mock tests for LDC, LGS, Degree Level, Secretariat Assistant, VEO, and other exams are meticulously updated to reflect the latest syllabus, negative marking systems, and question distributions specified by the Kerala Public Service Commission.'
+  },
+  {
+    q: 'What makes KPSC Master the best online preparation platform in Kerala?',
+    a: 'KPSC Master combines a database of 12 Lakh+ daily solved questions with psychological learning aids like the study streak system, rank leaderboards, a smart revision engine, and instant AI doubt-solving to deliver a premium learning experience.'
+  }
+];
+
+const homeFaqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  'mainEntity': faqItems.map(item => ({
+    '@type': 'Question',
+    'name': item.q,
+    'acceptedAnswer': {
+      '@type': 'Answer',
+      'text': item.a
+    }
+  }))
+};
+
 
 // GPU-accelerated CSS Marquee for high performance and smooth animation
 const tickerStyles = `
@@ -159,6 +196,9 @@ export default function HomeClient() {
   const theme = useTheme();
   const hideImage = useMediaQuery('(min-width:767px) and (max-width:1024px)');
 
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+
   // Logged in users get redirected automatically to their dashboard
   useEffect(() => {
     if (user) {
@@ -237,25 +277,51 @@ export default function HomeClient() {
                 transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
               >
                 {/* Badge */}
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: { xs: 'center', md: 'center', lg: 'flex-start' },
-                    mb: 3
-                  }}
-                >
-                  <Chip
-                    label="🇮🇳 #1 Kerala PSC Platform"
+                  <Stack
+                    direction="row"
+                    spacing={1}
                     sx={{
-                      background: 'rgba(27,107,58,0.12)',
-                      border: '1px solid rgba(46,139,87,0.25)',
-                      color: '#2E8B57',
-                      fontWeight: 800,
-                      fontSize: '0.75rem',
-                      height: 32,
+                      justifyContent: { xs: 'center', md: 'center', lg: 'flex-start' },
+                      mb: 3,
+                      flexWrap: 'wrap',
+                      gap: 1
                     }}
-                  />
-                </Box>
+                  >
+                    <Chip
+                      label="🇮🇳 #1 Kerala PSC Platform"
+                      sx={{
+                        background: 'rgba(27,107,58,0.12)',
+                        border: '1px solid rgba(46,139,87,0.25)',
+                        color: '#2E8B57',
+                        fontWeight: 800,
+                        fontSize: '0.75rem',
+                        height: 32,
+                      }}
+                    />
+                    <Chip
+                      label="കേരള PSC തയ്യാറെടുപ്പ്"
+                      sx={{
+                        background: 'rgba(124, 58, 237, 0.12)',
+                        border: '1px solid rgba(124, 58, 237, 0.25)',
+                        color: '#7C3AED',
+                        fontWeight: 800,
+                        fontSize: '0.75rem',
+                        height: 32,
+                      }}
+                    />
+                    <Chip
+                      label="PSC വിജയത്തിനുള്ള മികച്ച പ്ലാറ്റ്ഫോം"
+                      sx={{
+                        background: 'rgba(37, 99, 235, 0.12)',
+                        border: '1px solid rgba(37, 99, 235, 0.25)',
+                        color: '#2563EB',
+                        fontWeight: 800,
+                        fontSize: '0.75rem',
+                        height: 32,
+                      }}
+                    />
+                  </Stack>
+
 
                 {/* Headline */}
                 <Typography
@@ -307,7 +373,8 @@ export default function HomeClient() {
                     mb: { xs: 3, sm: 4, md: 4.5 },
                   }}
                 >
-                  Daily quiz, mock tests, current affairs, and AI doubt solving — free to start. Used by 47,000+ aspirants across Kerala.
+                  Daily quiz, mock tests, current affairs, and AI doubt solving — free to start. Trusted by Kerala PSC aspirants in Attingal, Thiruvananthapuram, Kollam, and across Kerala.
+
                 </Typography>
 
                 {/* CTAs */}
@@ -725,6 +792,76 @@ export default function HomeClient() {
         </Grid>
       </Container>
 
+      {/* ===== FAQ SECTION ===== */}
+      <Container id="faqs" maxWidth="md" sx={{ pb: { xs: 8, md: 12 } }}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(homeFaqSchema) }}
+        />
+        <Typography
+          variant="h2"
+          sx={{
+            fontFamily: "'Cabinet Grotesk'",
+            fontWeight: 900,
+            textAlign: 'center',
+            color: 'text.primary',
+            mb: 1.5,
+            fontSize: { xs: '1.65rem', sm: '2rem', md: '2.5rem' },
+            letterSpacing: '-0.02em',
+          }}
+        >
+          Frequently Asked{" "}
+          <Box component="span" sx={{ color: '#2E8B57' }}>
+            Questions
+          </Box>
+        </Typography>
+        <Typography sx={{ textAlign: 'center', color: 'text.secondary', mb: 6, fontSize: { xs: '0.9rem', sm: '1rem' } }}>
+          Everything you need to know about preparing for Kerala PSC with KPSC Master (കേരള സർക്കാർ ജോലി).
+        </Typography>
+
+        <Stack spacing={2.5}>
+          {faqItems.map((item, idx) => {
+            const isOpen = openFaq === idx;
+            return (
+              <Box
+                key={idx}
+                onClick={() => setOpenFaq(isOpen ? null : idx)}
+                sx={{
+                  p: 3,
+                  bgcolor: 'background.paper',
+                  border: '1px solid',
+                  borderColor: isOpen ? 'rgba(46,139,87,0.35)' : 'divider',
+                  borderRadius: '16px',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                  '&:hover': {
+                    borderColor: 'rgba(46,139,87,0.5)',
+                    boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
+                  },
+                }}
+              >
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                  <Typography sx={{ fontWeight: 800, fontSize: '0.95rem', color: isOpen ? '#2E8B57' : 'text.primary', transition: 'color 0.2s' }}>
+                    {item.q}
+                  </Typography>
+                  <Typography sx={{ fontWeight: 800, color: 'text.secondary', fontSize: '1.2rem', ml: 2 }}>
+                    {isOpen ? '−' : '+'}
+                  </Typography>
+                </Stack>
+                {isOpen && (
+                  <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
+                    <Typography sx={{ color: 'text.secondary', fontSize: '0.875rem', lineHeight: 1.65 }}>
+                      {item.a}
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            );
+          })}
+        </Stack>
+      </Container>
+
+
       {/* ===== CONTACT US ===== */}
       <Container id="contact" maxWidth="lg" sx={{ pb: { xs: 8, md: 12 } }}>
         <Typography variant="h2" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, textAlign: 'center', color: 'text.primary', mb: 1.5, fontSize: { xs: '1.65rem', sm: '2rem', md: '2.5rem' }, letterSpacing: '-0.02em' }}>
@@ -816,8 +953,9 @@ export default function HomeClient() {
                     </Box>
                     <Box>
                       <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', fontWeight: 600 }}>Location</Typography>
-                      <Typography sx={{ fontSize: '0.9rem', color: 'text.primary', fontWeight: 700 }}>Kochi, Kerala, India</Typography>
+                      <Typography sx={{ fontSize: '0.9rem', color: 'text.primary', fontWeight: 700 }}>Attingal, Thiruvananthapuram, Kerala, India</Typography>
                     </Box>
+
                   </Box>
                 </Stack>
               </Box>
@@ -914,7 +1052,7 @@ export default function HomeClient() {
               </Typography>
             </Box>
             <Typography sx={{ color: 'text.disabled', fontSize: '0.775rem', fontWeight: 500 }}>
-              © 2026 KPSC Master. Developed by{' '}
+              © 2026 KPSC Master. An In-House Product of{' '}
               <Link
                 href="https://www.digitalproductsolutions.in/"
                 target="_blank"
@@ -923,8 +1061,9 @@ export default function HomeClient() {
               >
                 Digital Product Solutions
               </Link>
-              . Kerala's #1 PSC Prep Platform.
+              . Head Office: Attingal, Thiruvananthapuram, Kerala.
             </Typography>
+
             <Stack direction="row" spacing={3.5}>
               {['Privacy', 'Terms', 'Contact'].map(item => (
                 <Typography key={item} sx={{ fontSize: '0.775rem', color: 'text.disabled', cursor: 'pointer', '&:hover': { color: 'text.secondary' }, fontWeight: 600 }}>
