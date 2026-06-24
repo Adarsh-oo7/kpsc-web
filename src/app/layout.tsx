@@ -123,10 +123,13 @@ const organisationSchema = {
   name: 'KPSC Master',
   url: BASE_URL,
   logo: `${BASE_URL}/logo.png`,
-  sameAs: [],
+  sameAs: [
+    'https://www.linkedin.com/showcase/kpsc-master/',
+    'https://www.instagram.com/kpsc_master_app/'
+  ],
   contactPoint: {
     '@type': 'ContactPoint',
-    telephone: '+91-94003-55185',
+    telephone: '+91-94003-55155',
     contactType: 'customer service',
     areaServed: 'IN',
     availableLanguage: ['English', 'Malayalam'],
