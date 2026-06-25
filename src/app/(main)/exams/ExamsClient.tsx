@@ -1019,10 +1019,14 @@ export default function ExamsClient() {
                   Subject Weightage distribution
                 </Typography>
                 <Stack spacing={1.5}>
-                  {(selectedSyllabus?.subject_weights && selectedSyllabus.subject_weights.length > 0
-                    ? selectedSyllabus.subject_weights
-                    : getSyllabusWeightage(selectedExamForSyllabus?.name)
-                  ).map((sub: any, idx: number) => (
+                  {(() => {
+                    const official = getSyllabusWeightage(selectedExamForSyllabus?.name || '');
+                    const isDefault = official.length === 4 && official[0].subject === 'General Studies & Current Affairs';
+                    if (!isDefault) return official;
+                    return (selectedSyllabus?.subject_weights && selectedSyllabus.subject_weights.length > 0)
+                      ? selectedSyllabus.subject_weights
+                      : official;
+                  })().map((sub: any, idx: number) => (
                     <Box key={idx}>
                       <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>{sub.subject}</Typography>
