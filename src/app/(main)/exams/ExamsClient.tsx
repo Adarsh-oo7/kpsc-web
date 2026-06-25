@@ -116,7 +116,7 @@ const getSyllabusWeightage = (examName: string) => {
 };
 
 export default function ExamsClient() {
-  const { setExamId, fetcher, themeMode, user } = useAppContext();
+  const { setExamId, fetcher, themeMode, user, profile } = useAppContext();
   const router = useRouter();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
@@ -185,16 +185,30 @@ export default function ExamsClient() {
     return ['All', ...categories.map((c: any) => c.name)];
   }, [categories]);
 
-  // Weekly recommended test (First exam in list dynamically or fallback)
+  // Weekly recommended test (Matches user's preferred exams if logged in, otherwise first exam in list)
   const featuredExam = useMemo(() => {
     if (!categories || categories.length === 0) return null;
+    
+    // Prioritize showing a test matching user's preferred exams
+    if (profile?.preferred_exams && profile.preferred_exams.length > 0) {
+      const preferredIds = new Set(profile.preferred_exams.map((pe: any) => pe.id));
+      for (const cat of categories) {
+        if (cat.exams && cat.exams.length > 0) {
+          const matchedExam = cat.exams.find((exam: any) => preferredIds.has(exam.id));
+          if (matchedExam) {
+            return { ...matchedExam, categoryName: cat.name };
+          }
+        }
+      }
+    }
+    
     for (const cat of categories) {
       if (cat.exams && cat.exams.length > 0) {
         return { ...cat.exams[0], categoryName: cat.name };
       }
     }
     return null;
-  }, [categories]);
+  }, [categories, profile]);
 
   const handleExamSelect = (examId: string) => {
     if (!user) {
@@ -960,7 +974,10 @@ export default function ExamsClient() {
                   Subject Weightage distribution
                 </Typography>
                 <Stack spacing={1.5}>
-                  {getSyllabusWeightage(selectedExamForSyllabus?.name).map((sub, idx) => (
+                  {(selectedSyllabus?.subject_weights && selectedSyllabus.subject_weights.length > 0
+                    ? selectedSyllabus.subject_weights
+                    : getSyllabusWeightage(selectedExamForSyllabus?.name)
+                  ).map((sub: any, idx: number) => (
                     <Box key={idx}>
                       <Stack direction="row" justifyContent="space-between" sx={{ mb: 0.5 }}>
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>{sub.subject}</Typography>

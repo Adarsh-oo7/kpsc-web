@@ -102,7 +102,7 @@ function LevelUpOverlay({ level, onClose }: { level: number; onClose: () => void
 // Main Study Feed Page
 // ============================================================
 export default function StudyFeedPage() {
-  const { fetcher, user, isLoading: ctxLoading, profile } = useAppContext();
+  const { fetcher, user, isLoading: ctxLoading, profile, refreshProfile } = useAppContext();
   const router = useRouter();
 
   useEffect(() => {
@@ -185,6 +185,9 @@ export default function StudyFeedPage() {
       } catch { }
     }
     mutateProfile();
+    if (refreshProfile) {
+      refreshProfile().catch(err => console.error("Error refreshing profile:", err));
+    }
     if (currentIndex < cards.length - 1) {
       setCurrentIndex(prev => prev + 1);
     } else {
@@ -213,6 +216,9 @@ export default function StudyFeedPage() {
         setLevelUp(res.data.gamification.new_level);
       }
       mutateProfile();
+      if (refreshProfile) {
+        refreshProfile().catch(err => console.error("Error refreshing profile:", err));
+      }
 
       // If user got the answer wrong, re-inject this question card 3 cards later
       if (!correct) {

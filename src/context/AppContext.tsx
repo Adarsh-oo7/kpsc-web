@@ -23,6 +23,7 @@ interface AppContextType {
   setTopicId: (id: string | null) => void;
   themeMode: 'light' | 'dark';
   toggleThemeMode: () => void;
+  refreshProfile: () => Promise<any>;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -146,6 +147,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setTopicId,
     themeMode,
     toggleThemeMode,
+    refreshProfile: fetchAndSetUser,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

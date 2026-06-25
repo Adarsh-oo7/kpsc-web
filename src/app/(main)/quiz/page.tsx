@@ -209,7 +209,7 @@ function ResultsScreen({ resultData, answers, onRetry }: { resultData: ResultDat
 // Quiz Page
 // ───────────────────────────────────────────────
 function QuizContent() {
-  const { fetcher, user, isLoading: ctxLoading } = useAppContext();
+  const { fetcher, user, isLoading: ctxLoading, refreshProfile } = useAppContext();
   const router = useRouter();
   const searchParams = useSearchParams();
   const theme = useTheme();
@@ -311,6 +311,9 @@ function QuizContent() {
       });
       setResultData({ ...res.data, timeTaken });
       setIsFinished(true);
+      if (refreshProfile) {
+        refreshProfile().catch(err => console.error("Error refreshing profile:", err));
+      }
     } catch {
       alert('Error submitting quiz.');
       setIsSubmitting(false);
