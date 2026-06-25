@@ -86,26 +86,42 @@ const marqueeStyles = `
   }
 `;
 
-// Helper to resolve topic weightages based on exam name
+// Helper to resolve topic weightages based on exam name — aligned with official KPSC marks
 const getSyllabusWeightage = (examName: string) => {
   const name = examName.toLowerCase();
   if (name.includes('ldc') || name.includes('clerk')) {
     return [
-      { subject: 'General Knowledge & Renaissance', weight: 40 },
-      { subject: 'Simple Arithmetic & Mental Ability', weight: 20 },
-      { subject: 'General English', weight: 20 },
-      { subject: 'Malayalam/Regional Language', weight: 10 },
-      { subject: 'General Science & IT', weight: 10 }
+      { subject: 'Part I: General Knowledge', weight: 50 },
+      { subject: 'Part II: Current Affairs', weight: 20 },
+      { subject: 'Part III: Simple Arithmetic & Mental Ability', weight: 10 },
+      { subject: 'Part IV: General English', weight: 10 },
+      { subject: 'Part V: Regional Language', weight: 10 }
     ];
   } else if (name.includes('lgs') || name.includes('servant')) {
     return [
-      { subject: 'General Knowledge & Renaissance', weight: 50 },
-      { subject: 'General Science', weight: 20 },
-      { subject: 'Simple Arithmetic & Mental Ability', weight: 20 },
-      { subject: 'Current Affairs', weight: 10 }
+      { subject: 'Part I: General Knowledge', weight: 40 },
+      { subject: 'Part II: Current Affairs', weight: 20 },
+      { subject: 'Part III: Science', weight: 10 },
+      { subject: 'Part IV: Public Health', weight: 10 },
+      { subject: 'Part V: Simple Arithmetic & Mental Ability', weight: 20 }
+    ];
+  } else if (name.includes('constable') || name.includes('cpo') || name.includes('police')) {
+    return [
+      { subject: 'Part I: General Knowledge', weight: 40 },
+      { subject: 'Part II: Current Affairs', weight: 10 },
+      { subject: 'Part III: Simple Arithmetic & Mental Ability', weight: 10 },
+      { subject: 'Part IV: General English', weight: 10 },
+      { subject: 'Part V: Regional Language', weight: 10 },
+      { subject: 'Part VI: Special Topics (Job-Related)', weight: 20 }
+    ];
+  } else if (name.includes('degree') || name.includes('graduate') || name.includes('assistant')) {
+    return [
+      { subject: 'Part I: General Knowledge', weight: 50 },
+      { subject: 'Part II: Simple Arithmetic & Mental Ability', weight: 20 },
+      { subject: 'Part III: General English', weight: 20 },
+      { subject: 'Part IV: Regional Language', weight: 10 }
     ];
   } else {
-    // Default fallback weightage
     return [
       { subject: 'General Studies & Current Affairs', weight: 40 },
       { subject: 'English Language & Grammar', weight: 20 },
@@ -191,13 +207,33 @@ export default function ExamsClient() {
     
     // Prioritize showing a test matching user's preferred exams
     if (profile?.preferred_exams && profile.preferred_exams.length > 0) {
+      // Build sets for matching by ID, slug, and name keywords
       const preferredIds = new Set(profile.preferred_exams.map((pe: any) => pe.id));
+      const preferredSlugs = new Set(profile.preferred_exams.map((pe: any) => (pe.slug || '').toLowerCase()));
+      const preferredNames = profile.preferred_exams.map((pe: any) => (pe.name || '').toLowerCase());
+      
       for (const cat of categories) {
         if (cat.exams && cat.exams.length > 0) {
-          const matchedExam = cat.exams.find((exam: any) => preferredIds.has(exam.id));
-          if (matchedExam) {
-            return { ...matchedExam, categoryName: cat.name };
-          }
+          // First try exact ID match
+          const idMatch = cat.exams.find((exam: any) => preferredIds.has(exam.id));
+          if (idMatch) return { ...idMatch, categoryName: cat.name };
+          
+          // Then try slug match
+          const slugMatch = cat.exams.find((exam: any) => 
+            preferredSlugs.has((exam.slug || '').toLowerCase())
+          );
+          if (slugMatch) return { ...slugMatch, categoryName: cat.name };
+          
+          // Then try name keyword match (e.g. "LDC" in name matches "LD Clerk (LDC)")
+          const nameMatch = cat.exams.find((exam: any) => {
+            const examNameLower = (exam.name || '').toLowerCase();
+            return preferredNames.some((pn: string) => {
+              // Extract keywords (3+ chars) from preferred name and check if exam name contains them
+              const keywords = pn.replace(/[()]/g, '').split(/\s+/).filter((w: string) => w.length >= 3);
+              return keywords.some((kw: string) => examNameLower.includes(kw));
+            });
+          });
+          if (nameMatch) return { ...nameMatch, categoryName: cat.name };
         }
       }
     }

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 import { Container, Box, Typography, Button, Paper, Stack, Grid, Divider, Chip, LinearProgress } from '@mui/material';
 import ExamModeSelectionClient from './ExamModeSelectionClient';
+import DetailedSyllabusSearch from './DetailedSyllabusSearch';
 
 interface PageProps {
   params: Promise<{ examId: string }>;
@@ -44,18 +45,35 @@ const getSyllabusWeightage = (examName: string) => {
   const name = examName.toLowerCase();
   if (name.includes('ldc') || name.includes('clerk')) {
     return [
-      { subject: 'General Knowledge & Renaissance', weight: 40 },
-      { subject: 'Simple Arithmetic & Mental Ability', weight: 20 },
-      { subject: 'General English', weight: 20 },
-      { subject: 'Malayalam/Regional Language', weight: 10 },
-      { subject: 'General Science & IT', weight: 10 }
+      { subject: 'Part I: General Knowledge', weight: 50 },
+      { subject: 'Part II: Current Affairs', weight: 20 },
+      { subject: 'Part III: Simple Arithmetic & Mental Ability', weight: 10 },
+      { subject: 'Part IV: General English', weight: 10 },
+      { subject: 'Part V: Regional Language', weight: 10 }
     ];
   } else if (name.includes('lgs') || name.includes('servant')) {
     return [
-      { subject: 'General Knowledge & Renaissance', weight: 50 },
-      { subject: 'General Science', weight: 20 },
-      { subject: 'Simple Arithmetic & Mental Ability', weight: 20 },
-      { subject: 'Current Affairs', weight: 10 }
+      { subject: 'Part I: General Knowledge', weight: 40 },
+      { subject: 'Part II: Current Affairs', weight: 20 },
+      { subject: 'Part III: Science', weight: 10 },
+      { subject: 'Part IV: Public Health', weight: 10 },
+      { subject: 'Part V: Simple Arithmetic & Mental Ability', weight: 20 }
+    ];
+  } else if (name.includes('constable') || name.includes('cpo') || name.includes('police')) {
+    return [
+      { subject: 'Part I: General Knowledge', weight: 40 },
+      { subject: 'Part II: Current Affairs', weight: 10 },
+      { subject: 'Part III: Simple Arithmetic & Mental Ability', weight: 10 },
+      { subject: 'Part IV: General English', weight: 10 },
+      { subject: 'Part V: Regional Language', weight: 10 },
+      { subject: 'Part VI: Special Topics (Job-Related)', weight: 20 }
+    ];
+  } else if (name.includes('degree') || name.includes('graduate') || name.includes('assistant')) {
+    return [
+      { subject: 'Part I: General Knowledge', weight: 50 },
+      { subject: 'Part II: Simple Arithmetic & Mental Ability', weight: 20 },
+      { subject: 'Part III: General English', weight: 20 },
+      { subject: 'Part IV: Regional Language', weight: 10 }
     ];
   } else {
     return [
@@ -124,6 +142,7 @@ export default async function ExamDetailPage({ params }: PageProps) {
   const syllabuses = await getSyllabusList();
   const syllabus = syllabuses.find((s: any) => s.exam === exam.id);
   const weightages = getSyllabusWeightage(exam.name);
+  const isLDC = exam.name.toLowerCase().includes('ldc') || exam.slug.toLowerCase().includes('ldc') || exam.name.toLowerCase().includes('lower division clerk');
 
   // FAQ Schema JSON-LD
   const faqSchema = {
@@ -289,6 +308,7 @@ export default async function ExamDetailPage({ params }: PageProps) {
                   </Typography>
                 )}
               </Paper>
+              {isLDC && <DetailedSyllabusSearch />}
             </Box>
 
             {/* Preparation Strategy */}
