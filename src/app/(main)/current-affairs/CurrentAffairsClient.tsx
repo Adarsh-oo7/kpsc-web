@@ -256,22 +256,39 @@ export default function CurrentAffairsClient() {
                     {news.content}
                   </Typography>
 
-                  {/* See MCQ Button */}
-                  {getParsedMcq(news) && (
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      startIcon={<HelpOutlineIcon />}
-                      onClick={() => handleOpenMcq(news)}
-                      sx={{
-                        textTransform: 'none', fontWeight: 700, borderRadius: '8px',
-                        color: '#2563EB', borderColor: 'rgba(37,99,235,0.3)',
-                        '&:hover': { borderColor: '#2563EB', background: 'rgba(37,99,235,0.04)' }
-                      }}
-                    >
-                      Solve News MCQ
-                    </Button>
-                  )}
+                  {/* Actions Row */}
+                  <Stack direction="row" spacing={2} sx={{ mt: 1 }}>
+                    {getParsedMcq(news) && (
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        startIcon={<HelpOutlineIcon />}
+                        onClick={() => handleOpenMcq(news)}
+                        sx={{
+                          textTransform: 'none', fontWeight: 700, borderRadius: '8px',
+                          color: '#2563EB', borderColor: 'rgba(37,99,235,0.3)',
+                          '&:hover': { borderColor: '#2563EB', background: 'rgba(37,99,235,0.04)' }
+                        }}
+                      >
+                        Solve News MCQ
+                      </Button>
+                    )}
+                    {news.slug && (
+                      <Button
+                        variant="text"
+                        size="small"
+                        onClick={() => router.push(`/current-affairs/${news.slug}`)}
+                        sx={{
+                          textTransform: 'none',
+                          fontWeight: 700,
+                          color: 'text.secondary',
+                          '&:hover': { color: 'text.primary' }
+                        }}
+                      >
+                        Read Full Analysis →
+                      </Button>
+                    )}
+                  </Stack>
                 </Box>
               </motion.div>
             );
@@ -346,7 +363,7 @@ export default function CurrentAffairsClient() {
                     <Typography sx={{ fontWeight: 800, color: isCorrect ? '#22c55e' : '#EF4444', fontSize: '0.85rem', mb: 0.5 }}>
                       {isCorrect ? '✓ Correct Answer!' : `✗ Incorrect Answer (Correct option is ${['A', 'B', 'C', 'D'][mcqData.correct_index]})`}
                     </Typography>
-                    <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', lineHeight: 1.5 }}>
+                    <Typography sx={{ fontSize: '0.875rem', color: 'text.secondary', lineHeight: 1.5 }}>
                       {mcqData.explanation}
                     </Typography>
                   </Box>
