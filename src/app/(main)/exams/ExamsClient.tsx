@@ -105,6 +105,16 @@ const getSyllabusWeightage = (examName: string) => {
       { subject: 'Part IV: Public Health', weight: 10 },
       { subject: 'Part V: Simple Arithmetic & Mental Ability', weight: 20 }
     ];
+  } else if (name.includes('sub inspector') || name.includes('si ') || name.includes('si(') || name.includes('inspector')) {
+    return [
+      { subject: 'General Knowledge & Current Affairs', weight: 50 },
+      { subject: 'General Science', weight: 10 },
+      { subject: 'Mental Ability & Logical Reasoning', weight: 10 },
+      { subject: 'Quantitative Aptitude', weight: 10 },
+      { subject: 'General English', weight: 10 },
+      { subject: 'Regional Language (Malayalam/Kannada/Tamil)', weight: 5 },
+      { subject: 'Police & Legal Subjects', weight: 5 }
+    ];
   } else if (name.includes('constable') || name.includes('cpo') || name.includes('police')) {
     return [
       { subject: 'Part I: General Knowledge', weight: 40 },
