@@ -93,14 +93,37 @@ function ScoreGauge({ score, total }: { score: number; total: number }) {
 // ───────────────────────────────────────────────
 // Results Screen
 // ───────────────────────────────────────────────
-function ResultsScreen({ resultData, answers, onRetry }: { resultData: ResultData; answers: UserAnswers; onRetry: () => void }) {
+function ResultsScreen({ resultData, answers, onRetry, originalQuestions }: { resultData: ResultData; answers: UserAnswers; onRetry: () => void; originalQuestions: Question[] }) {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const router = useRouter();
-  const { results, questions, timeTaken } = resultData;
+  const { results, questions: backendQuestions, timeTaken } = resultData;
   const scorePercent = Math.max(0, Math.min(100, Math.round((results.score / results.total) * 100)));
   const mins = Math.floor(timeTaken / 60);
   const secs = timeTaken % 60;
+
+  // Create a map of backend questions for quick O(1) lookup of correct_answer and explanation
+  const backendMap = useMemo(() => {
+    const map: Record<number, Question> = {};
+    if (backendQuestions) {
+      backendQuestions.forEach((q: Question) => {
+        map[q.id] = q;
+      });
+    }
+    return map;
+  }, [backendQuestions]);
+
+  // Order questions based on originalQuestions to preserve the test sequence
+  const orderedReviewQuestions = useMemo(() => {
+    return originalQuestions.map((q: Question) => {
+      const backendQ = backendMap[q.id];
+      return {
+        ...q,
+        correct_answer: backendQ?.correct_answer || q.correct_answer,
+        explanation: backendQ?.explanation || q.explanation,
+      };
+    });
+  }, [originalQuestions, backendMap]);
 
   return (
     <Box sx={{ maxWidth: 600, mx: 'auto', py: 2 }}>
@@ -160,7 +183,7 @@ function ResultsScreen({ resultData, answers, onRetry }: { resultData: ResultDat
         Review Your Answers
       </Typography>
       <Stack spacing={2}>
-        {questions.map((q: Question, idx: number) => {
+        {orderedReviewQuestions.map((q: Question, idx: number) => {
           const userAns = answers[q.id];
           const correct = userAns === q.correct_answer;
           return (
@@ -181,6 +204,11 @@ function ResultsScreen({ resultData, answers, onRetry }: { resultData: ResultDat
                       }}>
                         <Typography sx={{ fontSize: '0.8rem', color: isCorrectOpt ? (isDark ? '#86efac' : '#145228') : isUserAns ? (isDark ? '#fca5a5' : '#EF4444') : 'text.secondary' }}>
                           <strong>{key}.</strong> {val}
+                          {isUserAns && (
+                            <Box component="span" sx={{ ml: 1, fontWeight: 700, fontSize: '0.75rem', color: isCorrectOpt ? '#22c55e' : '#EF4444' }}>
+                              (Your Answer)
+                            </Box>
+                          )}
                         </Typography>
                         {isCorrectOpt && <CheckCircleIcon sx={{ fontSize: 16, color: '#22c55e' }} />}
                         {isUserAns && !isCorrectOpt && <CancelIcon sx={{ fontSize: 16, color: '#EF4444' }} />}
@@ -396,7 +424,7 @@ function QuizContent() {
   }
 
   if (isFinished && resultData) {
-    return <ResultsScreen resultData={resultData} answers={answers} onRetry={() => { setAnswers({}); setCurrentQ(0); setIsFinished(false); setResultData(null); setTimeLeft(examDuration); setHasInitializedTime(false); }} />;
+    return <ResultsScreen resultData={resultData} answers={answers} onRetry={() => { setAnswers({}); setCurrentQ(0); setIsFinished(false); setResultData(null); setTimeLeft(examDuration); setHasInitializedTime(false); }} originalQuestions={questions} />;
   }
 
   // ── Pre-quiz screen ──
