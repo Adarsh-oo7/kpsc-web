@@ -12,6 +12,37 @@ import BookmarkIcon from '@mui/icons-material/Bookmark';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { useAppContext } from '@/context/AppContext';
+import { alpha } from '@mui/material/styles';
+
+interface MCQ {
+  question: string;
+  options: string[];
+  correct_index: number;
+  explanation: string;
+}
+
+function getParsedMcq(newsItem: any): MCQ | null {
+  if (!newsItem || !newsItem.mcq) return null;
+  let mcq = newsItem.mcq;
+  if (typeof mcq === 'string') {
+    try {
+      mcq = JSON.parse(mcq);
+    } catch (e) {
+      console.error("Failed to parse MCQ JSON string:", e);
+      return null;
+    }
+  }
+  if (
+    mcq &&
+    typeof mcq.question === 'string' &&
+    Array.isArray(mcq.options) &&
+    mcq.options.length >= 3 &&
+    typeof mcq.correct_index === 'number'
+  ) {
+    return mcq as MCQ;
+  }
+  return null;
+}
 
 export default function CurrentAffairsClient() {
   const router = useRouter();
@@ -30,6 +61,18 @@ export default function CurrentAffairsClient() {
     '/public/current-affairs/',
     fetcher
   );
+
+  // Automatically select the most recent date with news if selectedDate has no news
+  useEffect(() => {
+    if (data && data.length > 0) {
+      const dates = Array.from(new Set(data.map((n: any) => n.publication_date)))
+        .sort()
+        .reverse() as string[];
+      if (dates.length > 0 && !dates.includes(selectedDate)) {
+        setSelectedDate(dates[0]);
+      }
+    }
+  }, [data, selectedDate]);
 
   const toggleSaveArticle = (id: number) => {
     setSavedArticles(prev =>
@@ -78,10 +121,10 @@ export default function CurrentAffairsClient() {
         <Typography sx={{ fontSize: '0.8rem', color: '#2563EB', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
           Current Affairs 📰
         </Typography>
-        <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 950, color: '#F0F4F8', mt: 0.5 }}>
+        <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 950, color: 'text.primary', mt: 0.5 }}>
           Daily News Feed
         </Typography>
-        <Typography sx={{ color: '#8892A4', fontSize: '0.9rem', mt: 0.5 }}>
+        <Typography sx={{ color: 'text.secondary', fontSize: '0.9rem', mt: 0.5 }}>
           Read carefully curated news updates with probability tags indicating high-yield PSC topics.
         </Typography>
       </Box>
@@ -104,12 +147,12 @@ export default function CurrentAffairsClient() {
                 py: 0.75, px: 2,
                 fontFamily: "'JetBrains Mono'",
                 fontSize: '0.75rem',
-                color: isSelected ? '#F0F4F8' : '#8892A4',
-                background: isSelected ? 'linear-gradient(135deg, #1B6B3A, #2E8B57)' : 'rgba(255,255,255,0.02)',
-                borderColor: isSelected ? '#2E8B57' : 'rgba(255,255,255,0.1)',
+                color: isSelected ? 'common.white' : 'text.secondary',
+                background: isSelected ? 'linear-gradient(135deg, #1B6B3A, #2E8B57)' : 'transparent',
+                borderColor: isSelected ? '#2E8B57' : 'divider',
                 '&:hover': {
-                  borderColor: isSelected ? '#2E8B57' : 'rgba(255,255,255,0.2)',
-                  background: isSelected ? 'linear-gradient(135deg, #1B6B3A, #2E8B57)' : 'rgba(255,255,255,0.04)',
+                  borderColor: isSelected ? '#2E8B57' : 'action.selected',
+                  background: isSelected ? 'linear-gradient(135deg, #1B6B3A, #2E8B57)' : 'action.hover',
                 }
               }}
             >
@@ -123,18 +166,20 @@ export default function CurrentAffairsClient() {
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
         <Box sx={{
           p: 3,
-          background: 'linear-gradient(135deg, rgba(217, 119, 6, 0.12) 0%, rgba(21, 23, 27, 0.5) 100%)',
+          background: (theme) => theme.palette.mode === 'dark'
+            ? 'linear-gradient(135deg, rgba(217, 119, 6, 0.12) 0%, rgba(21, 23, 27, 0.5) 100%)'
+            : 'linear-gradient(135deg, rgba(217, 119, 6, 0.08) 0%, rgba(245, 158, 11, 0.02) 100%)',
           border: '1px solid rgba(217, 119, 6, 0.3)',
           borderRadius: '20px',
           mb: 4
         }}>
           <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
             <EmojiEventsIcon sx={{ color: '#F59E0B' }} />
-            <Typography variant="subtitle1" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: '#F0F4F8' }}>
+            <Typography variant="subtitle1" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: 'text.primary' }}>
               Weekly Digest Overview
             </Typography>
           </Stack>
-          <Typography sx={{ fontSize: '0.8rem', color: '#8892A4', lineHeight: 1.6 }}>
+          <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary', lineHeight: 1.6 }}>
             • India ranking in Global Innovation Index 2026: <strong>39th Position</strong><br />
             • New Governor of Reserve Bank of India appointed<br />
             • Kerala budget proposals announce infrastructure push of ₹2.3 Lakh Cr
@@ -167,7 +212,8 @@ export default function CurrentAffairsClient() {
                 <Box sx={{
                   p: 3,
                   background: 'background.paper',
-                  border: isHighChance ? '1px solid rgba(245, 158, 11, 0.25)' : '1px solid rgba(255,255,255,0.06)',
+                  border: '1px solid',
+                  borderColor: isHighChance ? 'rgba(245, 158, 11, 0.3)' : 'divider',
                   borderRadius: '20px',
                   position: 'relative'
                 }}>
@@ -178,7 +224,7 @@ export default function CurrentAffairsClient() {
                       size="small"
                       sx={{
                         fontSize: '0.7rem', fontWeight: 800,
-                        bgcolor: 'rgba(255,255,255,0.04)', color: '#8892A4',
+                        bgcolor: 'action.hover', color: 'text.secondary',
                         border: '1px solid', borderColor: 'divider'
                       }}
                     />
@@ -194,36 +240,38 @@ export default function CurrentAffairsClient() {
                           }}
                         />
                       )}
-                      <IconButton onClick={() => toggleSaveArticle(news.id)} sx={{ p: 0.5, color: isSaved ? '#F59E0B' : '#8892A4' }}>
+                      <IconButton onClick={() => toggleSaveArticle(news.id)} sx={{ p: 0.5, color: isSaved ? 'secondary.main' : 'text.secondary' }}>
                         {isSaved ? <BookmarkIcon fontSize="small" /> : <BookmarkBorderIcon fontSize="small" />}
                       </IconButton>
                     </Stack>
                   </Stack>
 
                   {/* Headline */}
-                  <Typography variant="h6" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: '#F0F4F8', lineHeight: 1.4, mb: 1.5 }}>
+                  <Typography variant="h6" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: 'text.primary', lineHeight: 1.4, mb: 1.5 }}>
                     {news.title}
                   </Typography>
 
                   {/* Summary Content */}
-                  <Typography sx={{ color: '#8892A4', fontSize: '0.875rem', lineHeight: 1.6, mb: 2.5 }}>
+                  <Typography sx={{ color: 'text.secondary', fontSize: '0.875rem', lineHeight: 1.6, mb: 2.5 }}>
                     {news.content}
                   </Typography>
 
                   {/* See MCQ Button */}
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<HelpOutlineIcon />}
-                    onClick={() => handleOpenMcq(news)}
-                    sx={{
-                      textTransform: 'none', fontWeight: 700, borderRadius: '8px',
-                      color: '#2563EB', borderColor: 'rgba(37,99,235,0.3)',
-                      '&:hover': { borderColor: '#2563EB', background: 'rgba(37,99,235,0.04)' }
-                    }}
-                  >
-                    Solve News MCQ
-                  </Button>
+                  {getParsedMcq(news) && (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<HelpOutlineIcon />}
+                      onClick={() => handleOpenMcq(news)}
+                      sx={{
+                        textTransform: 'none', fontWeight: 700, borderRadius: '8px',
+                        color: '#2563EB', borderColor: 'rgba(37,99,235,0.3)',
+                        '&:hover': { borderColor: '#2563EB', background: 'rgba(37,99,235,0.04)' }
+                      }}
+                    >
+                      Solve News MCQ
+                    </Button>
+                  )}
                 </Box>
               </motion.div>
             );
@@ -245,68 +293,80 @@ export default function CurrentAffairsClient() {
           }
         }}
       >
-        <DialogTitle sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: '#F0F4F8', pb: 1 }}>
-          💡 Practice MCQ
-        </DialogTitle>
-        <DialogContent>
-          <Typography sx={{ fontSize: '0.9rem', color: '#8892A4', mb: 3 }}>
-            Based on: "{activeMcqNews?.title}"
-          </Typography>
+        {activeMcqNews && (() => {
+          const mcqData = getParsedMcq(activeMcqNews);
+          if (!mcqData) return null;
 
-          {/* Dummy MCQ Question */}
-          <Typography sx={{ fontWeight: 700, color: '#F0F4F8', mb: 2.5 }}>
-            Question: What rank did India achieve in the recent publication of the Global Innovation Index 2026?
-          </Typography>
+          const isAnswerSelected = mcqAnswer !== '';
+          const isCorrect = isAnswerSelected && Number(mcqAnswer) === mcqData.correct_index;
 
-          <RadioGroup value={mcqAnswer} onChange={(e) => { setMcqAnswer(e.target.value); setShowExplanation(true); }}>
-            <FormControlLabel
-              value="A"
-              control={<Radio sx={{ color: '#8892A4', '&.Mui-checked': { color: '#2E8B57' } }} />}
-              label={<Typography sx={{ color: '#F0F4F8', fontSize: '0.875rem' }}>A) 35th Rank</Typography>}
-              sx={{ mb: 1 }}
-            />
-            <FormControlLabel
-              value="B"
-              control={<Radio sx={{ color: '#8892A4', '&.Mui-checked': { color: '#2E8B57' } }} />}
-              label={<Typography sx={{ color: '#F0F4F8', fontSize: '0.875rem' }}>B) 39th Rank (Correct)</Typography>}
-              sx={{ mb: 1 }}
-            />
-            <FormControlLabel
-              value="C"
-              control={<Radio sx={{ color: '#8892A4', '&.Mui-checked': { color: '#2E8B57' } }} />}
-              label={<Typography sx={{ color: '#F0F4F8', fontSize: '0.875rem' }}>C) 42nd Rank</Typography>}
-              sx={{ mb: 1 }}
-            />
-          </RadioGroup>
+          return (
+            <>
+              <DialogTitle sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: 'text.primary', pb: 1 }}>
+                💡 Practice MCQ
+              </DialogTitle>
+              <DialogContent>
+                <Typography sx={{ fontSize: '0.9rem', color: 'text.secondary', mb: 3 }}>
+                  Based on: "{activeMcqNews.title}"
+                </Typography>
 
-          {showExplanation && (
-            <Box sx={{
-              mt: 3, p: 2,
-              background: mcqAnswer === 'B' ? 'rgba(46,139,87,0.1)' : 'rgba(239,68,68,0.1)',
-              border: mcqAnswer === 'B' ? '1px solid rgba(46,139,87,0.2)' : '1px solid rgba(239,68,68,0.2)',
-              borderRadius: '12px',
-            }}>
-              <Typography sx={{ fontWeight: 800, color: mcqAnswer === 'B' ? '#22c55e' : '#EF4444', fontSize: '0.85rem', mb: 0.5 }}>
-                {mcqAnswer === 'B' ? '✓ Correct Answer!' : '✗ Incorrect Answer'}
-              </Typography>
-              <Typography sx={{ fontSize: '0.75rem', color: '#8892A4', lineHeight: 1.5 }}>
-                India achieved the 39th position moving up from previous records in the Global Innovation Index, highlighting major boosts in technological research and educational quality.
-              </Typography>
-            </Box>
-          )}
+                <Typography sx={{ fontWeight: 700, color: 'text.primary', mb: 2.5 }}>
+                  Question: {mcqData.question}
+                </Typography>
 
-          <Button
-            fullWidth
-            onClick={() => setActiveMcqNews(null)}
-            sx={{
-              mt: 3, textTransform: 'none', fontWeight: 700, borderRadius: '10px',
-              bgcolor: 'rgba(255,255,255,0.04)', color: '#F0F4F8',
-              '&:hover': { bgcolor: 'rgba(255,255,255,0.06)' }
-            }}
-          >
-            Close
-          </Button>
-        </DialogContent>
+                <RadioGroup 
+                  value={mcqAnswer} 
+                  onChange={(e) => { 
+                    setMcqAnswer(e.target.value); 
+                    setShowExplanation(true); 
+                  }}
+                >
+                  {mcqData.options.map((option: string, index: number) => {
+                    const letters = ['A', 'B', 'C', 'D'];
+                    const letter = letters[index] || String(index + 1);
+                    return (
+                      <FormControlLabel
+                        key={index}
+                        value={String(index)}
+                        control={<Radio sx={{ color: 'text.secondary', '&.Mui-checked': { color: '#2E8B57' } }} />}
+                        label={<Typography sx={{ color: 'text.primary', fontSize: '0.875rem' }}>{letter}) {option}</Typography>}
+                        sx={{ mb: 1 }}
+                      />
+                    );
+                  })}
+                </RadioGroup>
+
+                {showExplanation && isAnswerSelected && (
+                  <Box sx={{
+                    mt: 3, p: 2,
+                    background: isCorrect ? 'rgba(46,139,87,0.1)' : 'rgba(239,68,68,0.1)',
+                    border: isCorrect ? '1px solid rgba(46,139,87,0.2)' : '1px solid rgba(239,68,68,0.2)',
+                    borderRadius: '12px',
+                  }}>
+                    <Typography sx={{ fontWeight: 800, color: isCorrect ? '#22c55e' : '#EF4444', fontSize: '0.85rem', mb: 0.5 }}>
+                      {isCorrect ? '✓ Correct Answer!' : `✗ Incorrect Answer (Correct option is ${['A', 'B', 'C', 'D'][mcqData.correct_index]})`}
+                    </Typography>
+                    <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', lineHeight: 1.5 }}>
+                      {mcqData.explanation}
+                    </Typography>
+                  </Box>
+                )}
+
+                <Button
+                  fullWidth
+                  onClick={() => setActiveMcqNews(null)}
+                  sx={{
+                    mt: 3, textTransform: 'none', fontWeight: 700, borderRadius: '10px',
+                    bgcolor: 'action.hover', color: 'text.primary',
+                    '&:hover': { bgcolor: 'action.selected' }
+                  }}
+                >
+                  Close
+                </Button>
+              </DialogContent>
+            </>
+          );
+        })()}
       </Dialog>
     </Box>
   );

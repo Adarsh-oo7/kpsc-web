@@ -49,9 +49,9 @@ export default async function CurrentAffairSEOPage({ params }: PageProps) {
 
   if (!item) {
     return (
-      <Box sx={{ p: 4, textAlign: 'center', color: 'white' }}>
+      <Box sx={{ p: 4, textAlign: 'center', color: 'text.primary' }}>
         <Typography variant="h5" gutterBottom>Current Affairs Article Not Found</Typography>
-        <Typography variant="body1" sx={{ mb: 3, color: 'grey.400' }}>
+        <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
           The article you are looking for does not exist or has been removed.
         </Typography>
         <Link href="/" style={{ textDecoration: 'none' }}>
@@ -95,7 +95,7 @@ export default async function CurrentAffairSEOPage({ params }: PageProps) {
       </Box>
 
       {/* Article Container */}
-      <Card sx={{ bgcolor: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(10px)', color: 'white', borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
+      <Card sx={{ bgcolor: 'background.paper', color: 'text.primary', borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
         <CardContent sx={{ p: 4 }}>
           {/* Tags / Metadata */}
           <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 3 }} useFlexGap flexWrap="wrap">
@@ -111,7 +111,7 @@ export default async function CurrentAffairSEOPage({ params }: PageProps) {
               />
             )}
 
-            <Stack direction="row" spacing={0.5} alignItems="center" sx={{ color: 'grey.400', fontSize: '0.875rem' }}>
+            <Stack direction="row" spacing={0.5} alignItems="center" sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
               <EventIcon sx={{ fontSize: 16 }} />
               <Typography variant="body2">{new Date(item.publication_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</Typography>
             </Stack>
@@ -122,7 +122,7 @@ export default async function CurrentAffairSEOPage({ params }: PageProps) {
             {item.title}
           </Typography>
 
-          <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)', mb: 3 }} />
+          <Divider sx={{ mb: 3 }} />
 
           {/* AI Summary Highlight Box */}
           {item.ai_summary && (
@@ -130,14 +130,14 @@ export default async function CurrentAffairSEOPage({ params }: PageProps) {
               <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'warning.main', mb: 1 }}>
                 Quick AI Summary (Malayalam / English study highlight)
               </Typography>
-              <Typography variant="body1" sx={{ color: 'grey.300', lineHeight: 1.6, fontStyle: 'italic' }}>
+              <Typography variant="body1" sx={{ color: 'text.primary', lineHeight: 1.6, fontStyle: 'italic' }}>
                 {item.ai_summary}
               </Typography>
             </Box>
           )}
 
           {/* Content Body */}
-          <Typography variant="body1" sx={{ color: 'grey.100', lineHeight: 1.8, fontSize: '1.05rem', whiteSpace: 'pre-line' }}>
+          <Typography variant="body1" sx={{ color: 'text.primary', lineHeight: 1.8, fontSize: '1.05rem', whiteSpace: 'pre-line' }}>
             {item.content}
           </Typography>
         </CardContent>
@@ -145,7 +145,7 @@ export default async function CurrentAffairSEOPage({ params }: PageProps) {
 
       <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Link href="/" style={{ textDecoration: 'none' }}>
-          <Button variant="outlined" sx={{ color: 'white', borderColor: 'rgba(255,255,255,0.2)' }}>
+          <Button variant="outlined">
             Back to Home
           </Button>
         </Link>
