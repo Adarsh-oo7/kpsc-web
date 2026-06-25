@@ -68,6 +68,15 @@ const getSyllabusWeightage = (examName: string) => {
       { subject: 'Part V: Regional Language', weight: 10 },
       { subject: 'Part VI: Special Topics (Job-Related)', weight: 20 }
     ];
+  } else if (name.includes('forest') || name.includes('beat forest')) {
+    return [
+      { subject: 'General Knowledge', weight: 40 },
+      { subject: 'Current Affairs', weight: 10 },
+      { subject: 'Simple Arithmetic, Mental Ability & Reasoning', weight: 10 },
+      { subject: 'General English', weight: 10 },
+      { subject: 'Regional Language (Malayalam/Kannada/Tamil)', weight: 10 },
+      { subject: 'Special Topics (Forest & Wildlife)', weight: 20 }
+    ];
   } else if (name.includes('degree') || name.includes('graduate') || name.includes('assistant')) {
     return [
       { subject: 'Part I: General Knowledge', weight: 50 },
