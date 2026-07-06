@@ -186,9 +186,11 @@ export default function KsrtcConductorPage() {
 
                 <Button
                   variant="outlined"
+                  component="a"
+                  href="/files/ksrtc-conductor-syllabus.pdf"
+                  download
                   startIcon={<FileDownloadIcon />}
                   sx={{ mt: 4, textTransform: 'none', py: 1.2, px: 3, borderRadius: '10px', fontWeight: 800 }}
-                  onClick={() => alert("Syllabus PDF download will begin shortly...")}
                 >
                   Download Syllabus PDF Summary
                 </Button>
