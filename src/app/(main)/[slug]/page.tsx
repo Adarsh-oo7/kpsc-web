@@ -47,6 +47,10 @@ const EXAMS: Record<string, ExamInfo> = {
   'assistant-prison-officer': { name: 'Assistant Prison Officer', formalName: 'Assistant Prison Officer', duration: 75, qCount: 100 },
   'excise-officer': { name: 'Excise Officer', formalName: 'Excise Officer', duration: 75, qCount: 100 },
   'civil-excise-officer': { name: 'Civil Excise Officer', formalName: 'Civil Excise Officer', duration: 75, qCount: 100 },
+  'assistant-junior-assistant': { name: 'Assistant / Junior Assistant', formalName: 'Assistant / Junior Assistant (Various Depts.)', duration: 75, qCount: 100 },
+  'village-field-assistant': { name: 'Village Field Assistant', formalName: 'Village Field Assistant (VFA)', duration: 75, qCount: 100 },
+  'panchayat-secretary': { name: 'Panchayat Secretary', formalName: 'Panchayat Secretary', duration: 75, qCount: 100 },
+  'general-psc': { name: 'General PSC', formalName: 'General PSC (2025)', duration: 75, qCount: 100 },
 };
 
 function parseSlug(slug: string) {
@@ -59,6 +63,18 @@ function parseSlug(slug: string) {
   }
   if (slug === 'kerala-psc-degree-level-online-test') {
     return { type: 'exam-generic', examKey: 'degree-level', exam: EXAMS['degree-level'], location: 'Kerala', locationKey: 'kerala' };
+  }
+  if (slug === 'kerala-psc-assistant-junior-assistant-online-test') {
+    return { type: 'exam-generic', examKey: 'assistant-junior-assistant', exam: EXAMS['assistant-junior-assistant'], location: 'Kerala', locationKey: 'kerala' };
+  }
+  if (slug === 'kerala-psc-village-field-assistant-online-test') {
+    return { type: 'exam-generic', examKey: 'village-field-assistant', exam: EXAMS['village-field-assistant'], location: 'Kerala', locationKey: 'kerala' };
+  }
+  if (slug === 'kerala-psc-panchayat-secretary-online-test') {
+    return { type: 'exam-generic', examKey: 'panchayat-secretary', exam: EXAMS['panchayat-secretary'], location: 'Kerala', locationKey: 'kerala' };
+  }
+  if (slug === 'kerala-psc-general-psc-online-test') {
+    return { type: 'exam-generic', examKey: 'general-psc', exam: EXAMS['general-psc'], location: 'Kerala', locationKey: 'kerala' };
   }
   if (slug === 'kerala-psc-daily-quiz') {
     return { type: 'quiz-generic', location: 'Kerala', locationKey: 'kerala' };

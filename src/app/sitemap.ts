@@ -31,7 +31,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'ldc', 'lgs', 'degree-level', 'veo', 'ld-typist', 'secretariat-assistant',
     'police-constable', 'fire-and-rescue', 'lp-teacher', 'up-teacher', 'clerk',
     'company-board', 'water-authority', 'university-assistant', 'assistant-prison-officer',
-    'excise-officer', 'civil-excise-officer'
+    'excise-officer', 'civil-excise-officer', 'assistant-junior-assistant', 'village-field-assistant',
+    'panchayat-secretary', 'general-psc'
   ];
 
   // 1.5.1 Exam + Location (187 pages)
@@ -81,6 +82,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/kerala-psc-ldc-online-test',
     '/kerala-psc-lgs-online-test',
     '/kerala-psc-degree-level-online-test',
+    '/kerala-psc-assistant-junior-assistant-online-test',
+    '/kerala-psc-village-field-assistant-online-test',
+    '/kerala-psc-panchayat-secretary-online-test',
+    '/kerala-psc-general-psc-online-test',
     '/kerala-psc-daily-quiz'
   ];
   genericPaths.forEach((path) => {
