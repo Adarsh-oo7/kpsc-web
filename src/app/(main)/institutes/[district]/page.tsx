@@ -34,7 +34,8 @@ async function getInstitutesForDistrict(district: string) {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { district } = await params;
+  const resolvedParams = await params;
+  const district = resolvedParams?.district || '';
   const capitalized = capitalizeDistrict(district);
   
   return {
@@ -47,7 +48,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function DistrictInstitutesPage({ params }: PageProps) {
-  const { district } = await params;
+  const resolvedParams = await params;
+  const district = resolvedParams?.district || '';
   const capitalized = capitalizeDistrict(district);
   const rawInstitutes = await getInstitutesForDistrict(district);
   const institutes = Array.isArray(rawInstitutes) ? rawInstitutes : [];
