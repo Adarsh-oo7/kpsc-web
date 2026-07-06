@@ -49,7 +49,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function DistrictInstitutesPage({ params }: PageProps) {
   const { district } = await params;
   const capitalized = capitalizeDistrict(district);
-  const institutes = await getInstitutesForDistrict(district);
+  const rawInstitutes = await getInstitutesForDistrict(district);
+  const institutes = Array.isArray(rawInstitutes) ? rawInstitutes : [];
 
   // Generate LocalBusiness schemas
   const schemas = institutes.map((inst: any) => ({
