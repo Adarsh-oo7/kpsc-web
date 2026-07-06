@@ -5,7 +5,8 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import {
   Box, Typography, Button, CircularProgress, Stack,
-  LinearProgress, Chip, Alert, SwipeableDrawer, Divider, useTheme
+  LinearProgress, Chip, Alert, SwipeableDrawer, Divider, useTheme,
+  Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
@@ -252,6 +253,7 @@ function QuizContent() {
   const [isAnswered, setIsAnswered] = useState(false);
   const [selectedOption, setSelectedOption] = useState('');
   const [isFinished, setIsFinished] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [resultData, setResultData] = useState<ResultData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -329,7 +331,10 @@ function QuizContent() {
 
   const handleFinish = useCallback(async (autoSubmit = false) => {
     if (isFinished) return;
-    if (!autoSubmit && !window.confirm('Submit this quiz?')) return;
+    if (!autoSubmit) {
+      setShowConfirm(true);
+      return;
+    }
     setIsSubmitting(true);
     const timeTaken = examDuration - timeLeft;
     try {
@@ -794,6 +799,43 @@ function QuizContent() {
           Got it!
         </Button>
       </SwipeableDrawer>
+
+      {/* Confirmation Dialog */}
+      <Dialog 
+        open={showConfirm} 
+        onClose={() => setShowConfirm(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            bgcolor: 'background.paper',
+            backgroundImage: 'none',
+            border: '1px solid',
+            borderColor: 'divider',
+            p: 1
+          }
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 700 }}>Submit Test?</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ color: 'text.secondary', fontSize: '0.9rem' }}>
+            Are you sure you want to finish and submit your test?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={() => setShowConfirm(false)} sx={{ textTransform: 'none', fontWeight: 600, color: 'text.secondary' }}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={() => { setShowConfirm(false); handleFinish(true); }} 
+            variant="contained"
+            color="success"
+            sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '10px', px: 3 }}
+            autoFocus
+          >
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
