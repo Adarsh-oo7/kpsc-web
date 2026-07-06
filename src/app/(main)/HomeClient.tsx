@@ -75,7 +75,21 @@ const features = [
   },
 ];
 
-const exams = ['LDC', 'LGS', 'Degree Level', 'VEO', 'LD Typist', 'LP/UP Teacher', 'Police Constable', 'Fire & Rescue', 'PSC Secretariat', 'KPSC Clerk', 'Company Board', 'Water Authority'];
+const exams = [
+  { name: 'LDC', href: '/exams/kerala-psc-ldc-online-test' },
+  { name: 'LGS', href: '/exams/kerala-psc-lgs-online-test' },
+  { name: 'Company Board LGS', href: '/exams/company-board-lgs' },
+  { name: 'Degree Level', href: '/exams/kerala-psc-degree-level-online-test' },
+  { name: 'VEO', href: '/exams/veo' },
+  { name: 'LD Typist', href: '/exams/ld-typist' },
+  { name: 'LP/UP Teacher', href: '/exams/lp-teacher' },
+  { name: 'Police Constable', href: '/exams/police-constable' },
+  { name: 'Fire & Rescue', href: '/exams/fire-and-rescue' },
+  { name: 'PSC Secretariat', href: '/exams/secretariat-assistant' },
+  { name: 'KPSC Clerk', href: '/exams/clerk' },
+  { name: 'Water Authority', href: '/exams/water-authority' }
+];
+
 
 const testimonials = [
   { name: 'Hari Kumar', place: 'Attingal', rank: '#1 LDC 2025 Topper', text: 'KPSC Master\'s daily quiz kept me on track for 6 months. The streak mechanic genuinely worked — I couldn\'t let go of my 90-day streak!', avatar: 'H' },
@@ -673,24 +687,27 @@ export default function HomeClient() {
           </Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.25, justifyContent: 'center' }}>
             {exams.map(exam => (
-              <Chip
-                key={exam}
-                label={exam}
-                sx={{
-                  bgcolor: 'surface.card',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  color: 'text.secondary',
-                  fontWeight: 700,
-                  fontSize: '0.75rem',
-                  py: 2,
-                  px: 0.5,
-                  '&:hover': { background: 'rgba(27,107,58,0.12)', borderColor: 'rgba(46,139,87,0.3)', color: '#2E8B57', transform: 'translateY(-1px)' },
-                  transition: 'all 0.2s ease',
-                }}
-              />
+              <Link href={exam.href} key={exam.name} style={{ textDecoration: 'none' }}>
+                <Chip
+                  label={exam.name}
+                  sx={{
+                    bgcolor: 'surface.card',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    color: 'text.secondary',
+                    fontWeight: 700,
+                    fontSize: '0.75rem',
+                    py: 2,
+                    px: 0.5,
+                    cursor: 'pointer',
+                    '&:hover': { background: 'rgba(27,107,58,0.12)', borderColor: 'rgba(46,139,87,0.3)', color: '#2E8B57', transform: 'translateY(-1px)' },
+                    transition: 'all 0.2s ease',
+                  }}
+                />
+              </Link>
             ))}
           </Box>
+
         </Container>
       </Box>
 
