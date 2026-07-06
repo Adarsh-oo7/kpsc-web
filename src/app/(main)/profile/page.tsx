@@ -90,8 +90,10 @@ export default function ProfilePage() {
     preferred_topics_ids: [] as number[],
     preferred_exams_ids: [] as number[],
     preferred_difficulty: '',
+    preferred_language: '',
     bio: '',
   });
+
   
   const [preview, setPreview] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -119,8 +121,10 @@ export default function ProfilePage() {
         preferred_topics_ids: profileData.preferred_topics?.map((t: any) => t.id) || [],
         preferred_exams_ids: profileData.preferred_exams?.map((e: any) => e.id) || [],
         preferred_difficulty: profileData.preferred_difficulty || '',
+        preferred_language: profileData.preferred_language || '',
         bio: profileData.bio || '',
       }));
+
       if (profileData.profile_photo) {
         setPreview(`${profileData.profile_photo}?t=${new Date().getTime()}`);
       }
@@ -158,7 +162,9 @@ export default function ProfilePage() {
     if (formData.place) data.append('place', formData.place);
     if (formData.district) data.append('district', formData.district);
     if (formData.preferred_difficulty) data.append('preferred_difficulty', formData.preferred_difficulty);
+    if (formData.preferred_language) data.append('preferred_language', formData.preferred_language);
     if (formData.bio) data.append('bio', formData.bio);
+
     formData.preferred_topics_ids.forEach(id => data.append('preferred_topics_ids', id.toString()));
     formData.preferred_exams_ids.forEach(id => data.append('preferred_exams_ids', id.toString()));
     
@@ -610,6 +616,31 @@ export default function ProfilePage() {
                         </Select>
                       </FormControl>
                     </Grid>
+
+                    {/* Preferred Language */}
+                    <Grid size={12}>
+                      <FormControl fullWidth sx={{
+                        '& .MuiInputLabel-root': { color: 'text.secondary' },
+                        '& .MuiOutlinedInput-root': {
+                          '& fieldset': { borderColor: 'divider' },
+                          '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' },
+                          '&.Mui-focused fieldset': { borderColor: '#2E8B57' },
+                        },
+                        bgcolor: isDark ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.01)',
+                        borderRadius: '12px'
+                      }}>
+                        <InputLabel>Preferred Language</InputLabel>
+                        <Select
+                          value={formData.preferred_language}
+                          onChange={(e) => setFormData({ ...formData, preferred_language: e.target.value as string })}
+                          sx={{ color: 'text.primary' }}
+                        >
+                          <MenuItem value="en">English</MenuItem>
+                          <MenuItem value="ml">Malayalam</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+
                   </Grid>
                 </CardContent>
               </Card>
