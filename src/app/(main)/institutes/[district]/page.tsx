@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { Container, Box, Typography, Button, Paper, Stack, Grid, Avatar, Chip } from '@mui/material';
+import { Container, Box, Typography, Button, Paper, Stack, Grid, Avatar, Chip, Divider } from '@mui/material';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import PhoneIcon from '@mui/icons-material/Phone';
 import EmailIcon from '@mui/icons-material/Email';
