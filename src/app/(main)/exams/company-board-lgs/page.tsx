@@ -9,6 +9,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 // Client components
 import LgsCountdown from './LgsCountdown';
