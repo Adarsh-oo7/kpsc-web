@@ -187,7 +187,7 @@ export default function CurrentAffairsClient() {
           <Button
             variant="text"
             size="small"
-            onClick={() => router.push('/quiz')}
+            onClick={() => router.push('/quiz?current_affairs=weekly')}
             sx={{ color: '#F59E0B', textTransform: 'none', fontWeight: 700, mt: 1.5, p: 0 }}
           >
             Take Weekly News Quiz →

@@ -260,11 +260,13 @@ function QuizContent() {
   const examId = searchParams.get('exam_id');
   const topicId = searchParams.get('topic_id');
   const limitParam = searchParams.get('limit');
+  const currentAffairsParam = searchParams.get('current_affairs');
 
+  const isWeeklyCurrentAffairs = currentAffairsParam === 'weekly';
   const isMockExam = !!examId && !limitParam;
   const isPracticeQuiz = !!examId && !!limitParam;
   const isTopicPractice = !!topicId;
-  const isDailyQuiz = !examId && !topicId;
+  const isDailyQuiz = !examId && !topicId && !isWeeklyCurrentAffairs;
 
   const [timeLeft, setTimeLeft] = useState(15 * 60);
   const [hasInitializedTime, setHasInitializedTime] = useState(false);
@@ -283,8 +285,11 @@ function QuizContent() {
     if (isTopicPractice) {
       return `/questions/?topic_id=${topicId}&limit=${limitParam || '15'}`;
     }
+    if (isWeeklyCurrentAffairs) {
+      return `/questions/weekly-current-affairs/`;
+    }
     return `/questions/daily-quiz/?limit=10`;
-  }, [isMockExam, isPracticeQuiz, isTopicPractice, examId, topicId, limitParam]);
+  }, [isMockExam, isPracticeQuiz, isTopicPractice, isWeeklyCurrentAffairs, examId, topicId, limitParam]);
 
   const { data: rawQuizData, error, isLoading } = useSWR(apiUrl, fetcher, { revalidateOnFocus: false });
 
@@ -300,11 +305,14 @@ function QuizContent() {
     if (isMockExam && rawQuizData && rawQuizData.duration_minutes) {
       return rawQuizData.duration_minutes * 60;
     }
+    if (isWeeklyCurrentAffairs) {
+      return 15 * 60; // 15 minutes for weekly current affairs quiz
+    }
     if (isDailyQuiz) {
       return 10 * 60; // 10 minutes for daily quiz
     }
     return 15 * 60; // 15 minutes default for practice
-  }, [rawQuizData, isMockExam, isDailyQuiz]);
+  }, [rawQuizData, isMockExam, isDailyQuiz, isWeeklyCurrentAffairs]);
 
   const quizTitle = useMemo(() => {
     if (isMockExam && rawQuizData && rawQuizData.exam_name) {
@@ -316,8 +324,11 @@ function QuizContent() {
     if (isTopicPractice && questions.length > 0 && questions[0]?.topic?.name) {
       return `${questions[0].topic.name} Practice`;
     }
+    if (isWeeklyCurrentAffairs) {
+      return "Weekly Current Affairs Quiz";
+    }
     return "Daily Quiz";
-  }, [isMockExam, isPracticeQuiz, isTopicPractice, rawQuizData, questions]);
+  }, [isMockExam, isPracticeQuiz, isTopicPractice, isWeeklyCurrentAffairs, rawQuizData, questions]);
 
   useEffect(() => {
     if (rawQuizData && !hasInitializedTime) {
