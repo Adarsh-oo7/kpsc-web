@@ -10,11 +10,31 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
 export const metadata: Metadata = {
-  title: "Fire & Rescue Officer Mock Test 2026 | Kerala PSC Free Practice",
-  description: "Get Kerala PSC Fire & Rescue Officer expected cut off 2026, answer key discussions, and practice standard exam mocks online. No signup needed.",
+  title: "Fire & Rescue Officer Answer Key July 4 2026 | Expected Cutoff | Kerala PSC Previous Questions | KPSC Master",
+  description: "Kerala PSC Fire & Rescue Officer answer key July 4, 2026 — expected cutoff prediction, previous year question papers, and post-exam analysis. Fire rescue officer expected cutoff 2026 discussed here.",
+  keywords: [
+    'fire rescue officer answer key 2026',
+    'fire rescue officer answer key July 2026',
+    'fire and rescue officer previous questions 2026',
+    'fire rescue officer expected cutoff 2026',
+    'kerala psc fire and rescue officer mock test',
+    'fire rescue officer exam analysis July 4 2026',
+  ],
   alternates: {
     canonical: 'https://www.kpscmaster.in/exams/fire-and-rescue',
-  }
+  },
+  openGraph: {
+    title: 'Fire & Rescue Officer Answer Key July 4 2026 | Expected Cutoff | KPSC Master',
+    description: "Kerala PSC Fire & Rescue Officer answer key July 4, 2026 — expected cutoff, previous year questions, exam analysis. No signup needed.",
+    url: 'https://www.kpscmaster.in/exams/fire-and-rescue',
+    images: [{ url: '/KPSC MASTER.png', width: 1200, height: 630, alt: 'Fire Rescue Officer Answer Key July 2026' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Fire & Rescue Officer Answer Key July 2026 | Expected Cutoff | KPSC Master',
+    description: "Fire rescue officer answer key July 4, 2026 — expected cutoff and previous questions analysis.",
+    images: ['/KPSC MASTER.png'],
+  },
 };
 
 export default function FireAndRescuePage() {
@@ -27,23 +47,31 @@ export default function FireAndRescuePage() {
         'name': "What was the Fire & Rescue Officer exam date 2026?",
         'acceptedAnswer': {
           '@type': 'Answer',
-          'text': "The Kerala PSC Fire & Rescue Officer exam was held on July 4, 2026."
+          'text': "The Kerala PSC Fire & Rescue Officer exam was held on July 4, 2026 (Saturday). The exam covered General Knowledge, Current Affairs, and Fire & Rescue-specific technical questions."
         }
       },
       {
         '@type': 'Question',
-        'name': "What is the expected cut off for Fire & Rescue Officer 2026?",
+        'name': "What is the Fire Rescue Officer answer key July 2026?",
         'acceptedAnswer': {
           '@type': 'Answer',
-          'text': "Based on student feedback and exam difficulty, the expected cut-off marks for general category are estimated between 58 and 64 marks."
+          'text': "The official Kerala PSC Fire & Rescue Officer answer key for July 4, 2026 will be published on the official Kerala PSC website (keralapsc.gov.in). KPSC Master provides a community discussion board and question-by-question analysis on this page."
         }
       },
       {
         '@type': 'Question',
-        'name': "Where can I discuss the official answer key?",
+        'name': "What is the expected cutoff for Fire Rescue Officer 2026?",
         'acceptedAnswer': {
           '@type': 'Answer',
-          'text': "You can join our community chat boards under the KPSC Master Community section to participate in the live answer key discussion and review solved questions."
+          'text': "Based on student feedback and exam difficulty analysis, the expected cutoff marks for the Kerala PSC Fire & Rescue Officer 2026 exam (general category) are estimated between 58 and 65 marks out of 100. Final cutoffs will be published by Kerala PSC after rank list preparation."
+        }
+      },
+      {
+        '@type': 'Question',
+        'name': "Where can I find Fire & Rescue Officer previous year question papers?",
+        'acceptedAnswer': {
+          '@type': 'Answer',
+          'text': "KPSC Master provides Fire & Rescue Officer previous year questions in interactive mock test format. You can practice all past papers with answers and AI explanations directly in your browser — no download or signup required."
         }
       }
     ]

@@ -10,11 +10,33 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 export const metadata: Metadata = {
-  title: "Conductor Syllabus 2026 PDF + Free Mock Test | Kerala PSC KSRTC",
-  description: "Download Conductor Syllabus 2026 PDF. KSRTC Conductor exam pattern, 40M General Studies + 40M Arithmetic + 20M Special Topics. Free mock test.",
+  title: "Conductor Syllabus 2026 PDF Download Free | KSRTC Conductor Mock Test | Kerala PSC | KPSC Master",
+  description: "Download KSRTC Conductor Syllabus 2026 PDF free. Free KSRTC conductor mock test online — 40M General Studies + 40M Arithmetic + 20M KSRTC Act & First Aid. No signup. Malayalam bilingual.",
+  keywords: [
+    'conductor syllabus 2026 PDF Kerala PSC',
+    'KSRTC conductor mock test free',
+    'KSRTC conductor mock test free online',
+    'KSRTC conductor mock test malayalam',
+    'KSRTC conductor syllabus download 2026',
+    'conductor exam pattern 2026',
+    'KSRTC conductor previous year questions',
+    'kerala psc conductor mock test',
+  ],
   alternates: {
     canonical: 'https://www.kpscmaster.in/exams/ksrtc-conductor',
-  }
+  },
+  openGraph: {
+    title: 'Conductor Syllabus 2026 PDF Free + KSRTC Conductor Mock Test | KPSC Master',
+    description: "Free KSRTC Conductor Syllabus PDF 2026 + free mock test online. 40M GS + 40M Arithmetic + 20M KSRTC Act. Malayalam bilingual, no signup.",
+    url: 'https://www.kpscmaster.in/exams/ksrtc-conductor',
+    images: [{ url: '/KPSC MASTER.png', width: 1200, height: 630, alt: 'KSRTC Conductor Syllabus 2026 PDF Free' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Conductor Syllabus 2026 PDF Free | KSRTC Mock Test | Kerala PSC',
+    description: "Free KSRTC Conductor syllabus PDF 2026 + free mock test. No signup needed.",
+    images: ['/KPSC MASTER.png'],
+  },
 };
 
 export default function KsrtcConductorPage() {

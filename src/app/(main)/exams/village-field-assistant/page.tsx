@@ -14,11 +14,33 @@ import VfaCountdown from './VfaCountdown';
 import VfaDistrictStats from './VfaDistrictStats';
 
 export const metadata: Metadata = {
-  title: "Village Field Assistant Mock Test 2026 Free | VFA Kerala PSC Sept 19",
-  description: "Free VFA mock tests for Kerala PSC Village Field Assistant exam Sept 19, 2026. Bilingual questions (ML/EN), AI explanations, streak-based daily practice.",
+  title: "VFA Mock Test 2026 Free | Village Field Assistant Kerala PSC Sept 19 | Bilingual Malayalam | KPSC Master",
+  description: "Free Village Field Assistant (VFA) mock test 2026 — Kerala PSC exam September 19. VFA mock test Malayalam medium, bilingual questions, downloadable syllabus summary. Cat 571/2025. No signup.",
+  keywords: [
+    'VFA mock test 2026 free',
+    'village field assistant mock test 2026',
+    'VFA mock test Malayalam medium',
+    'VFA syllabus 2026 PDF',
+    'VFA Kerala PSC Sept 19',
+    'village field assistant syllabus 2026',
+    'VFA previous year questions Kerala PSC',
+    'cat 571/2025 mock test',
+  ],
   alternates: {
     canonical: 'https://www.kpscmaster.in/exams/village-field-assistant',
-  }
+  },
+  openGraph: {
+    title: 'VFA Mock Test 2026 Free | Village Field Assistant Kerala PSC Sept 19 | KPSC Master',
+    description: "Free VFA mock test Malayalam 2026 — Kerala PSC September 19, Cat 571/2025. Bilingual questions, syllabus summary, AI explanations. No signup.",
+    url: 'https://www.kpscmaster.in/exams/village-field-assistant',
+    images: [{ url: '/KPSC MASTER.png', width: 1200, height: 630, alt: 'Village Field Assistant Mock Test 2026 Free' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'VFA Mock Test 2026 Free | Village Field Assistant Sept 19 | KPSC Master',
+    description: "Free VFA mock test Malayalam 2026 — Kerala PSC exam Sept 19. Bilingual, AI explanations. No signup.",
+    images: ['/KPSC MASTER.png'],
+  },
 };
 
 export default function VillageFieldAssistantPage() {

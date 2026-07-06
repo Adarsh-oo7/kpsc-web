@@ -12,11 +12,33 @@ import ShieldIcon from '@mui/icons-material/Shield';
 import HubCountdown from './HubCountdown';
 
 export const metadata: Metadata = {
-  title: "August 2026 LDC & LGS Exam Hub | Free Mock Tests & Prep",
-  description: "Targeting August 1 Kerala PSC exams? Free mock tests for LDC 2026 (Cat 619/2025), Storeman (Cat 620/2025), and BEVCO LDC (Cat 618/2025). No signup required.",
+  title: "BEVCO LDC Mock Test 2026 Free | August LDC LGS Exam Hub | Kerala PSC | KPSC Master",
+  description: "Free BEVCO LDC mock test 2026 (Cat 618/2025) + LDC General (Cat 619/2025) + Storeman (Cat 620/2025). August 1, 2026 Kerala PSC exam hub — OMR simulation, bilingual practice, no signup.",
+  keywords: [
+    'BEVCO LDC mock test 2026',
+    'BEVCO LDC mock test 2026 free',
+    'LDC mock test August 2026',
+    'LDC mock test free online 2026',
+    'kerala psc LDC August 2026',
+    'storeman PSC mock test 2026',
+    'cat 618/2025 mock test',
+    'cat 619/2025 mock test',
+  ],
   alternates: {
     canonical: 'https://www.kpscmaster.in/exams/ldc-lgs-august-2026',
-  }
+  },
+  openGraph: {
+    title: 'BEVCO LDC Mock Test 2026 Free | August LDC LGS Exam Hub | KPSC Master',
+    description: "Free BEVCO LDC, LDC General & Storeman mock tests for August 1, 2026 Kerala PSC exams. No signup required.",
+    url: 'https://www.kpscmaster.in/exams/ldc-lgs-august-2026',
+    images: [{ url: '/KPSC MASTER.png', width: 1200, height: 630, alt: 'BEVCO LDC Mock Test 2026 Free' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'BEVCO LDC Mock Test 2026 Free | August LDC LGS Hub | KPSC Master',
+    description: "Free BEVCO LDC, LDC General & Storeman mock tests — August 1, 2026 Kerala PSC.",
+    images: ['/KPSC MASTER.png'],
+  },
 };
 
 export default function LdcLgsAugust2026HubPage() {

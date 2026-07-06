@@ -17,11 +17,33 @@ import LgsLeaderboard from './LgsLeaderboard';
 import LgsSyllabusAccordion from './LgsSyllabusAccordion';
 
 export const metadata: Metadata = {
-  title: "Company Board LGS Mock Test 2026 Free | Kerala PSC (Cat 423/2025)",
-  description: "Free Company Board LGS 2026 mock tests with AI explanations. Exam on July 18. 100 questions, OMR pattern. Start free — no signup needed.",
+  title: "Company Board LGS Mock Test 2026 Free | Kerala PSC Cat 423/2025 | Exam July 18 | KPSC Master",
+  description: "Free Company Board LGS (Last Grade Servant) mock test 2026 — exam July 18, Cat 423/2025. LGS mock test free Malayalam, 100 questions OMR pattern, no negative marking, no signup needed.",
+  keywords: [
+    'company board LGS mock test 2026 free',
+    'LGS mock test free Malayalam 2026',
+    'LGS mock test free online 2026',
+    'lgs company board answer key July 2026',
+    'kerala psc lgs mock test',
+    'company board last grade servant mock test',
+    'cat 423/2025 mock test',
+    'LGS exam July 18 2026',
+  ],
   alternates: {
     canonical: 'https://www.kpscmaster.in/exams/company-board-lgs',
-  }
+  },
+  openGraph: {
+    title: 'Company Board LGS Mock Test 2026 Free | Exam July 18 | KPSC Master',
+    description: "Free Company Board LGS mock test 2026 — exam July 18, Cat 423/2025. 100 questions, no negative marking, LGS mock test free Malayalam. No signup.",
+    url: 'https://www.kpscmaster.in/exams/company-board-lgs',
+    images: [{ url: '/KPSC MASTER.png', width: 1200, height: 630, alt: 'Company Board LGS Mock Test 2026 Free' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Company Board LGS Mock Test 2026 Free | July 18 Exam | KPSC Master',
+    description: "Free LGS mock test Malayalam 2026 — 100 questions, no negative marking. Exam July 18.",
+    images: ['/KPSC MASTER.png'],
+  },
 };
 
 export default function CompanyBoardLgsPage() {
@@ -70,6 +92,22 @@ export default function CompanyBoardLgsPage() {
         'acceptedAnswer': {
           '@type': 'Answer',
           'text': "You can practice full-length LGS mock tests on KPSC Master, study SCERT-based math and science materials, and review daily current affairs. All resources are free and do not require registration."
+        }
+      },
+      {
+        '@type': 'Question',
+        'name': "Where to find the Company Board LGS answer key July 2026?",
+        'acceptedAnswer': {
+          '@type': 'Answer',
+          'text': "The Kerala PSC Company Board LGS answer key for July 18, 2026 (Cat 423/2025) will be published on the official Kerala PSC website (keralapsc.gov.in) after the exam. KPSC Master will also publish a detailed question-by-question analysis and expected cutoff prediction on this page."
+        }
+      },
+      {
+        '@type': 'Question',
+        'name': "What is the expected cutoff for Company Board LGS 2026?",
+        'acceptedAnswer': {
+          '@type': 'Answer',
+          'text': "Based on previous LGS exams and the difficulty level, the expected cutoff for Company Board LGS (Cat 423/2025) is approximately 65–75 marks out of 100. Since there is no negative marking, candidates should attempt all questions."
         }
       }
     ]

@@ -11,11 +11,34 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 export const metadata: Metadata = {
-  title: "KSEB Electricity Worker Mock Test 2026 | Mazdoor Cat 021/2026 Free",
-  description: "Free KSEB Electricity Worker (Mazdoor) mock tests. Exam Sept 30, 2026. Basic Electricity, Ohm's Law, Magnetism, Kerala PSC GK. No signup needed.",
+  title: "KSEB Electricity Worker Mock Test 2026 Free | Mazdoor Cat 021/2026 | 29363 Applicants | KPSC Master",
+  description: "Free KSEB Electricity Worker (Mazdoor) mock test 2026 online — 29,363 applicants, exam Sept 30. 10-module syllabus: Ohm's Law, Magnetism, AC Circuits, Wiring. Bilingual ML/EN. No signup needed.",
+  keywords: [
+    'KSEB electricity worker mock test 2026 free',
+    'KSEB mazdoor mock test free online',
+    'KSEB mazdoor mock test malayalam',
+    'KSEB electricity worker syllabus 2026',
+    'KSEB mazdoor previous year questions',
+    'KSEB electricity worker cut off 2026',
+    'KSEB mazdoor cat 021/2026',
+    'KSEB electricity worker exam date 2026',
+    'KSEB electricity worker 985 vacancy',
+  ],
   alternates: {
     canonical: 'https://www.kpscmaster.in/exams/kseb-electricity-worker',
-  }
+  },
+  openGraph: {
+    title: 'KSEB Electricity Worker Mock Test 2026 Free | Mazdoor Cat 021/2026 | KPSC Master',
+    description: "29,363 applicants, exam Sept 30, 2026. Free KSEB Mazdoor mock tests online — 10-module syllabus, bilingual Malayalam & English, AI explanations.",
+    url: 'https://www.kpscmaster.in/exams/kseb-electricity-worker',
+    images: [{ url: '/KPSC MASTER.png', width: 1200, height: 630, alt: 'KSEB Electricity Worker Mock Test 2026 Free' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'KSEB Electricity Worker Mock Test 2026 Free | Mazdoor | KPSC Master',
+    description: "Free KSEB Mazdoor mock test 2026 — 29,363 applicants, exam Sept 30. Bilingual, AI explanations. No signup.",
+    images: ['/KPSC MASTER.png'],
+  },
 };
 
 export default function KsebElectricityWorkerPage() {
@@ -54,7 +77,31 @@ export default function KsebElectricityWorkerPage() {
           '@type': 'Answer',
           'text': "Yes, a deduction of 1/3 (0.33) marks applies for each wrong answer as per standard Kerala PSC exam regulations."
         }
-      }
+      },
+      {
+        '@type': 'Question',
+        'name': "How many applicants are there for KSEB Electricity Worker 2026?",
+        'acceptedAnswer': {
+          '@type': 'Answer',
+          'text': "A total of 29,363 applicants have registered for the KSEB Electricity Worker (Cat 021/2026) exam competing for 985 vacancies. This makes it one of the most competitive KSEB recruitment drives in 2026."
+        }
+      },
+      {
+        '@type': 'Question',
+        'name': "Where can I find KSEB Mazdoor previous year questions?",
+        'acceptedAnswer': {
+          '@type': 'Answer',
+          'text': "KPSC Master offers KSEB Mazdoor previous year question papers in interactive mock test format. You can practice them directly in the browser — no download or signup required."
+        }
+      },
+      {
+        '@type': 'Question',
+        'name': "What is the expected KSEB Electricity Worker cutoff 2026?",
+        'acceptedAnswer': {
+          '@type': 'Answer',
+          'text': "Based on past KSEB recruitment trends and the applicant ratio (29,363 applicants for 985 posts), the expected cutoff for the KSEB Electricity Worker 2026 exam is approximately 60–70 marks out of 100. General category candidates should aim for 65+ marks to be safe."
+        }
+      },
     ]
   };
 
