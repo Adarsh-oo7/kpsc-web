@@ -99,7 +99,7 @@ export default function LoginClient() {
       } else if (!profile?.preferred_exams || profile.preferred_exams.length === 0) {
         router.push('/onboarding');
       } else {
-        router.push('/');
+        router.push('/home');
       }
     }
   }, [user, profile, isLoading, router]);
@@ -129,7 +129,7 @@ export default function LoginClient() {
       } else if (!profileData?.preferred_exams || profileData.preferred_exams.length === 0) {
         router.push('/onboarding');
       } else {
-        router.push('/');
+        router.push('/home');
       }
 
     } catch (err: any) {
@@ -154,7 +154,7 @@ export default function LoginClient() {
       } else if (!has_preferred_exams || !profileData?.preferred_exams || profileData.preferred_exams.length === 0) {
         router.push('/onboarding');
       } else {
-        router.push('/');
+        router.push('/home');
       }
     } catch (err: any) {
       console.error(err);

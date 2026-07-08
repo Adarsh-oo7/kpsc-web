@@ -238,7 +238,7 @@ function ResultsScreen({ resultData, answers, onRetry, originalQuestions }: { re
 // Quiz Page
 // ───────────────────────────────────────────────
 function QuizContent() {
-  const { fetcher, user, isLoading: ctxLoading, refreshProfile } = useAppContext();
+  const { fetcher, user, profile, isLoading: ctxLoading, refreshProfile } = useAppContext();
   const router = useRouter();
   const searchParams = useSearchParams();
   const theme = useTheme();
@@ -256,6 +256,25 @@ function QuizContent() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [resultData, setResultData] = useState<ResultData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [language, setLanguage] = useState<'en' | 'ml'>('en');
+
+  // Initialize language from user preferred language
+  useEffect(() => {
+    if (profile?.preferred_language) {
+      setLanguage(profile.preferred_language as 'en' | 'ml');
+    }
+  }, [profile?.preferred_language]);
+
+  // Reset quiz progress when language is changed
+  useEffect(() => {
+    setAnswers({});
+    setCurrentQ(0);
+    setIsFinished(false);
+    setResultData(null);
+    setSelectedOption('');
+    setIsAnswered(false);
+    setHasInitializedTime(false);
+  }, [language]);
 
   const examId = searchParams.get('exam_id');
   const topicId = searchParams.get('topic_id');
@@ -277,19 +296,19 @@ function QuizContent() {
 
   const apiUrl = useMemo(() => {
     if (isMockExam) {
-      return `/generate-mock-exam/${examId}/`;
+      return `/generate-mock-exam/${examId}/?language=${language}`;
     }
     if (isPracticeQuiz) {
-      return `/questions/?exam_id=${examId}&limit=${limitParam}`;
+      return `/questions/?exam_id=${examId}&limit=${limitParam}&language=${language}`;
     }
     if (isTopicPractice) {
-      return `/questions/?topic_id=${topicId}&limit=${limitParam || '15'}`;
+      return `/questions/?topic_id=${topicId}&limit=${limitParam || '15'}&language=${language}`;
     }
     if (isWeeklyCurrentAffairs) {
-      return `/questions/weekly-current-affairs/`;
+      return `/questions/weekly-current-affairs/?language=${language}`;
     }
-    return `/questions/daily-quiz/?limit=10`;
-  }, [isMockExam, isPracticeQuiz, isTopicPractice, isWeeklyCurrentAffairs, examId, topicId, limitParam]);
+    return `/questions/daily-quiz/?limit=10&language=${language}`;
+  }, [isMockExam, isPracticeQuiz, isTopicPractice, isWeeklyCurrentAffairs, examId, topicId, limitParam, language]);
 
   const { data: rawQuizData, error, isLoading } = useSWR(apiUrl, fetcher, { revalidateOnFocus: false });
 
@@ -480,7 +499,7 @@ function QuizContent() {
         border: '1px solid', borderColor: 'divider',
         boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.06)',
       }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5, flexWrap: 'wrap', gap: 1 }}>
           <Stack spacing={0.25}>
             <Typography sx={{ fontSize: '0.9rem', color: 'text.primary', fontWeight: 800 }}>
               {quizTitle}
@@ -489,6 +508,47 @@ function QuizContent() {
               Question {currentQ + 1} of {questions.length}
             </Typography>
           </Stack>
+          
+          <Box sx={{ display: 'flex', gap: 0.5, border: '1px solid', borderColor: 'divider', borderRadius: '10px', p: 0.25 }}>
+            <Button
+              size="small"
+              onClick={() => setLanguage('en')}
+              sx={{
+                fontSize: '0.65rem',
+                py: 0.25,
+                px: 1,
+                borderRadius: '8px',
+                bgcolor: language === 'en' ? 'rgba(46, 139, 87, 0.15)' : 'transparent',
+                color: language === 'en' ? '#2E8B57' : 'text.secondary',
+                fontWeight: 700,
+                textTransform: 'none',
+                minWidth: 40,
+                height: 24,
+                '&:hover': { bgcolor: language === 'en' ? 'rgba(46, 139, 87, 0.25)' : 'action.hover' }
+              }}
+            >
+              EN
+            </Button>
+            <Button
+              size="small"
+              onClick={() => setLanguage('ml')}
+              sx={{
+                fontSize: '0.65rem',
+                py: 0.25,
+                px: 1,
+                borderRadius: '8px',
+                bgcolor: language === 'ml' ? 'rgba(46, 139, 87, 0.15)' : 'transparent',
+                color: language === 'ml' ? '#2E8B57' : 'text.secondary',
+                fontWeight: 700,
+                textTransform: 'none',
+                minWidth: 40,
+                height: 24,
+                '&:hover': { bgcolor: language === 'ml' ? 'rgba(46, 139, 87, 0.25)' : 'action.hover' }
+              }}
+            >
+              മലയാളം
+            </Button>
+          </Box>
           <Box sx={{
             display: 'flex', alignItems: 'center', gap: 0.75,
             px: 2, py: 0.5, borderRadius: '20px',

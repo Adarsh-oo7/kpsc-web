@@ -10,12 +10,14 @@ import {
 } from '@mui/material';
 import { useAppContext } from '@/context/AppContext';
 import { motion, Variants } from 'framer-motion';
+import apiClient from '@/lib/apiClient';
 
 // Import relevant icons
 import HistoryIcon from '@mui/icons-material/History';
 import SchoolIcon from '@mui/icons-material/School';
 import SearchIcon from '@mui/icons-material/Search';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
 // Using the same design components from the Exams page for consistency
 const categoryGradients = [
@@ -66,6 +68,12 @@ export default function PreviousPapersClient() {
   const [searchQuery, setSearchQuery] = useState('');
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
 
+  // States for options dialog & PYQ PDF papers
+  const [selectedExam, setSelectedExam] = useState<any | null>(null);
+  const [optionsDialogOpen, setOptionsDialogOpen] = useState(false);
+  const [pyqList, setPyqList] = useState<any[]>([]);
+  const [pyqLoading, setPyqLoading] = useState(false);
+
   // CORRECTED: This now fetches all exams, which represent previous papers
   const { data: categories, error, isLoading } = useSWR('/exams/', fetcher);
 
@@ -78,14 +86,24 @@ export default function PreviousPapersClient() {
       .filter((category: any) => category.exams.length > 0);
   }, [categories, searchQuery]);
 
-  // CORRECTED: This ensures reliable navigation to the quiz
-  const handleExamSelect = (selectedExamId: string) => {
+  // CORRECTED: This opens the preparation options dialog
+  const handleExamSelect = async (exam: any) => {
     if (!user) {
       setAuthDialogOpen(true);
       return;
     }
-    setExamId(selectedExamId);
-    router.push(`/quiz?exam_id=${selectedExamId}`);
+    setSelectedExam(exam);
+    setOptionsDialogOpen(true);
+    setPyqLoading(true);
+    setPyqList([]);
+    try {
+      const res = await apiClient.get(`/exams/${exam.id}/pyq/`);
+      setPyqList(res.data || []);
+    } catch (err) {
+      console.error("Error fetching PYQs:", err);
+    } finally {
+      setPyqLoading(false);
+    }
   };
 
   if (isLoading) return <Box sx={{ display: 'flex', justifyContent: 'center', p: 5 }}><CircularProgress /></Box>;
@@ -122,7 +140,7 @@ export default function PreviousPapersClient() {
                     <Grid container spacing={3}>
                         {category.exams.map((exam: any) => (
                             <Grid size={{ xs: 6, sm: 4, md: 3 }} key={exam.id}>
-                                <ExamCard exam={exam} onClick={() => handleExamSelect(exam.id.toString())} categoryName={category.name} />
+                                <ExamCard exam={exam} onClick={() => handleExamSelect(exam)} categoryName={category.name} />
                             </Grid>
                         ))}
                     </Grid>
@@ -193,6 +211,149 @@ export default function PreviousPapersClient() {
             }}
           >
             Register
+          </Button>
+        </DialogActions>
+      </Dialog>
+      {/* Paper Options Dialog */}
+      <Dialog
+        open={optionsDialogOpen}
+        onClose={() => setOptionsDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 5,
+            p: 3,
+            bgcolor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider',
+          }
+        }}
+      >
+        <DialogTitle sx={{ p: 0, mb: 2, fontWeight: 950, fontFamily: "'Cabinet Grotesk'", fontSize: '1.4rem', color: 'text.primary' }}>
+          {selectedExam?.name} Question Paper Archives
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, mb: 3 }}>
+          <Typography sx={{ color: 'text.secondary', fontSize: '0.9rem', mb: 3 }}>
+            Choose how you would like to prepare with this previous year paper:
+          </Typography>
+          
+          <Stack spacing={3}>
+            {/* Option 1: Start Mock Test */}
+            <Paper
+              variant="outlined"
+              onClick={() => {
+                setOptionsDialogOpen(false);
+                if (selectedExam) {
+                  setExamId(selectedExam.id.toString());
+                  router.push(`/quiz?exam_id=${selectedExam.id}`);
+                }
+              }}
+              sx={{
+                p: 2.5,
+                borderRadius: '16px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                transition: 'all 0.2s',
+                border: '1px solid',
+                borderColor: 'divider',
+                bgcolor: 'action.hover',
+                '&:hover': {
+                  borderColor: '#2E8B57',
+                  bgcolor: 'rgba(46, 139, 87, 0.04)',
+                }
+              }}
+            >
+              <Box>
+                <Typography sx={{ fontWeight: 800, color: 'text.primary', fontSize: '1rem', mb: 0.5 }}>
+                  Attempt as Online Mock Test 🎯
+                </Typography>
+                <Typography sx={{ fontSize: '0.775rem', color: 'text.secondary' }}>
+                  Solve with a live countdown timer, scoring, and instant AI explanation support.
+                </Typography>
+              </Box>
+              <ArrowForwardIcon sx={{ color: '#2E8B57' }} />
+            </Paper>
+
+            {/* Option 2: Download PDF (PYQs) */}
+            <Box>
+              <Typography sx={{ fontWeight: 800, color: 'text.primary', fontSize: '0.9rem', mb: 1.5, mt: 1 }}>
+                Download Official PDF Question Papers:
+              </Typography>
+              {pyqLoading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+                  <CircularProgress size={24} sx={{ color: '#2E8B57' }} />
+                </Box>
+              ) : pyqList.length > 0 ? (
+                <Stack spacing={1.5}>
+                  {pyqList.map((pyq) => (
+                    <Paper
+                      key={pyq.id}
+                      variant="outlined"
+                      sx={{
+                        p: 2,
+                        borderRadius: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        borderColor: 'divider',
+                        bgcolor: 'background.default',
+                      }}
+                    >
+                      <Box>
+                        <Typography sx={{ fontWeight: 700, color: 'text.primary', fontSize: '0.85rem' }}>
+                          {pyq.title || `${selectedExam?.name} - PYQ`}
+                        </Typography>
+                        <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary' }}>
+                          Year: {pyq.year || selectedExam?.year}
+                        </Typography>
+                      </Box>
+                      {pyq.pdf_file_url ? (
+                        <Button
+                          variant="contained"
+                          size="small"
+                          href={pyq.pdf_file_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          sx={{
+                            borderRadius: '8px',
+                            textTransform: 'none',
+                            fontWeight: 700,
+                            fontSize: '0.75rem',
+                            background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
+                            '&:hover': {
+                              background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
+                              filter: 'brightness(1.1)',
+                            }
+                          }}
+                        >
+                          Download PDF
+                        </Button>
+                      ) : (
+                        <Typography sx={{ fontSize: '0.75rem', color: 'text.disabled', fontStyle: 'italic' }}>
+                          PDF Pending Upload
+                        </Typography>
+                      )}
+                    </Paper>
+                  ))}
+                </Stack>
+              ) : (
+                <Typography sx={{ fontSize: '0.8rem', color: 'text.disabled', fontStyle: 'italic', pl: 1 }}>
+                  No official PDF downloads uploaded for this category yet.
+                </Typography>
+              )}
+            </Box>
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ p: 0 }}>
+          <Button
+            variant="outlined"
+            onClick={() => setOptionsDialogOpen(false)}
+            sx={{ borderRadius: '10px', textTransform: 'none', px: 3, fontWeight: 700 }}
+          >
+            Close
           </Button>
         </DialogActions>
       </Dialog>

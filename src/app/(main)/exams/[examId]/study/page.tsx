@@ -12,12 +12,13 @@ import LightbulbIcon from '@mui/icons-material/Lightbulb';
 export default function StudyModePage() {
     const params = useParams();
     const examId = params.examId;
-    const { fetcher } = useAppContext();
+    const { fetcher, profile } = useAppContext();
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [showAnswer, setShowAnswer] = useState(false);
 
-    const { data: questions, error, isLoading } = useSWR(`/questions/?exam_id=${examId}`, fetcher);
+    const lang = profile?.preferred_language || 'en';
+    const { data: questions, error, isLoading } = useSWR(`/questions/?exam_id=${examId}&language=${lang}`, fetcher);
 
     if (isLoading) return <CircularProgress />;
     if (error || !questions || questions.length === 0) return <Alert severity="error">No questions found for this exam.</Alert>;

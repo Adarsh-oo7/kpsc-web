@@ -45,6 +45,7 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [preferredLanguage, setPreferredLanguage] = useState<'en' | 'ml'>('en');
 
   // Protect the route
   useEffect(() => {
@@ -98,6 +99,7 @@ export default function OnboardingPage() {
       // Save exam preferences to user profile
       await apiClient.patch('/auth/profile/', {
         preferred_exams_ids: selectedExamIds,
+        preferred_language: preferredLanguage,
       });
 
       // Retrieve tokens from localStorage to re-trigger login contexts
@@ -108,7 +110,7 @@ export default function OnboardingPage() {
       }
 
       // Redirect to dashboard/home page
-      router.push('/');
+      router.push('/home');
     } catch (err: any) {
       console.error("Failed to save onboarding preferences:", err);
       setError("An error occurred while saving your preferences. Please try again.");
@@ -323,6 +325,59 @@ export default function OnboardingPage() {
               </Box>
             ))}
           </Stack>
+
+          {/* Language Selection */}
+          <Box sx={{ mt: 5, mb: 2 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontFamily: "'Cabinet Grotesk', sans-serif",
+                fontWeight: 800,
+                mb: 2,
+                color: '#2E8B57',
+                letterSpacing: '0.02em',
+              }}
+            >
+              Preferred Exam Language (പരീക്ഷ ഭാഷ)
+            </Typography>
+            <Grid container spacing={3}>
+              {[
+                { key: 'ml', name: 'Malayalam (മലയാളം)', desc: 'Recommended if you are preparing for KPSC exams in Malayalam medium.' },
+                { key: 'en', name: 'English (ഇംഗ്ലീഷ്)', desc: 'Select if you prefer English medium questions and explanations.' }
+              ].map((lang) => {
+                const isSelected = preferredLanguage === lang.key;
+                return (
+                  <Grid item xs={12} sm={6} key={lang.key}>
+                    <Card
+                      onClick={() => setPreferredLanguage(lang.key as 'en' | 'ml')}
+                      sx={{
+                        cursor: 'pointer',
+                        borderRadius: '20px',
+                        border: '2px solid',
+                        borderColor: isSelected ? '#2E8B57' : 'divider',
+                        bgcolor: isSelected
+                          ? 'rgba(46, 139, 87, 0.08)'
+                          : 'background.paper',
+                        transition: 'all 0.3s ease',
+                        boxShadow: isSelected ? '0 8px 24px rgba(46, 139, 87, 0.12)' : 'none',
+                        '&:hover': {
+                          borderColor: isSelected ? '#2E8B57' : 'text.disabled',
+                        }
+                      }}
+                    >
+                      <CardContent sx={{ p: 3 }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                          <Typography sx={{ fontWeight: 700, color: 'text.primary' }}>{lang.name}</Typography>
+                          {isSelected && <CheckCircleIcon sx={{ color: '#2E8B57', fontSize: 24 }} />}
+                        </Box>
+                        <Typography sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>{lang.desc}</Typography>
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                );
+              })}
+            </Grid>
+          </Box>
 
           {/* Footer Controls */}
           <Box

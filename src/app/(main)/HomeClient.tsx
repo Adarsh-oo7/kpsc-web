@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import NextLink from 'next/link';
 import { Box, Typography, Button, Container, Grid, Chip, Stack, Avatar, CircularProgress, TextField, Link, IconButton } from '@mui/material';
 import { motion } from 'framer-motion';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -1149,6 +1150,20 @@ export default function HomeClient() {
                 </IconButton>
               </Stack>
               
+              <Typography
+                component={NextLink}
+                href="/directory"
+                sx={{
+                  fontSize: '0.775rem',
+                  color: 'text.disabled',
+                  textDecoration: 'none',
+                  cursor: 'pointer',
+                  '&:hover': { color: 'text.secondary' },
+                  fontWeight: 600
+                }}
+              >
+                Exams & Locations Directory
+              </Typography>
               {['Privacy', 'Terms', 'Contact'].map(item => (
                 <Typography key={item} sx={{ fontSize: '0.775rem', color: 'text.disabled', cursor: 'pointer', '&:hover': { color: 'text.secondary' }, fontWeight: 600 }}>
                   {item}

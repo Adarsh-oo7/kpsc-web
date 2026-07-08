@@ -92,7 +92,7 @@ export default function RegisterClient() {
       } else if (!has_preferred_exams || !profileData?.preferred_exams || profileData.preferred_exams.length === 0) {
         router.push('/onboarding');
       } else {
-        router.push('/');
+        router.push('/home');
       }
     } catch (err: any) {
       console.error(err);

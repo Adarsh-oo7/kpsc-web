@@ -68,6 +68,25 @@ const getSubjectWeightages = (examName: string) => {
   }
 };
 
+const LOCATION_DISTRICTS: Record<string, string> = {
+  attingal: 'Thiruvananthapuram',
+  thiruvananthapuram: 'Thiruvananthapuram',
+  varkala: 'Thiruvananthapuram',
+  kilimanoor: 'Thiruvananthapuram',
+  chirayinkeezhu: 'Thiruvananthapuram',
+  kazhakkoottam: 'Thiruvananthapuram',
+  nedumangad: 'Thiruvananthapuram',
+  neyyattinkara: 'Thiruvananthapuram',
+  kollam: 'Kollam',
+  pathanamthitta: 'Pathanamthitta',
+  ernakulam: 'Ernakulam',
+  thrissur: 'Thrissur',
+  kozhikode: 'Kozhikode',
+  malappuram: 'Malappuram',
+  palakkad: 'Palakkad',
+  kerala: 'Kerala',
+};
+
 export default function ProgrammaticSeoClient({
   type,
   location,
@@ -77,6 +96,9 @@ export default function ProgrammaticSeoClient({
 }: ProgrammaticSeoClientProps) {
   const router = useRouter();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const districtName = LOCATION_DISTRICTS[locationKey] || 'Kerala';
+  const districtLabel = districtName === 'Kerala' ? 'Kerala State' : `${districtName} District`;
 
   // Determine Title, Subtitle and SEO Headlines based on page type
   let pageTitle = '';
@@ -97,25 +119,25 @@ export default function ProgrammaticSeoClient({
     pageTitle = `${exam.formalName} Online Coaching & Preparation in ${location}`;
     pageSubtitle = `Accelerate your ${exam.name} preparation in ${location} with Kerala's top AI-powered study platform. Timed mock tests, subject weightages, and 24/7 smart revision.`;
     badges = [malayalamPhrases[0], malayalamPhrases[1], `🎯 Target ${exam.name} Exam`];
-    descriptionText = `Aspirants in ${location} (Thiruvananthapuram District) preparing for the ${exam.formalName} can now access official syllabus guides, subject-wise mock tests, and smart revision notes on KPSC Master. Solve over 12 Lakh+ daily questions and benchmark your performance against other aspirants in ${location} and across Kerala.`;
+    descriptionText = `Aspirants in ${location} (${districtLabel}) preparing for the ${exam.formalName} can now access official syllabus guides, subject-wise mock tests, and smart revision notes on KPSC Master. Solve over 12 Lakh+ daily questions, learn from state SCERT textbook solutions, and benchmark your performance against other aspirants in ${location} and across Kerala. Our adaptive tracking system targets your weak areas to improve mock scores.`;
     detailTitle = `${exam.name} Subject Distribution & Study Tracker`;
   } else if (type === 'mock-test-location') {
     pageTitle = `Free Kerala PSC Mock Tests & Daily Quizzes in ${location}`;
     pageSubtitle = `Practice timed Kerala PSC exams, daily quizzes, and current affairs online. Designed specifically for aspirants preparing from ${location}.`;
     badges = [malayalamPhrases[3], malayalamPhrases[4], `📊 District Rankings`];
-    descriptionText = `Looking for free Kerala PSC online tests in ${location}? Get instant access to simulated exam environments with strict timers, real negative marking, and instant AI doubt solving. Compare your daily scores on the live leaderboard with other Kerala PSC aspirants in ${location}, Thiruvananthapuram, and across Kerala.`;
+    descriptionText = `Looking for free Kerala PSC online tests in ${location}? Get instant access to simulated exam environments with strict timers, real negative marking, and instant AI doubt solving. Compare your daily scores on the live leaderboard with other Kerala PSC aspirants in ${location}, the rest of ${districtLabel}, and all of Kerala. Study with 2,800+ Malayalam medium questions and keep your daily streak alive.`;
     detailTitle = `Available Online Mock Exams & Test Series`;
   } else if (type === 'coaching-location') {
     pageTitle = `Best Kerala PSC Coaching in ${location} — Online Classes & Study App`;
     pageSubtitle = `Transform your preparation with the best digital PSC coaching platform. Access structured classes, study cards, and mock exams from the comfort of your home in ${location}.`;
     badges = [malayalamPhrases[4], 'കേരള സർക്കാർ ജോലി', `🏆 Study Streak System`];
-    descriptionText = `Traditional offline coaching classes in ${location} can be rigid and expensive. KPSC Master offers a smart, interactive digital coaching environment that adapts to your learning pace. Trusted by 47,000+ students, it is the premier platform to study for LDC, LGS, Degree Level, and other Kerala Government job exams in ${location}, Thiruvananthapuram, and Kollam.`;
+    descriptionText = `Traditional offline coaching classes in ${location} can be rigid and expensive. KPSC Master offers a smart, interactive digital coaching environment that adapts to your learning pace. Trusted by 47,000+ students, it is the premier platform to study for LDC, LGS, Degree Level, and other Kerala Government job exams in ${location} and the rest of ${districtLabel}. Get access to gamified study streaks, leaderboard rankings, and dynamic AI explanations.`;
     detailTitle = `Why Choose Online Coaching Over Offline Classes in ${location}?`;
   } else if (type === 'online-coaching-location') {
     pageTitle = `Kerala PSC Online Coaching & Classes in ${location} — KPSC Master`;
     pageSubtitle = `Achieve your dream government job with AI-powered Kerala PSC online classes. Study daily quizzes and real mock tests with full Malayalam explanation support in ${location}.`;
     badges = [malayalamPhrases[2], malayalamPhrases[1], `✨ AI Explanations`];
-    descriptionText = `Prepare smarter for Kerala PSC exams with our complete digital coaching suite in ${location}. Get subject-wise study material, daily current affairs, leaderboards, and detailed analytics. Experience the flexibility of studying anywhere in ${location} at a fraction of the cost of offline coaching centers.`;
+    descriptionText = `Prepare smarter for Kerala PSC exams with our complete digital coaching suite in ${location}. Get subject-wise study material, daily current affairs, leaderboards, and detailed analytics. Experience the flexibility of studying anywhere in ${location} (${districtLabel}) at a fraction of the cost of offline coaching centers. Ask our AI tutor for instant question breakdowns in Malayalam or English.`;
     detailTitle = `Structured Online Syllabus & Prep Strategy`;
   } else if (type === 'exam-generic' && exam) {
     pageTitle = `Kerala PSC ${exam.name} Mock Test — Free Online Practice`;
@@ -135,7 +157,7 @@ export default function ProgrammaticSeoClient({
   const faqs = [
     {
       q: `Does KPSC Master support aspirants from ${location}?`,
-      a: `Yes! KPSC Master is an in-house product of Digital Product Solutions. We serve aspirants in ${location}, Thiruvananthapuram, Kollam, and all other 14 districts of Kerala. We provide online mock tests, daily quizzes, and detailed performance tracking designed to adapt to the local syllabus expectations.`
+      a: `Yes! KPSC Master is an in-house product of Digital Product Solutions. We serve aspirants in ${location}, ${districtLabel}, and all other 14 districts of Kerala. We provide online mock tests, daily quizzes, and detailed performance tracking designed to adapt to the local syllabus expectations.`
     },
     {
       q: `Are the questions available in Malayalam and English?`,
@@ -143,7 +165,7 @@ export default function ProgrammaticSeoClient({
     },
     {
       q: `Can I see district-wise leaderboards for ${location}?`,
-      a: `Absolutely. You can track your study rankings against other aspirants specifically in ${location} and the rest of Thiruvananthapuram/Kerala. This helps you understand where you stand in district-specific recruitment counts.`
+      a: `Absolutely. You can track your study rankings against other aspirants specifically in ${location} and the rest of ${districtLabel}. This helps you understand where you stand in district-specific recruitment counts.`
     },
     {
       q: `How does KPSC Master compare to traditional offline coaching centers in ${location}?`,
@@ -526,7 +548,7 @@ export default function ProgrammaticSeoClient({
             <Link href="/kerala-psc-degree-level-online-test" style={{ textDecoration: 'none' }}>
               <Chip label="Degree Level Test" clickable sx={{ fontWeight: 700 }} />
             </Link>
-            <Link href="/kerala-psc-current-affairs" style={{ textDecoration: 'none' }}>
+            <Link href="/current-affairs" style={{ textDecoration: 'none' }}>
               <Chip label="Current Affairs" clickable sx={{ fontWeight: 700 }} />
             </Link>
             <Link href="/kerala-psc-daily-quiz" style={{ textDecoration: 'none' }}>
