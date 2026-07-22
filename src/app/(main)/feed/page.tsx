@@ -477,12 +477,20 @@ export default function StudyFeedPage() {
                 )}
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
-                {currentCard?.content_data?.question_id && (
-                  <ReportQuestionButton
-                    questionId={currentCard.content_data.question_id}
-                    questionText={currentCard.content_data.question_text || currentCard.title}
-                  />
-                )}
+                {(() => {
+                  const qId = Number(
+                    currentCard?.content_data?.question_id ||
+                    currentCard?.content_data?.id ||
+                    (typeof currentCard?.id === 'string' ? currentCard.id.replace(/\D/g, '') : currentCard?.id)
+                  );
+                  if (!qId) return null;
+                  return (
+                    <ReportQuestionButton
+                      questionId={qId}
+                      questionText={currentCard?.content_data?.question_text || currentCard?.title}
+                    />
+                  );
+                })()}
                 <IconButton size="small" onClick={handleBookmark} sx={{ color: bookmarked ? '#F59E0B' : '#4A5568', ml: 0.5, flexShrink: 0 }}>
                   {bookmarked ? <BookmarkIcon fontSize="small" /> : <BookmarkBorderIcon fontSize="small" />}
                 </IconButton>
