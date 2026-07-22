@@ -17,6 +17,7 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import ReportQuestionButton from '@/components/ReportQuestionButton';
 
 // ───────────────────────────────────────────────
 // Types
@@ -190,9 +191,12 @@ function ResultsScreen({ resultData, answers, onRetry, originalQuestions }: { re
           return (
             <motion.div key={q.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}>
               <Box sx={{ p: 3, borderRadius: '16px', background: 'background.paper', border: `1px solid ${correct ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.15)'}` }}>
-                <Typography sx={{ fontWeight: 600, color: 'text.primary', mb: 2, fontSize: '0.9rem', lineHeight: 1.5 }}>
-                  {idx + 1}. {q.text}
-                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                  <Typography sx={{ fontWeight: 600, color: 'text.primary', fontSize: '0.9rem', lineHeight: 1.5, flex: 1, pr: 1 }}>
+                    {idx + 1}. {q.text}
+                  </Typography>
+                  <ReportQuestionButton questionId={q.id} questionText={q.text} />
+                </Box>
                 <Stack spacing={0.75}>
                   {Object.entries(q.options).map(([key, val]) => {
                     const isCorrectOpt = key === q.correct_answer;
@@ -587,16 +591,20 @@ function QuizContent() {
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
         >
           <Box sx={{ borderRadius: '20px', background: 'background.paper', border: '1px solid', borderColor: 'divider', p: 3, mb: 3 }}>
-            {/* Tags */}
-            <Box sx={{ display: 'flex', gap: 1, mb: 2.5, flexWrap: 'wrap' }}>
-              {q.topic?.name && (
-                <Chip label={q.topic.name} size="small"
-                  sx={{ background: 'rgba(27,107,58,0.15)', border: '1px solid rgba(46,139,87,0.2)', color: '#2E8B57', fontWeight: 600, fontSize: '0.7rem' }}
-                />
-              )}
-              {q.difficulty && (
-                <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: difficultyColor[q.difficulty] || '#F59E0B', alignSelf: 'center' }} />
-              )}
+            {/* Tags + Report button */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2.5, flexWrap: 'wrap', gap: 1 }}>
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+                {q.topic?.name && (
+                  <Chip label={q.topic.name} size="small"
+                    sx={{ background: 'rgba(27,107,58,0.15)', border: '1px solid rgba(46,139,87,0.2)', color: '#2E8B57', fontWeight: 600, fontSize: '0.7rem' }}
+                  />
+                )}
+                {q.difficulty && (
+                  <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: difficultyColor[q.difficulty] || '#F59E0B', alignSelf: 'center' }} />
+                )}
+              </Box>
+              {/* Report button — visible always so user can flag before answering */}
+              <ReportQuestionButton questionId={q.id} questionText={q.text} />
             </Box>
 
             {/* Question text */}
