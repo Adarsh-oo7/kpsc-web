@@ -478,12 +478,18 @@ export default function StudyFeedPage() {
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
                 {(() => {
-                  const qId = Number(
-                    currentCard?.content_data?.question_id ||
-                    currentCard?.content_data?.id ||
-                    (typeof currentCard?.id === 'string' ? currentCard.id.replace(/\D/g, '') : currentCard?.id)
-                  );
-                  if (!qId) return null;
+                  let qId: number | null = null;
+                  if (currentCard?.content_data?.question_id) {
+                    qId = Number(currentCard.content_data.question_id);
+                  } else if (typeof currentCard?.id === 'string' && currentCard.id.startsWith('quiz-')) {
+                    const match = currentCard.id.match(/\d+/);
+                    if (match) qId = Number(match[0]);
+                  } else if (currentCard?.card_type === 'question' && currentCard?.content_data?.id) {
+                    qId = Number(currentCard.content_data.id);
+                  }
+
+                  if (!qId || isNaN(qId) || qId <= 0) return null;
+
                   return (
                     <ReportQuestionButton
                       questionId={qId}

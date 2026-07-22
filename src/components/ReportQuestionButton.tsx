@@ -48,17 +48,37 @@ export default function ReportQuestionButton({ questionId, questionText }: Props
   };
 
   const handleSubmit = async () => {
+    const validQId = Number(questionId);
+    if (!validQId || isNaN(validQId) || validQId <= 0) {
+      setSnack({ open: true, severity: 'error', msg: 'Cannot report: question ID is invalid or missing.' });
+      return;
+    }
     setSubmitting(true);
     try {
       await apiClient.post('/reports/', {
-        question: questionId,
+        question: validQId,
         report_type: reportType,
         reason: reason.trim() || REPORT_TYPES.find(r => r.value === reportType)?.label || reportType,
       });
       setSnack({ open: true, severity: 'success', msg: 'Report submitted — our team will review and fix it.' });
       handleClose();
     } catch (err: any) {
-      const msg = err?.response?.data?.detail || 'Could not submit report. Please try again.';
+      let msg = 'Could not submit report. Please try again.';
+      if (err?.response?.data) {
+        const data = err.response.data;
+        if (typeof data.detail === 'string') {
+          msg = data.detail;
+        } else if (data.question && Array.isArray(data.question)) {
+          msg = `Question error: ${data.question[0]}`;
+        } else if (data.report_type && Array.isArray(data.report_type)) {
+          msg = `Report type error: ${data.report_type[0]}`;
+        } else if (typeof data === 'object') {
+          const firstKey = Object.keys(data)[0];
+          if (firstKey && Array.isArray(data[firstKey])) {
+            msg = `${firstKey}: ${data[firstKey][0]}`;
+          }
+        }
+      }
       setSnack({ open: true, severity: 'error', msg });
     } finally {
       setSubmitting(false);
