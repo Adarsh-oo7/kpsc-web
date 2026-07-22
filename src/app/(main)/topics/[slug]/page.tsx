@@ -11,6 +11,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
+import ReportQuestionButton from '@/components/ReportQuestionButton';
 
 // Icon imports
 import HistoryEduIcon from '@mui/icons-material/HistoryEdu';
@@ -546,18 +547,21 @@ export default function TopicStudyPage() {
               transition={{ duration: 0.2 }}
             >
               <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px', p: 3, mb: 3 }}>
-                <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: 'wrap' }}>
-                  <Chip
-                    label={questions[currentIdx].difficulty?.toUpperCase() || 'MIXED'}
-                    size="small"
-                    sx={{
-                      fontSize: '0.65rem',
-                      fontWeight: 800,
-                      bgcolor: questions[currentIdx].difficulty === 'easy' ? 'rgba(34,197,94,0.1)' : questions[currentIdx].difficulty === 'hard' ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.1)',
-                      color: questions[currentIdx].difficulty === 'easy' ? '#22c55e' : questions[currentIdx].difficulty === 'hard' ? '#EF4444' : '#F59E0B',
-                      border: '1px solid transparent'
-                    }}
-                  />
+                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                  <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
+                    <Chip
+                      label={questions[currentIdx].difficulty?.toUpperCase() || 'MIXED'}
+                      size="small"
+                      sx={{
+                        fontSize: '0.65rem',
+                        fontWeight: 800,
+                        bgcolor: questions[currentIdx].difficulty === 'easy' ? 'rgba(34,197,94,0.1)' : questions[currentIdx].difficulty === 'hard' ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.1)',
+                        color: questions[currentIdx].difficulty === 'easy' ? '#22c55e' : questions[currentIdx].difficulty === 'hard' ? '#EF4444' : '#F59E0B',
+                        border: '1px solid transparent'
+                      }}
+                    />
+                  </Stack>
+                  <ReportQuestionButton questionId={questions[currentIdx].id} questionText={questions[currentIdx].text} />
                 </Stack>
 
                 <Typography sx={{ fontWeight: 700, fontSize: '1.05rem', color: '#F0F4F8', lineHeight: 1.6, mb: 3 }}>

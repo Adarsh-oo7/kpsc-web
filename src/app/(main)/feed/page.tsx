@@ -20,6 +20,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
+import ReportQuestionButton from '@/components/ReportQuestionButton';
 
 // ============================================================
 // XP Notification (flies up and disappears)
@@ -475,9 +476,17 @@ export default function StudyFeedPage() {
                   />
                 )}
               </Box>
-              <IconButton size="small" onClick={handleBookmark} sx={{ color: bookmarked ? '#F59E0B' : '#4A5568', ml: 1, flexShrink: 0 }}>
-                {bookmarked ? <BookmarkIcon fontSize="small" /> : <BookmarkBorderIcon fontSize="small" />}
-              </IconButton>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexShrink: 0 }}>
+                {currentCard?.content_data?.question_id && (
+                  <ReportQuestionButton
+                    questionId={currentCard.content_data.question_id}
+                    questionText={currentCard.content_data.question_text || currentCard.title}
+                  />
+                )}
+                <IconButton size="small" onClick={handleBookmark} sx={{ color: bookmarked ? '#F59E0B' : '#4A5568', ml: 0.5, flexShrink: 0 }}>
+                  {bookmarked ? <BookmarkIcon fontSize="small" /> : <BookmarkBorderIcon fontSize="small" />}
+                </IconButton>
+              </Box>
             </Box>
 
             <Box sx={{ px: 3, pb: 3 }}>
