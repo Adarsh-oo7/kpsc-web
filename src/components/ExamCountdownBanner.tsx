@@ -36,17 +36,43 @@ export default function ExamCountdownBanner({
   availableExams = [],
   onExamChange,
 }: ExamCountdownBannerProps) {
-  // Default exam dates mapping if not provided in DB
+  // Comprehensive Kerala PSC 2026 Upcoming Exam Lookup
   const defaultDates: Record<string, string> = {
     'Company Board LGS': '2026-07-18T00:00:00',
     'Last Grade Servant': '2026-08-01T00:00:00',
     'LGS': '2026-08-01T00:00:00',
+    'Lower Division Clerk': '2026-08-15T00:00:00',
+    'LDC': '2026-08-15T00:00:00',
     'Village Field Assistant': '2026-09-19T00:00:00',
     'VFA': '2026-09-19T00:00:00',
-    'LD Clerk': '2026-08-15T00:00:00',
-    'LDC': '2026-08-15T00:00:00',
-    'Degree Level': '2026-10-10T00:00:00',
     'KSEB Electricity Worker': '2026-09-05T00:00:00',
+    'Fire & Rescue Officer': '2026-09-26T00:00:00',
+    'Fireman': '2026-09-26T00:00:00',
+    'KSRTC Conductor': '2026-10-03T00:00:00',
+    'Degree Level': '2026-10-10T00:00:00',
+    'University LGS': '2026-10-24T00:00:00',
+    'Secretariat Assistant': '2026-11-07T00:00:00',
+    'Sub Inspector of Police': '2026-11-21T00:00:00',
+    'SI Police': '2026-11-21T00:00:00',
+    'Civil Excise Officer': '2026-12-05T00:00:00',
+  };
+
+  const defaultCategoryNumbers: Record<string, string> = {
+    'Company Board LGS': 'Cat 423/2025',
+    'Last Grade Servant': 'Cat 701/2025',
+    'LGS': 'Cat 701/2025',
+    'Lower Division Clerk': 'Cat 501/2025',
+    'LDC': 'Cat 501/2025',
+    'Village Field Assistant': 'Cat 571/2025',
+    'VFA': 'Cat 571/2025',
+    'KSEB Electricity Worker': 'Cat 612/2025',
+    'Fire & Rescue Officer': 'Cat 330/2025',
+    'KSRTC Conductor': 'Cat 410/2025',
+    'Degree Level': 'Cat 112/2026',
+    'University LGS': 'Cat 215/2025',
+    'Secretariat Assistant': 'Cat 089/2026',
+    'Sub Inspector of Police': 'Cat 045/2026',
+    'Civil Excise Officer': 'Cat 198/2025',
   };
 
   const examName = primaryExam?.name || 'Company Board LGS 2026';
@@ -56,7 +82,7 @@ export default function ExamCountdownBanner({
     defaultDates['Company Board LGS'] ||
     '2026-08-01T00:00:00';
 
-  const catNumber = primaryExam?.category_number || (examName.includes('VFA') ? 'Cat 571/2025' : 'Cat 423/2025');
+  const catNumber = primaryExam?.category_number || defaultCategoryNumbers[examName] || 'Cat 423/2025';
 
   // Countdown timer state
   const [timeLeft, setTimeLeft] = useState({
