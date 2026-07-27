@@ -24,6 +24,7 @@ import apiClient from '@/lib/apiClient';
 import MasterPlanRoadmap from '@/components/MasterPlanRoadmap';
 import ExamCountdownBanner from '@/components/ExamCountdownBanner';
 import WeakAreaInterventionCard from '@/components/WeakAreaInterventionCard';
+import OfficialSyllabusCard from '@/components/OfficialSyllabusCard';
 
 // ============================================================
 // Sub-components
@@ -286,21 +287,6 @@ export default function HomePage() {
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto' }}>
-      {/* Greeting */}
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <Box sx={{ mb: 3 }}>
-          <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-            Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 17 ? 'Afternoon' : 'Evening'} 👋
-          </Typography>
-          <Typography variant="h3" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: 'text.primary', mt: 0.5, fontSize: { xs: '1.75rem', md: '2.25rem' } }}>
-            {username}
-          </Typography>
-          <Typography sx={{ color: 'text.secondary', fontSize: '0.9rem' }}>
-            {answeredToday === 0 ? "Ready to start your study session?" : `You've studied ${answeredToday} questions today. Keep going!`}
-          </Typography>
-        </Box>
-      </motion.div>
-
       {/* Target Exam Goal & Live Countdown Banner */}
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.5 }}>
         <Box sx={{ mb: 3 }}>
@@ -310,8 +296,69 @@ export default function HomePage() {
         </Box>
       </motion.div>
 
+      {/* Official Kerala PSC Examination Syllabus Breakdown */}
+      <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }}>
+        <Box sx={{ mb: 3 }}>
+          <OfficialSyllabusCard
+            examName={profile?.primary_exam_detail?.name || profile?.preferred_exams?.[0]?.name || 'LGS / VFA 2026'}
+          />
+        </Box>
+      </motion.div>
+
+      {/* Shared Master Study Plan Roadmap */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.5 }}>
+        <Box sx={{ mb: 3 }}>
+          <MasterPlanRoadmap examId={profile?.primary_exam_detail?.id || profile?.preferred_exams?.[0]?.id} />
+        </Box>
+      </motion.div>
+
+      {/* Smart Weak Area Intervention Card */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18, duration: 0.5 }}>
+        <Box sx={{ mb: 3 }}>
+          <WeakAreaInterventionCard
+            weakTopics={dashData?.weakest_topics}
+            examName={profile?.primary_exam_detail?.name || profile?.preferred_exams?.[0]?.name || 'LGS 2026'}
+          />
+        </Box>
+      </motion.div>
+
+      {/* Quick Actions */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}>
+        <Typography sx={{ fontWeight: 700, color: 'text.secondary', fontSize: '0.7rem', letterSpacing: '0.1em', textTransform: 'uppercase', mb: 1.5 }}>
+          Quick Actions
+        </Typography>
+        <Grid container spacing={1.5} sx={{ mb: 3 }}>
+          {quickActions.map((action, i) => (
+            <Grid size={{ xs: 6, sm: 3 }} key={action.label}>
+              <motion.div whileHover={{ y: -4, scale: 1.02 }} whileTap={{ scale: 0.97 }}>
+                <Box
+                  onClick={() => router.push(action.path)}
+                  sx={{
+                    p: 2, textAlign: 'center',
+                    background: action.bg,
+                    border: `1px solid ${action.border}`,
+                    borderRadius: '14px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <Box sx={{ color: action.color, mb: 0.75, '& .MuiSvgIcon-root': { fontSize: '1.5rem' } }}>
+                    {action.icon}
+                  </Box>
+                  <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: 'text.primary' }}>
+                    {action.label}
+                  </Typography>
+                </Box>
+              </motion.div>
+            </Grid>
+          ))}
+        </Grid>
+      </motion.div>
+
+      {/* --- BOTTOM SECTION: GAMIFICATION, GOALS & MOTIVATION --- */}
+
       {/* Stat Badges */}
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }}>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22, duration: 0.5 }}>
         <Stack direction="row" spacing={1.5} sx={{ mb: 3 }}>
           <StatBadge icon={<LocalFireDepartmentIcon sx={{ fontSize: 20 }} />} value={streak} label="Day Streak" color="#FF6B2B" />
           <StatBadge icon={<BoltIcon sx={{ fontSize: 20 }} />} value={`${xp.toLocaleString()}`} label="Total XP" color="#8B5CF6" />
@@ -334,7 +381,7 @@ export default function HomePage() {
       <motion.div 
         initial={{ opacity: 0, y: 16 }} 
         animate={{ opacity: 1, y: 0 }} 
-        transition={{ delay: 0.12, duration: 0.5 }}
+        transition={{ delay: 0.24, duration: 0.5 }}
       >
         <Box sx={{
           mb: 3,
@@ -413,8 +460,8 @@ export default function HomePage() {
         </Box>
       </motion.div>
 
-      {/* Hero Swipeable Strip */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.5 }}>
+      {/* Hero Swipeable Strip (Goals, Streak Saver, Leaderboard) */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.26, duration: 0.5 }}>
         <Box sx={{ mb: 3 }}>
           <Box sx={{ position: 'relative', height: 180, mb: 1.5 }}>
             {heroCards.map((card, i) => (
@@ -454,58 +501,8 @@ export default function HomePage() {
         </Box>
       </motion.div>
 
-      {/* Quick Actions */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2, duration: 0.5 }}>
-        <Typography sx={{ fontWeight: 700, color: 'text.secondary', fontSize: '0.7rem', letterSpacing: '0.1em', textTransform: 'uppercase', mb: 1.5 }}>
-          Quick Actions
-        </Typography>
-        <Grid container spacing={1.5} sx={{ mb: 3 }}>
-          {quickActions.map((action, i) => (
-            <Grid size={{ xs: 6, sm: 3 }} key={action.label}>
-              <motion.div whileHover={{ y: -4, scale: 1.02 }} whileTap={{ scale: 0.97 }}>
-                <Box
-                  onClick={() => router.push(action.path)}
-                  sx={{
-                    p: 2, textAlign: 'center',
-                    background: action.bg,
-                    border: `1px solid ${action.border}`,
-                    borderRadius: '14px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                  }}
-                >
-                  <Box sx={{ color: action.color, mb: 0.75, '& .MuiSvgIcon-root': { fontSize: '1.5rem' } }}>
-                    {action.icon}
-                  </Box>
-                  <Typography sx={{ fontSize: '0.8rem', fontWeight: 600, color: 'text.primary' }}>
-                    {action.label}
-                  </Typography>
-                </Box>
-              </motion.div>
-            </Grid>
-          ))}
-        </Grid>
-      </motion.div>
-
-      {/* Smart Weak Area Intervention Card (Zero AI Cost) */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.21, duration: 0.5 }}>
-        <Box sx={{ mb: 3 }}>
-          <WeakAreaInterventionCard
-            weakTopics={dashData?.weakest_topics}
-            examName={profile?.primary_exam_detail?.name || profile?.preferred_exams?.[0]?.name || 'LGS 2026'}
-          />
-        </Box>
-      </motion.div>
-
-      {/* Shared Master Study Plan Roadmap */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22, duration: 0.5 }}>
-        <Box sx={{ mb: 3 }}>
-          <MasterPlanRoadmap examId={profile?.primary_exam_detail?.id || profile?.preferred_exams?.[0]?.id} />
-        </Box>
-      </motion.div>
-
       {/* Study Feed CTA */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.5 }}>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28, duration: 0.5 }}>
         <Box
           onClick={() => router.push('/feed')}
           sx={{
