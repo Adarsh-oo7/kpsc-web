@@ -38,12 +38,18 @@ export function sanitizeQuestion<T extends QuestionData>(q: T): T {
       C: cleanOpt(optC),
       D: cleanOpt(optD),
     };
-  } else if (options && typeof options === 'object') {
     // 2. Clean leading option prefixes like [a], [b], [c], [d] or A), B)
+    const hasMalayalamText = /[\u0D00-\u0D7F]/.test(text);
     const cleanedOpts: Record<string, string> = {};
     for (const [k, v] of Object.entries(options)) {
       if (typeof v === 'string') {
-        cleanedOpts[k] = v.replace(/^(?:\[|\(|\b)[a-d][.\)\]]\s*/i, '').trim();
+        let cleanVal = v.replace(/^(?:\[|\(|\b)[a-d][.\)\]]\s*/i, '').trim();
+        // If question text is purely English, clean mismatched Malayalam option corruption
+        if (!hasMalayalamText && /[\u0D00-\u0D7F]/.test(cleanVal)) {
+          cleanVal = cleanVal.replace(/[\u0D00-\u0D7F]+/g, '').trim();
+          if (!cleanVal) cleanVal = `Option ${k}`;
+        }
+        cleanedOpts[k] = cleanVal;
       } else {
         cleanedOpts[k] = v;
       }
