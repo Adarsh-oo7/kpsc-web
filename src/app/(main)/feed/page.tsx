@@ -618,6 +618,7 @@ export default function StudyFeedPage() {
               )}
 
               {/* Action Buttons */}
+              <Box sx={{ mt: 3 }}>
                 {currentCard?.card_type === 'question' ? (
                   !isAnswered ? (
                     <Stack direction="row" spacing={1.5}>
