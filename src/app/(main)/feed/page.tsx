@@ -618,18 +618,38 @@ export default function StudyFeedPage() {
               )}
 
               {/* Action Buttons */}
-              <Box sx={{ mt: 3 }}>
                 {currentCard?.card_type === 'question' ? (
                   !isAnswered ? (
-                    <Button
-                      variant="contained"
-                      fullWidth
-                      disabled={!selectedOption || isSubmitting}
-                      onClick={handleSubmitAnswer}
-                      sx={{ py: 1.5, fontSize: '0.95rem' }}
-                    >
-                      {isSubmitting ? <CircularProgress size={20} color="inherit" /> : 'Submit Answer'}
-                    </Button>
+                    <Stack direction="row" spacing={1.5}>
+                      <Button
+                        variant="contained"
+                        disabled={!selectedOption || isSubmitting}
+                        onClick={handleSubmitAnswer}
+                        sx={{ py: 1.5, fontSize: '0.95rem', flex: 2 }}
+                      >
+                        {isSubmitting ? <CircularProgress size={20} color="inherit" /> : 'Submit Answer'}
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        onClick={() => {
+                          setIsAnswered(true);
+                          setIsCorrect(false);
+                        }}
+                        sx={{
+                          py: 1.5,
+                          fontSize: '0.85rem',
+                          fontWeight: 800,
+                          color: '#F59E0B',
+                          borderColor: '#F59E0B',
+                          borderRadius: '12px',
+                          textTransform: 'none',
+                          flex: 1.2,
+                          '&:hover': { borderColor: '#D97706', bgcolor: 'rgba(245,158,11,0.08)' }
+                        }}
+                      >
+                        🤔 Don't Know (അറിയില്ല)
+                      </Button>
+                    </Stack>
                   ) : (
                     <Stack direction="row" spacing={1}>
                       <Button
@@ -683,6 +703,7 @@ export default function StudyFeedPage() {
         open={aiOpen}
         onClose={() => setAiOpen(false)}
         onOpen={() => setAiOpen(true)}
+        ModalProps={{ disableRestoreFocus: true }}
         sx={{
           '& .MuiDrawer-paper': {
             borderTopLeftRadius: 24, borderTopRightRadius: 24,
