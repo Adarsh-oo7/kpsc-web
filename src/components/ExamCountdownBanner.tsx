@@ -58,21 +58,21 @@ export default function ExamCountdownBanner({
   };
 
   const defaultCategoryNumbers: Record<string, string> = {
-    'Company Board LGS': 'Cat 423/2025',
-    'Last Grade Servant': 'Cat 701/2025',
-    'LGS': 'Cat 701/2025',
-    'Lower Division Clerk': 'Cat 501/2025',
-    'LDC': 'Cat 501/2025',
-    'Village Field Assistant': 'Cat 571/2025',
-    'VFA': 'Cat 571/2025',
-    'KSEB Electricity Worker': 'Cat 612/2025',
-    'Fire & Rescue Officer': 'Cat 330/2025',
-    'KSRTC Conductor': 'Cat 410/2025',
-    'Degree Level': 'Cat 112/2026',
-    'University LGS': 'Cat 215/2025',
-    'Secretariat Assistant': 'Cat 089/2026',
-    'Sub Inspector of Police': 'Cat 045/2026',
-    'Civil Excise Officer': 'Cat 198/2025',
+    'Company Board LGS': 'Cat. No. 423/2023',
+    'Last Grade Servant': 'Cat. No. 701/2024',
+    'LGS': 'Cat. No. 701/2024',
+    'Lower Division Clerk': 'Cat. No. 501/2023',
+    'LDC': 'Cat. No. 501/2023',
+    'Village Field Assistant': 'Cat. No. 571/2023',
+    'VFA': 'Cat. No. 571/2023',
+    'KSEB Electricity Worker': 'Cat. No. 612/2023',
+    'Fire & Rescue Officer': 'Cat. No. 330/2024',
+    'KSRTC Conductor': 'Cat. No. 410/2024',
+    'Degree Level': 'Cat. No. 112/2024',
+    'University LGS': 'Cat. No. 215/2024',
+    'Secretariat Assistant': 'Cat. No. 089/2024',
+    'Sub Inspector of Police': 'Cat. No. 045/2024',
+    'Civil Excise Officer': 'Cat. No. 198/2024',
   };
 
   const examName = primaryExam?.name || 'Company Board LGS 2026';
@@ -82,7 +82,7 @@ export default function ExamCountdownBanner({
     defaultDates['Company Board LGS'] ||
     '2026-08-01T00:00:00';
 
-  const catNumber = primaryExam?.category_number || defaultCategoryNumbers[examName] || 'Cat 423/2025';
+  const catNumber = primaryExam?.category_number || defaultCategoryNumbers[examName] || 'Cat. No. 423/2023';
 
   // Countdown timer state
   const [timeLeft, setTimeLeft] = useState({
