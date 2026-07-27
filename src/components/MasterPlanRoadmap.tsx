@@ -70,12 +70,62 @@ export default function MasterPlanRoadmap({ examId }: MasterPlanRoadmapProps) {
     fetchPlanAndProgress();
   }, [examId]);
 
+  const fallbackPlan: MasterPlan = {
+    id: 1,
+    exam_name: 'LGS / VFA 2026',
+    title: 'Kerala PSC 2026 Master Coaching Roadmap',
+    description: 'Structured 60-day study plan covering General Knowledge, Science, Math, English, and Malayalam.',
+    estimated_days: 60,
+    syllabus_structure: [
+      {
+        subject: 'General Knowledge & Renaissance',
+        weightage: 50,
+        modules: [
+          { name: 'Kerala History & Renaissance Movement', target_day: 5 },
+          { name: 'Indian Geography & River Systems', target_day: 10 },
+          { name: 'Indian Constitution & Rights', target_day: 15 },
+          { name: 'General Science & Environment', target_day: 22 },
+        ]
+      },
+      {
+        subject: 'Arithmetic & Mental Ability',
+        weightage: 20,
+        modules: [
+          { name: 'Numbers & Percentages', target_day: 28 },
+          { name: 'Profit & Loss, Simple Interest', target_day: 34 },
+          { name: 'Time & Distance, Series', target_day: 40 },
+        ]
+      },
+      {
+        subject: 'English & Malayalam',
+        weightage: 30,
+        modules: [
+          { name: 'English Grammar & Vocabulary', target_day: 50 },
+          { name: 'Malayalam Grammar & Idioms', target_day: 60 },
+        ]
+      }
+    ],
+    weekly_milestones: [
+      { week: 1, goal: 'Master Kerala History & Renaissance Leaders' },
+      { week: 2, goal: 'Indian Constitution & General Science' },
+      { week: 3, goal: 'Arithmetic Core Concepts & Mental Ability' },
+      { week: 4, goal: 'Full Length Mock Tests & PYQ Revision' },
+    ],
+    mock_test_schedule: [15, 30, 45, 60],
+    revision_schedule: [7, 14, 28, 56],
+    pyq_schedule: [10, 20, 40]
+  };
+
   const fetchPlanAndProgress = async () => {
     setLoading(true);
     try {
       const url = examId ? `/master-study-plan/${examId}/` : '/master-study-plan/';
       const res = await apiClient.get(url);
-      setPlan(res.data);
+      if (res.data && (res.data.syllabus_structure?.length || res.data.title)) {
+        setPlan(res.data);
+      } else {
+        setPlan(fallbackPlan);
+      }
 
       // Fetch user's progress against this exam roadmap
       try {
@@ -87,7 +137,8 @@ export default function MasterPlanRoadmap({ examId }: MasterPlanRoadmapProps) {
         console.warn("User exam progress fetch failed or unauthenticated:", err);
       }
     } catch (err) {
-      console.error("Failed to load master study plan:", err);
+      console.warn("Using fallback master study plan:", err);
+      setPlan(fallbackPlan);
     } finally {
       setLoading(false);
     }

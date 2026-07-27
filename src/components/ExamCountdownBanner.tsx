@@ -94,6 +94,9 @@ export default function ExamCountdownBanner({
   const targetDateStr = getUpcomingTargetDate(primaryExam?.expected_exam_date, examName);
   const catNumber = primaryExam?.category_number || defaultCategoryNumbers[examName] || 'Cat. No. 423/2023';
 
+  // Mounted state to avoid React Hydration mismatch #418 on SSR
+  const [mounted, setMounted] = useState(false);
+
   // Countdown timer state
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -103,6 +106,7 @@ export default function ExamCountdownBanner({
   });
 
   useEffect(() => {
+    setMounted(true);
     const calculateTimeLeft = () => {
       const difference = +new Date(targetDateStr) - +new Date();
       if (difference > 0) {
@@ -167,7 +171,7 @@ export default function ExamCountdownBanner({
             </Typography>
 
             <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.9rem' }}>
-              Scheduled expected exam date: <strong>{new Date(targetDateStr).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</strong>
+              Scheduled expected exam date: <strong>{mounted ? new Date(targetDateStr).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Upcoming 2026 Session'}</strong>
             </Typography>
           </Stack>
         </Grid>
