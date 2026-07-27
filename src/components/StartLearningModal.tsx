@@ -28,6 +28,7 @@ import HistoryEduIcon from '@mui/icons-material/HistoryEdu';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useRouter } from 'next/navigation';
 
 interface StartLearningModalProps {
@@ -38,7 +39,19 @@ interface StartLearningModalProps {
 
 export default function StartLearningModal({ open, onClose, examName = 'LGS 2026' }: StartLearningModalProps) {
   const router = useRouter();
-  const [selectedPathway, setSelectedPathway] = useState<'syllabus' | 'model' | 'mock' | 'pyq' | null>(null);
+  const [selectedPathway, setSelectedPathway] = useState<'syllabus' | 'model' | 'mock' | 'pyq'>('syllabus');
+
+  const getExamSlug = (name: string) => {
+    const lower = (name || '').toLowerCase();
+    if (lower.includes('vfa') || lower.includes('village field assistant')) return 'village-field-assistant';
+    if (lower.includes('company board')) return 'company-board-lgs';
+    if (lower.includes('fire')) return 'fire-and-rescue';
+    if (lower.includes('kseb')) return 'kseb-electricity-worker';
+    if (lower.includes('ksrtc')) return 'ksrtc-conductor';
+    return 'ldc-lgs-august-2026';
+  };
+
+  const examSlug = getExamSlug(examName);
 
   const syllabusSubjects = [
     {
@@ -46,11 +59,11 @@ export default function StartLearningModal({ open, onClose, examName = 'LGS 2026
       marks: 50,
       color: '#10B981',
       topics: [
-        { title: 'Kerala History & Renaissance Leaders', query: 'kerala-history' },
-        { title: 'Indian Geography & Rivers', query: 'geography' },
-        { title: 'Indian Constitution & Fundamental Rights', query: 'constitution' },
-        { title: 'SCERT Basic Science (Physics, Chem, Bio)', query: 'science' },
-        { title: 'Current Affairs 2026', query: 'current-affairs' },
+        { title: 'Kerala History, Freedom Struggle & Renaissance Movements', query: 'kerala-history' },
+        { title: 'Indian Geography, Rivers & Natural Resources', query: 'geography' },
+        { title: 'Indian Constitution, Preamble & Fundamental Rights', query: 'constitution' },
+        { title: 'SCERT Basic Science (Physics, Chemistry & Biology)', query: 'science' },
+        { title: 'Current Affairs 2026 & National Events', query: 'current-affairs' },
       ]
     },
     {
@@ -58,10 +71,10 @@ export default function StartLearningModal({ open, onClose, examName = 'LGS 2026
       marks: 20,
       color: '#3B82F6',
       topics: [
-        { title: 'Numbers, Fractions & Percentages', query: 'percentages' },
-        { title: 'Profit & Loss, Simple Interest', query: 'arithmetic' },
-        { title: 'Time, Distance & Work', query: 'time-work' },
-        { title: 'Mental Ability & Series Completion', query: 'reasoning' },
+        { title: 'Numbers, Basic Operations & Percentages', query: 'percentages' },
+        { title: 'Profit & Loss, Simple & Compound Interest', query: 'arithmetic' },
+        { title: 'Time & Work, Time & Distance', query: 'time-work' },
+        { title: 'Mental Ability, Coding-Decoding & Series', query: 'reasoning' },
       ]
     },
     {
@@ -69,9 +82,9 @@ export default function StartLearningModal({ open, onClose, examName = 'LGS 2026
       marks: 20,
       color: '#8B5CF6',
       topics: [
-        { title: 'Sentence Types & Tenses', query: 'english-grammar' },
-        { title: 'Prepositions & Subject-Verb Agreement', query: 'prepositions' },
-        { title: 'Vocabulary, Idioms & Phrases', query: 'vocabulary' },
+        { title: 'Sentence Types, Tenses & Agreement', query: 'english-grammar' },
+        { title: 'Prepositions, Conjunctions & Voice', query: 'prepositions' },
+        { title: 'Vocabulary, Synonyms, Antonyms & Idioms', query: 'vocabulary' },
       ]
     },
     {
@@ -79,9 +92,9 @@ export default function StartLearningModal({ open, onClose, examName = 'LGS 2026
       marks: 10,
       color: '#F59E0B',
       topics: [
-        { title: 'പദശുദ്ധി & വാക്യശുദ്ധി', query: 'malayalam-grammar' },
-        { title: 'ഒറ്റപ്പദം & ശൈലികൾ', query: 'malayalam-idioms' },
-        { title: 'പരിഭാഷ & പഴഞ്ചൊല്ലുകൾ', query: 'malayalam-translation' },
+        { title: 'പദശുദ്ധി & വാക്യശുദ്ധി (Sentence Correction)', query: 'malayalam-grammar' },
+        { title: 'ഒറ്റപ്പദം & ശൈലികൾ (One Word Substitutes)', query: 'malayalam-idioms' },
+        { title: 'പരിഭാഷ & പഴഞ്ചൊല്ലുകൾ (Translation)', query: 'malayalam-translation' },
       ]
     }
   ];
@@ -91,13 +104,22 @@ export default function StartLearningModal({ open, onClose, examName = 'LGS 2026
     router.push(`/quiz?topic=${encodeURIComponent(topicQuery)}&exam=${encodeURIComponent(examName)}`);
   };
 
-  const handleStartPathway = (pathway: 'model' | 'mock' | 'pyq') => {
+  const handleGoToDedicatedExamHub = () => {
     onClose();
-    if (pathway === 'mock') {
+    router.push(`/exams/${examSlug}`);
+  };
+
+  const handleStartPathway = (pathway: 'syllabus' | 'model' | 'mock' | 'pyq') => {
+    if (pathway === 'syllabus') {
+      setSelectedPathway('syllabus');
+    } else if (pathway === 'mock') {
+      onClose();
       router.push(`/quiz?mode=mock&exam=${encodeURIComponent(examName)}`);
     } else if (pathway === 'pyq') {
-      router.push(`/previous-papers`);
-    } else {
+      onClose();
+      router.push(`/previous-papers?exam=${encodeURIComponent(examName)}`);
+    } else if (pathway === 'model') {
+      onClose();
       router.push(`/quiz?mode=model&exam=${encodeURIComponent(examName)}`);
     }
   };
@@ -134,7 +156,7 @@ export default function StartLearningModal({ open, onClose, examName = 'LGS 2026
           </Box>
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 900, fontFamily: "'Outfit', sans-serif" }}>
-              Choose Your Learning Pathway ({examName})
+              Start Learning — {examName}
             </Typography>
             <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
               നിങ്ങളുടെ പരീക്ഷാ ലക്ഷ്യത്തിനനുസരിച്ച് പഠനം ആരംഭിക്കുക
@@ -152,7 +174,7 @@ export default function StartLearningModal({ open, onClose, examName = 'LGS 2026
           {/* Pathway 1: Syllabus Based */}
           <Grid item xs={12} sm={6}>
             <Card
-              onClick={() => setSelectedPathway(selectedPathway === 'syllabus' ? null : 'syllabus')}
+              onClick={() => handleStartPathway('syllabus')}
               sx={{
                 cursor: 'pointer',
                 borderRadius: '20px',
@@ -275,69 +297,95 @@ export default function StartLearningModal({ open, onClose, examName = 'LGS 2026
           </Grid>
         </Grid>
 
-        {/* Syllabus Serial Subject Breakdown (Accordion when Pathway 1 selected) */}
-        {selectedPathway === 'syllabus' && (
-          <Box sx={{ mt: 2, p: 2.5, borderRadius: '20px', bgcolor: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 900, mb: 1.5, color: '#10B981' }}>
-              📖 Select Syllabus Subject to Start Serial Practice (വിഷയാധിഷ്ഠിത പഠനം)
+        {/* Dedicated Exam Page Action Bar */}
+        <Box sx={{ mb: 2, p: 2, borderRadius: '16px', bgcolor: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box>
+            <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#3B82F6' }}>
+              🎯 Dedicated {examName} Exam Hub
             </Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              പരീക്ഷ കേന്ദ്രീകൃത വിശകലനം & പഠനമുറി
+            </Typography>
+          </Box>
+          <Button
+            size="small"
+            variant="contained"
+            onClick={handleGoToDedicatedExamHub}
+            endIcon={<OpenInNewIcon />}
+            sx={{
+              bgcolor: '#3B82F6',
+              color: '#ffffff',
+              fontWeight: 800,
+              borderRadius: '12px',
+              textTransform: 'none',
+              '&:hover': { bgcolor: '#2563EB' }
+            }}
+          >
+            Open Exam Hub
+          </Button>
+        </Box>
 
-            <Stack spacing={1.5}>
-              {syllabusSubjects.map((subj, idx) => (
-                <Accordion key={idx} elevation={0} defaultExpanded={idx === 0} sx={{ borderRadius: '16px !important', border: '1px solid', borderColor: 'divider' }}>
-                  <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: subj.color }} />}>
-                    <Stack direction="row" spacing={1.5} alignItems="center">
-                      <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: subj.color }} />
-                      <Typography sx={{ fontWeight: 800, fontSize: '0.9rem' }}>
-                        {subj.name} ({subj.marks} Marks)
-                      </Typography>
-                    </Stack>
-                  </AccordionSummary>
-                  <AccordionDetails sx={{ pt: 0, pb: 2 }}>
-                    <Stack spacing={1}>
-                      {subj.topics.map((t, tIdx) => (
-                        <Box
-                          key={tIdx}
+        {/* Syllabus Serial Subject Breakdown */}
+        <Box sx={{ p: 2.5, borderRadius: '20px', bgcolor: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 900, mb: 1.5, color: '#10B981' }}>
+            📖 Select Subject to Study Topic-by-Topic (വിഷയാധിഷ്ഠിത ക്രമാനുഗത പഠനം)
+          </Typography>
+
+          <Stack spacing={1.5}>
+            {syllabusSubjects.map((subj, idx) => (
+              <Accordion key={idx} elevation={0} defaultExpanded={idx === 0} sx={{ borderRadius: '16px !important', border: '1px solid', borderColor: 'divider' }}>
+                <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: subj.color }} />}>
+                  <Stack direction="row" spacing={1.5} alignItems="center">
+                    <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: subj.color }} />
+                    <Typography sx={{ fontWeight: 800, fontSize: '0.9rem' }}>
+                      {subj.name} ({subj.marks} Marks)
+                    </Typography>
+                  </Stack>
+                </AccordionSummary>
+                <AccordionDetails sx={{ pt: 0, pb: 2 }}>
+                  <Stack spacing={1}>
+                    {subj.topics.map((t, tIdx) => (
+                      <Box
+                        key={tIdx}
+                        sx={{
+                          p: 1.5,
+                          borderRadius: '12px',
+                          bgcolor: 'background.paper',
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center'
+                        }}
+                      >
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                          {t.title}
+                        </Typography>
+                        <Button
+                          size="small"
+                          variant="contained"
+                          onClick={() => handleStartTopicPractice(t.query)}
+                          startIcon={<PlayArrowIcon />}
                           sx={{
-                            p: 1.5,
-                            borderRadius: '12px',
-                            bgcolor: 'background.paper',
-                            border: '1px solid',
-                            borderColor: 'divider',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center'
+                            bgcolor: subj.color,
+                            color: '#ffffff',
+                            fontWeight: 800,
+                            fontSize: '0.75rem',
+                            textTransform: 'none',
+                            borderRadius: '10px',
+                            '&:hover': { bgcolor: subj.color, filter: 'brightness(0.9)' }
                           }}
                         >
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                            {t.title}
-                          </Typography>
-                          <Button
-                            size="small"
-                            variant="contained"
-                            onClick={() => handleStartTopicPractice(t.query)}
-                            startIcon={<PlayArrowIcon />}
-                            sx={{
-                              bgcolor: subj.color,
-                              color: '#ffffff',
-                              fontWeight: 800,
-                              fontSize: '0.75rem',
-                              textTransform: 'none',
-                              borderRadius: '10px',
-                              '&:hover': { bgcolor: subj.color, filter: 'brightness(0.9)' }
-                            }}
-                          >
-                            പഠനം ആരംഭിക്കുക
-                          </Button>
-                        </Box>
-                      ))}
-                    </Stack>
-                  </AccordionDetails>
-                </Accordion>
-              ))}
-            </Stack>
-          </Box>
-        )}
+                          പഠനം ആരംഭിക്കുക
+                        </Button>
+                      </Box>
+                    ))}
+                  </Stack>
+                </AccordionDetails>
+              </Accordion>
+            ))}
+          </Stack>
+        </Box>
       </DialogContent>
     </Dialog>
   );
