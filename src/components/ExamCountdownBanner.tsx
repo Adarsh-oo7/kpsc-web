@@ -17,8 +17,12 @@ import {
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import SwapHorizIcon from '@mui/icons-material/SwapHoriz';
 import apiClient from '@/lib/apiClient';
+import StartLearningModal from '@/components/StartLearningModal';
+import { useRouter } from 'next/navigation';
 
 interface ExamCountdownBannerProps {
   primaryExam?: {
@@ -96,6 +100,7 @@ export default function ExamCountdownBanner({
 
   // Mounted state to avoid React Hydration mismatch #418 on SSR
   const [mounted, setMounted] = useState(false);
+  const [learningModalOpen, setLearningModalOpen] = useState(false);
 
   // Countdown timer state
   const [timeLeft, setTimeLeft] = useState({
@@ -126,55 +131,100 @@ export default function ExamCountdownBanner({
     return () => clearInterval(timer);
   }, [targetDateStr]);
 
+  const router = useRouter();
+
   return (
-    <Paper
-      sx={{
-        p: { xs: 3, md: 4 },
-        borderRadius: 5,
-        background: (theme) =>
-          theme.palette.mode === 'dark'
-            ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(15, 23, 42, 0.95) 100%)'
-            : 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, #ffffff 100%)',
-        border: '1px solid',
-        borderColor: 'divider',
-        boxShadow: '0 12px 32px rgba(0,0,0,0.06)',
-        position: 'relative',
-        overflow: 'hidden'
-      }}
-    >
-      <Grid container spacing={3} alignItems="center">
-        <Grid item xs={12} md={7}>
-          <Stack spacing={1.5}>
-            <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" gap={0.5}>
-              <Chip
-                label="🎯 Primary Target Exam"
-                icon={<LocalFireDepartmentIcon sx={{ fontSize: '0.85rem !important', color: '#10B981 !important' }} />}
-                sx={{ bgcolor: 'rgba(16, 185, 129, 0.12)', color: '#10B981', fontWeight: 800, fontSize: '0.75rem' }}
-              />
-              <Chip
-                label={catNumber}
-                icon={<AssignmentIcon sx={{ fontSize: '0.85rem !important', color: '#3B82F6 !important' }} />}
-                sx={{ bgcolor: 'rgba(59, 130, 246, 0.12)', color: '#3B82F6', fontWeight: 800, fontSize: '0.75rem' }}
-              />
+    <>
+      <Paper
+        sx={{
+          p: { xs: 3, md: 4 },
+          borderRadius: 5,
+          background: (theme) =>
+            theme.palette.mode === 'dark'
+              ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(15, 23, 42, 0.95) 100%)'
+              : 'linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, #ffffff 100%)',
+          border: '1px solid',
+          borderColor: 'divider',
+          boxShadow: '0 12px 32px rgba(0,0,0,0.06)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}
+      >
+        <Grid container spacing={3} alignItems="center">
+          <Grid item xs={12} md={7}>
+            <Stack spacing={1.5}>
+              <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" gap={0.5}>
+                <Chip
+                  label="🎯 Primary Target Exam"
+                  icon={<LocalFireDepartmentIcon sx={{ fontSize: '0.85rem !important', color: '#10B981 !important' }} />}
+                  sx={{ bgcolor: 'rgba(16, 185, 129, 0.12)', color: '#10B981', fontWeight: 800, fontSize: '0.75rem' }}
+                />
+                <Chip
+                  label={catNumber}
+                  icon={<AssignmentIcon sx={{ fontSize: '0.85rem !important', color: '#3B82F6 !important' }} />}
+                  sx={{ bgcolor: 'rgba(59, 130, 246, 0.12)', color: '#3B82F6', fontWeight: 800, fontSize: '0.75rem' }}
+                />
+              </Stack>
+
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: 900,
+                  fontFamily: "'Outfit', sans-serif",
+                  fontSize: { xs: '1.5rem', sm: '1.85rem' },
+                  lineHeight: 1.2
+                }}
+              >
+                {examName}
+              </Typography>
+
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.9rem' }}>
+                Scheduled expected exam date: <strong>{mounted ? new Date(targetDateStr).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Upcoming 2026 Session'}</strong>
+              </Typography>
+
+              {/* Primary Action Buttons */}
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ pt: 1 }}>
+                <Button
+                  variant="contained"
+                  startIcon={<RocketLaunchIcon />}
+                  onClick={() => setLearningModalOpen(true)}
+                  sx={{
+                    background: 'linear-gradient(135deg, #10B981, #059669)',
+                    color: '#ffffff',
+                    fontWeight: 900,
+                    fontSize: '0.85rem',
+                    textTransform: 'none',
+                    borderRadius: '14px',
+                    px: 3,
+                    py: 1.2,
+                    boxShadow: '0 8px 20px rgba(16, 185, 129, 0.3)',
+                    '&:hover': { background: 'linear-gradient(135deg, #059669, #047857)' }
+                  }}
+                >
+                  🚀 Start Learning (പഠനം ആരംഭിക്കുക)
+                </Button>
+
+                <Button
+                  variant="outlined"
+                  endIcon={<PlayArrowIcon />}
+                  onClick={() => router.push('/feed')}
+                  sx={{
+                    borderColor: '#10B981',
+                    color: '#10B981',
+                    fontWeight: 800,
+                    fontSize: '0.85rem',
+                    textTransform: 'none',
+                    borderRadius: '14px',
+                    px: 2.5,
+                    py: 1.2,
+                    '&:hover': { borderColor: '#059669', bgcolor: 'rgba(16, 185, 129, 0.08)' }
+                  }}
+                >
+                  ⏩ Continue Learning (തുടരുക)
+                </Button>
+              </Stack>
             </Stack>
-
-            <Typography
-              variant="h4"
-              sx={{
-                fontWeight: 900,
-                fontFamily: "'Outfit', sans-serif",
-                fontSize: { xs: '1.5rem', sm: '1.85rem' },
-                lineHeight: 1.2
-              }}
-            >
-              {examName}
-            </Typography>
-
-            <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.9rem' }}>
-              Scheduled expected exam date: <strong>{mounted ? new Date(targetDateStr).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Upcoming 2026 Session'}</strong>
-            </Typography>
-          </Stack>
-        </Grid>
+          </Grid>
 
         {/* Live Countdown Timer */}
         <Grid item xs={12} md={5}>
@@ -230,5 +280,12 @@ export default function ExamCountdownBanner({
         </Grid>
       </Grid>
     </Paper>
+
+    <StartLearningModal
+      open={learningModalOpen}
+      onClose={() => setLearningModalOpen(false)}
+      examName={examName}
+    />
+  </>
   );
 }
