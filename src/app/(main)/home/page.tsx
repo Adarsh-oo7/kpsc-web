@@ -21,6 +21,9 @@ import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
+import MasterPlanRoadmap from '@/components/MasterPlanRoadmap';
+import ExamCountdownBanner from '@/components/ExamCountdownBanner';
+import WeakAreaInterventionCard from '@/components/WeakAreaInterventionCard';
 
 // ============================================================
 // Sub-components
@@ -298,6 +301,15 @@ export default function HomePage() {
         </Box>
       </motion.div>
 
+      {/* Target Exam Goal & Live Countdown Banner */}
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.5 }}>
+        <Box sx={{ mb: 3 }}>
+          <ExamCountdownBanner
+            primaryExam={profile?.primary_exam_detail || profile?.preferred_exams?.[0]}
+          />
+        </Box>
+      </motion.div>
+
       {/* Stat Badges */}
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }}>
         <Stack direction="row" spacing={1.5} sx={{ mb: 3 }}>
@@ -473,6 +485,23 @@ export default function HomePage() {
             </Grid>
           ))}
         </Grid>
+      </motion.div>
+
+      {/* Smart Weak Area Intervention Card (Zero AI Cost) */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.21, duration: 0.5 }}>
+        <Box sx={{ mb: 3 }}>
+          <WeakAreaInterventionCard
+            weakTopics={dashData?.weakest_topics}
+            examName={profile?.primary_exam_detail?.name || profile?.preferred_exams?.[0]?.name || 'LGS 2026'}
+          />
+        </Box>
+      </motion.div>
+
+      {/* Shared Master Study Plan Roadmap */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22, duration: 0.5 }}>
+        <Box sx={{ mb: 3 }}>
+          <MasterPlanRoadmap examId={profile?.primary_exam_detail?.id || profile?.preferred_exams?.[0]?.id} />
+        </Box>
       </motion.div>
 
       {/* Study Feed CTA */}

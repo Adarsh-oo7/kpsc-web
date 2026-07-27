@@ -17,6 +17,11 @@ export const metadata: Metadata = {
   title: "VFA Mock Test 2026 Free | Village Field Assistant Kerala PSC Sept 19 | Bilingual Malayalam | KPSC Master",
   description: "Free Village Field Assistant (VFA) mock test 2026 — Kerala PSC exam September 19. VFA mock test Malayalam medium, bilingual questions, downloadable syllabus summary. Cat 571/2025. No signup.",
   keywords: [
+    'village field assistant mock test',
+    'vfa mock test',
+    'village field assistant mock test malayalam',
+    'psc vfa mock test',
+    'vfa question paper 2024',
     'VFA mock test 2026 free',
     'village field assistant mock test 2026',
     'VFA mock test Malayalam medium',

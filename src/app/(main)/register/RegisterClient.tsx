@@ -20,6 +20,7 @@ import Image from 'next/image';
 import PersonOutline from '@mui/icons-material/PersonOutline';
 import MailOutline from '@mui/icons-material/MailOutline';
 import LockOutlined from '@mui/icons-material/LockOutlined';
+import PhoneOutlined from '@mui/icons-material/PhoneOutlined';
 import { motion } from 'framer-motion';
 import apiClient from '@/lib/apiClient';
 import { useAppContext } from '@/context/AppContext';
@@ -70,6 +71,7 @@ export default function RegisterClient() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -130,6 +132,7 @@ export default function RegisterClient() {
         username: name,
         email,
         password,
+        phone_number: phoneNumber,
       });
 
       setSuccess('Registration successful! Redirecting to login...');
@@ -267,6 +270,16 @@ export default function RegisterClient() {
                 required
                 InputProps={{
                   startAdornment: <InputAdornment position="start"><MailOutline /></InputAdornment>,
+                }}
+              />
+              <StyledTextField
+                placeholder="WhatsApp / Phone Number (ഫോൺ നമ്പർ)"
+                type="tel"
+                fullWidth
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><PhoneOutlined /></InputAdornment>,
                 }}
               />
               <StyledTextField

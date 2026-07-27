@@ -43,10 +43,18 @@ export default async function sitemap({ id }: { id: number }): Promise<MetadataR
         { path: '/exams/ldc-lgs-august-2026', priority: 0.9, freq: 'daily' as const },       // ⭐⭐⭐⭐ Aug 1
       ];
 
-      // High-intent generic online test pages
+      // High-intent generic online test pages matching Google Search Console top queries
       const onlineTestPages = [
         '/kerala-psc-ldc-online-test',
         '/kerala-psc-lgs-online-test',
+        '/lgs-mock-test-2026',
+        '/company-board-lgs-mock-test',
+        '/lgs-mock-test-free',
+        '/vfa-mock-test',
+        '/village-field-assistant-mock-test-malayalam',
+        '/psc-coaching-centre-neyyattinkara',
+        '/psc-coaching-centre-nedumangad',
+        '/psc-coaching-centre-pathanamthitta',
         '/kerala-psc-degree-level-online-test',
         '/kerala-psc-village-field-assistant-online-test',
         '/kerala-psc-panchayat-secretary-online-test',

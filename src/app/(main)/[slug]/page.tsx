@@ -96,7 +96,21 @@ function parseSlug(slug: string) {
     }
   }
 
-  // Check 3: psc-coaching-[location]
+  // High-demand exact match Search Console queries
+  if (slug === 'lgs-mock-test-2026' || slug === 'lgs-mock-test-free' || slug === 'company-board-lgs-mock-test' || slug === 'company-board-lgs-mock-test-free') {
+    return { type: 'exam-generic', examKey: 'lgs', exam: EXAMS['lgs'], location: 'Kerala', locationKey: 'kerala' };
+  }
+  if (slug === 'vfa-mock-test' || slug === 'village-field-assistant-mock-test' || slug === 'village-field-assistant-mock-test-malayalam' || slug === 'psc-vfa-mock-test') {
+    return { type: 'exam-generic', examKey: 'village-field-assistant', exam: EXAMS['village-field-assistant'], location: 'Kerala', locationKey: 'kerala' };
+  }
+
+  // Check 3: psc-coaching-[location] & psc-coaching-centre-[location]
+  if (slug.startsWith('psc-coaching-centre-')) {
+    const locKey = slug.replace('psc-coaching-centre-', '');
+    if (LOCATIONS[locKey]) {
+      return { type: 'coaching-location', locationKey: locKey, location: LOCATIONS[locKey] };
+    }
+  }
   if (slug.startsWith('psc-coaching-')) {
     const locKey = slug.replace('psc-coaching-', '');
     if (LOCATIONS[locKey]) {

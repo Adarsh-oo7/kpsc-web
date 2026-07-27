@@ -14,11 +14,14 @@ import {
   Alert,
   Paper,
   Divider,
+  TextField,
+  InputAdornment
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import SchoolIcon from '@mui/icons-material/School';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import PhoneIcon from '@mui/icons-material/Phone';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
 
@@ -46,6 +49,7 @@ export default function OnboardingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [preferredLanguage, setPreferredLanguage] = useState<'en' | 'ml'>('en');
+  const [phoneNumber, setPhoneNumber] = useState('');
 
   // Protect the route
   useEffect(() => {
@@ -96,10 +100,13 @@ export default function OnboardingPage() {
     setError('');
 
     try {
-      // Save exam preferences to user profile
+      // Save exam preferences and phone number to user profile
+      const primaryExamId = selectedExamIds[0];
       await apiClient.patch('/auth/profile/', {
         preferred_exams_ids: selectedExamIds,
+        primary_exam_id: primaryExamId,
         preferred_language: preferredLanguage,
+        phone_number: phoneNumber,
       });
 
       // Retrieve tokens from localStorage to re-trigger login contexts
@@ -377,6 +384,44 @@ export default function OnboardingPage() {
                 );
               })}
             </Grid>
+          </Box>
+
+          {/* WhatsApp / Phone Number Collection */}
+          <Box sx={{ mt: 4, mb: 2 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontFamily: "'Cabinet Grotesk', sans-serif",
+                fontWeight: 800,
+                mb: 1,
+                color: '#2E8B57',
+                letterSpacing: '0.02em',
+              }}
+            >
+              WhatsApp / Contact Number (വാട്ട്‌സ്ആപ്പ് ഫോൺ നമ്പർ)
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+              Enter your WhatsApp number to receive exam alerts, daily study updates, and rank updates.
+            </Typography>
+            <TextField
+              fullWidth
+              placeholder="e.g. +91 98765 43210"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PhoneIcon sx={{ color: '#2E8B57' }} />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '16px',
+                  bgcolor: 'background.paper'
+                }
+              }}
+            />
           </Box>
 
           {/* Footer Controls */}
