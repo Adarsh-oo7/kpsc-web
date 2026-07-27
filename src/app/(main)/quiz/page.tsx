@@ -18,6 +18,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import ReportQuestionButton from '@/components/ReportQuestionButton';
+import { sanitizeQuestion } from '@/lib/questionSanitizer';
 
 // ───────────────────────────────────────────────
 // Types
@@ -280,16 +281,16 @@ function QuizContent() {
     setHasInitializedTime(false);
   }, [language]);
 
-  const examId = searchParams.get('exam_id');
-  const topicId = searchParams.get('topic_id');
-  const limitParam = searchParams.get('limit');
+  const examParam = searchParams.get('exam') || searchParams.get('exam_id');
+  const topicParam = searchParams.get('topic') || searchParams.get('topic_id') || searchParams.get('topic_name');
+  const modeParam = searchParams.get('mode');
+  const limitParam = searchParams.get('limit') || '15';
   const currentAffairsParam = searchParams.get('current_affairs');
 
   const isWeeklyCurrentAffairs = currentAffairsParam === 'weekly';
-  const isMockExam = !!examId && !limitParam;
-  const isPracticeQuiz = !!examId && !!limitParam;
-  const isTopicPractice = !!topicId;
-  const isDailyQuiz = !examId && !topicId && !isWeeklyCurrentAffairs;
+  const isMockExam = modeParam === 'mock' || (!!examParam && !limitParam && !topicParam);
+  const isTopicPractice = !!topicParam;
+  const isDailyQuiz = !examParam && !topicParam && !isWeeklyCurrentAffairs && !modeParam;
 
   const [timeLeft, setTimeLeft] = useState(15 * 60);
   const [hasInitializedTime, setHasInitializedTime] = useState(false);
@@ -299,30 +300,30 @@ function QuizContent() {
   const [aiLoading, setAiLoading] = useState(false);
 
   const apiUrl = useMemo(() => {
-    if (isMockExam) {
-      return `/generate-mock-exam/${examId}/?language=${language}`;
-    }
-    if (isPracticeQuiz) {
-      return `/questions/?exam_id=${examId}&limit=${limitParam}&language=${language}`;
-    }
-    if (isTopicPractice) {
-      return `/questions/?topic_id=${topicId}&limit=${limitParam || '15'}&language=${language}`;
-    }
     if (isWeeklyCurrentAffairs) {
       return `/questions/weekly-current-affairs/?language=${language}`;
     }
-    return `/questions/daily-quiz/?limit=10&language=${language}`;
-  }, [isMockExam, isPracticeQuiz, isTopicPractice, isWeeklyCurrentAffairs, examId, topicId, limitParam, language]);
+    let url = `/questions/?limit=${limitParam}&language=${language}`;
+    if (examParam) url += `&exam=${encodeURIComponent(examParam)}`;
+    if (topicParam) url += `&topic=${encodeURIComponent(topicParam)}`;
+    if (modeParam) url += `&mode=${encodeURIComponent(modeParam)}`;
+    return url;
+  }, [examParam, topicParam, modeParam, limitParam, language, isWeeklyCurrentAffairs]);
 
   const { data: rawQuizData, error, isLoading } = useSWR(apiUrl, fetcher, { revalidateOnFocus: false });
 
   const questions = useMemo(() => {
     if (!rawQuizData) return [];
-    if (isMockExam) {
-      return (rawQuizData.questions || []) as Question[];
+    let list: any[] = [];
+    if (Array.isArray(rawQuizData)) {
+      list = rawQuizData;
+    } else if (rawQuizData.questions && Array.isArray(rawQuizData.questions)) {
+      list = rawQuizData.questions;
+    } else if (rawQuizData.results && Array.isArray(rawQuizData.results)) {
+      list = rawQuizData.results;
     }
-    return rawQuizData as Question[];
-  }, [rawQuizData, isMockExam]);
+    return list.map(q => sanitizeQuestion(q)) as Question[];
+  }, [rawQuizData]);
 
   const examDuration = useMemo(() => {
     if (isMockExam && rawQuizData && rawQuizData.duration_minutes) {

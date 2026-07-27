@@ -24,7 +24,7 @@ export function sanitizeQuestion<T extends QuestionData>(q: T): T {
   const embeddedMatch = text.match(/^(.*?)\s*(?:\[|\(|\b)a[.\)\]]\s*(.*?)\s*(?:\[|\(|\b)b[.\)\]]\s*(.*?)\s*(?:\[|\(|\b)c[.\)\]]\s*(.*?)\s*(?:\[|\(|\b)d[.\)\]]\s*(.*)$/is);
 
   if (embeddedMatch) {
-    text = embeddedMatch[1].strip ? embeddedMatch[1].strip() : embeddedMatch[1].trim();
+    text = embeddedMatch[1].trim();
     const optA = embeddedMatch[2].trim();
     const optB = embeddedMatch[3].trim();
     const optC = embeddedMatch[4].trim();

@@ -8,6 +8,7 @@ import { useAppContext } from '@/context/AppContext';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
+import { sanitizeQuestion } from '@/lib/questionSanitizer';
 
 export default function StudyModePage() {
     const params = useParams();
@@ -18,12 +19,13 @@ export default function StudyModePage() {
     const [showAnswer, setShowAnswer] = useState(false);
 
     const lang = profile?.preferred_language || 'en';
-    const { data: questions, error, isLoading } = useSWR(`/questions/?exam_id=${examId}&language=${lang}`, fetcher);
+    const { data: questions, error, isLoading } = useSWR(`/questions/?exam=${examId}&language=${lang}`, fetcher);
 
     if (isLoading) return <CircularProgress />;
-    if (error || !questions || questions.length === 0) return <Alert severity="error">No questions found for this exam.</Alert>;
+    if (error || !questions || questions.length === 0) return <Alert severity="error">No questions found for this exam target yet.</Alert>;
 
-    const currentQuestion = questions[currentIndex];
+    const rawQuestion = questions[currentIndex];
+    const currentQuestion = sanitizeQuestion(rawQuestion);
     const goToNext = () => {
         setShowAnswer(false);
         setCurrentIndex(prev => (prev + 1) % questions.length);
