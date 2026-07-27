@@ -75,13 +75,23 @@ export default function ExamCountdownBanner({
     'Civil Excise Officer': 'Cat. No. 198/2024',
   };
 
-  const examName = primaryExam?.name || 'Company Board LGS 2026';
-  const targetDateStr =
-    primaryExam?.expected_exam_date ||
-    defaultDates[examName] ||
-    defaultDates['Company Board LGS'] ||
-    '2026-08-01T00:00:00';
+  // Helper to ensure countdown targets only UPCOMING future exam dates
+  const getUpcomingTargetDate = (rawDateStr?: string, name?: string) => {
+    const now = new Date();
+    let dateObj = rawDateStr ? new Date(rawDateStr) : null;
+    if (!dateObj || isNaN(dateObj.getTime()) || dateObj <= now) {
+      const fallbackStr = defaultDates[name || ''] || '2026-08-15T00:00:00';
+      dateObj = new Date(fallbackStr);
+      if (dateObj <= now) {
+        // If date has passed, roll forward to next upcoming exam session
+        dateObj.setFullYear(now.getFullYear() + 1);
+      }
+    }
+    return dateObj.toISOString();
+  };
 
+  const examName = primaryExam?.name || 'Company Board LGS 2026';
+  const targetDateStr = getUpcomingTargetDate(primaryExam?.expected_exam_date, examName);
   const catNumber = primaryExam?.category_number || defaultCategoryNumbers[examName] || 'Cat. No. 423/2023';
 
   // Countdown timer state
