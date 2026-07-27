@@ -301,6 +301,8 @@ export default function HomePage() {
         <Box sx={{ mb: 3 }}>
           <OfficialSyllabusCard
             examName={profile?.primary_exam_detail?.name || profile?.preferred_exams?.[0]?.name || 'LGS / VFA 2026'}
+            officialSyllabus={profile?.primary_exam_detail?.official_syllabus}
+            questionPattern={profile?.primary_exam_detail?.question_pattern}
           />
         </Box>
       </motion.div>

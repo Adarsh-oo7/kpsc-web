@@ -27,10 +27,25 @@ interface SyllabusSubject {
 
 interface OfficialSyllabusCardProps {
   examName?: string;
+  officialSyllabus?: {
+    total_marks?: number;
+    subjects?: SyllabusSubject[];
+  };
+  questionPattern?: {
+    mode?: string;
+    total_questions?: number;
+    total_marks?: number;
+    duration_minutes?: number;
+    marking_scheme?: string;
+  };
 }
 
-export default function OfficialSyllabusCard({ examName = 'LGS / VFA 2026' }: OfficialSyllabusCardProps) {
-  const syllabusData: SyllabusSubject[] = [
+export default function OfficialSyllabusCard({
+  examName = 'LGS / VFA 2026',
+  officialSyllabus,
+  questionPattern
+}: OfficialSyllabusCardProps) {
+  const fallbackSyllabusData: SyllabusSubject[] = [
     {
       title: 'General Knowledge & Kerala Renaissance',
       marks: 50,
@@ -86,6 +101,11 @@ export default function OfficialSyllabusCard({ examName = 'LGS / VFA 2026' }: Of
       ]
     }
   ];
+
+  const syllabusData = officialSyllabus?.subjects?.length ? officialSyllabus.subjects : fallbackSyllabusData;
+  const totalMarks = officialSyllabus?.total_marks || 100;
+  const durationMins = questionPattern?.duration_minutes || 75;
+  const modeText = questionPattern?.mode || 'OMR Objective Type';
 
   return (
     <Paper
