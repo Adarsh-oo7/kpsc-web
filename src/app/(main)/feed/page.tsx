@@ -142,9 +142,17 @@ export default function StudyFeedPage() {
   const [aiText, setAiText] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
 
+  // Mounted state to avoid React Hydration mismatch #418 on SSR
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const cards = feedData?.cards || [];
   const limitExceeded = feedData?.limit_exceeded || false;
   const limit = feedData?.limit || 15;
+  const viewsToday = feedData?.views_today || 0;
   const rawCurrentCard = cards[currentIndex];
   const currentCard = rawCurrentCard && rawCurrentCard.content_data ? {
     ...rawCurrentCard,
