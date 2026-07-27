@@ -288,7 +288,8 @@ function QuizContent() {
   const currentAffairsParam = searchParams.get('current_affairs');
 
   const isWeeklyCurrentAffairs = currentAffairsParam === 'weekly';
-  const isMockExam = modeParam === 'mock' || (!!examParam && !limitParam && !topicParam);
+  const isMockExam = modeParam === 'mock';
+  const isPracticeQuiz = !!examParam && !isMockExam;
   const isTopicPractice = !!topicParam;
   const isDailyQuiz = !examParam && !topicParam && !isWeeklyCurrentAffairs && !modeParam;
 
