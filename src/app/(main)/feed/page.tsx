@@ -21,6 +21,7 @@ import { useRouter } from 'next/navigation';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
 import ReportQuestionButton from '@/components/ReportQuestionButton';
+import { sanitizeQuestion } from '@/lib/questionSanitizer';
 
 // ============================================================
 // XP Notification (flies up and disappears)
@@ -144,8 +145,11 @@ export default function StudyFeedPage() {
   const cards = feedData?.cards || [];
   const limitExceeded = feedData?.limit_exceeded || false;
   const limit = feedData?.limit || 15;
-  const viewsToday = feedData?.views_today || 0;
-  const currentCard = cards[currentIndex];
+  const rawCurrentCard = cards[currentIndex];
+  const currentCard = rawCurrentCard && rawCurrentCard.content_data ? {
+    ...rawCurrentCard,
+    content_data: sanitizeQuestion(rawCurrentCard.content_data)
+  } : rawCurrentCard;
 
   const xp = userProfile?.total_xp || 0;
   const level = userProfile?.level || 1;
