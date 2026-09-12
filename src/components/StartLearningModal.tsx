@@ -111,7 +111,8 @@ export default function StartLearningModal({ open, onClose, examName = 'LGS 2026
 
   const handleStartPathway = (pathway: 'syllabus' | 'model' | 'mock' | 'pyq') => {
     if (pathway === 'syllabus') {
-      setSelectedPathway('syllabus');
+      onClose();
+      router.push('/topics');
     } else if (pathway === 'mock') {
       onClose();
       router.push(`/quiz?mode=mock&exam=${encodeURIComponent(examName)}`);

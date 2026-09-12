@@ -214,6 +214,9 @@ export default function HomePage() {
   const { data: dashData, isLoading: dashLoading } = useSWR(
     user ? '/my-progress-dashboard/' : null, fetcher
   );
+  const { data: syllabusData } = useSWR(
+    user ? '/syllabus-sections/' : null, fetcher
+  );
 
   const streak = profile?.current_streak || 0;
   const xp = profile?.total_xp || 0;
@@ -300,10 +303,38 @@ export default function HomePage() {
       <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }}>
         <Box sx={{ mb: 3 }}>
           <OfficialSyllabusCard
-            examName={profile?.primary_exam_detail?.name || profile?.preferred_exams?.[0]?.name || 'LGS / VFA 2026'}
-            officialSyllabus={profile?.primary_exam_detail?.official_syllabus}
+            examName={profile?.primary_exam_detail?.name || profile?.preferred_exams?.[0]?.name || syllabusData?.exam_name || 'LGS / VFA 2026'}
+            officialSyllabus={
+              syllabusData?.sections?.length
+                ? {
+                    total_marks: syllabusData.total_marks,
+                    subjects: syllabusData.sections.map((section: any) => ({
+                      title: section.title,
+                      marks: section.marks,
+                      color: section.color,
+                      topics: (section.topics || []).slice(0, 8).map((topic: any) => topic.name),
+                    })),
+                  }
+                : profile?.primary_exam_detail?.official_syllabus
+            }
             questionPattern={profile?.primary_exam_detail?.question_pattern}
           />
+          <Button
+            fullWidth
+            variant="outlined"
+            onClick={() => router.push('/topics')}
+            sx={{ mt: 1.5, textTransform: 'none', fontWeight: 800, borderRadius: 3 }}
+          >
+            Study by syllabus section
+          </Button>
+          <Button
+            fullWidth
+            variant="outlined"
+            onClick={() => router.push('/topics')}
+            sx={{ mt: 1.5, textTransform: 'none', fontWeight: 800, borderRadius: 3 }}
+          >
+            Study by official paper section
+          </Button>
         </Box>
       </motion.div>
 
@@ -318,8 +349,8 @@ export default function HomePage() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18, duration: 0.5 }}>
         <Box sx={{ mb: 3 }}>
           <WeakAreaInterventionCard
-            weakTopics={dashData?.weakest_topics}
-            examName={profile?.primary_exam_detail?.name || profile?.preferred_exams?.[0]?.name || 'LGS 2026'}
+            weakTopics={syllabusData?.weak_sections || dashData?.weakest_topics}
+            examName={profile?.primary_exam_detail?.name || profile?.preferred_exams?.[0]?.name || syllabusData?.exam_name || 'LGS 2026'}
           />
         </Box>
       </motion.div>

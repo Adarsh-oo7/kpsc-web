@@ -11,8 +11,6 @@ import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import BoltIcon from '@mui/icons-material/Bolt';
 import StarIcon from '@mui/icons-material/Star';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
@@ -22,6 +20,7 @@ import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
 import ReportQuestionButton from '@/components/ReportQuestionButton';
 import { sanitizeQuestion } from '@/lib/questionSanitizer';
+import KpscOptionList from '@/components/KpscOptionList';
 
 // ============================================================
 // XP Notification (flies up and disappears)
@@ -185,7 +184,8 @@ export default function StudyFeedPage() {
     if (!currentCard) return;
     const isQuiz = typeof currentCard.id === 'string' && currentCard.id.startsWith('quiz-');
     const isReask = typeof currentCard.id === 'string' && currentCard.id.startsWith('reask-');
-    if (!isQuiz && !isReask) {
+    const isReview = typeof currentCard.id === 'string' && currentCard.id.startsWith('review-');
+    if (!isQuiz && !isReask && !isReview) {
       try {
         await apiClient.post('/study-feed/view/', { card_id: currentCard.id });
         // Optimistically update views_today without refetching from server
@@ -206,6 +206,36 @@ export default function StudyFeedPage() {
     } else {
       await mutateFeed();
       setCurrentIndex(0);
+    }
+  };
+
+  const injectReask = (sourceCard: any, retryPayload?: Record<string, unknown> | null) => {
+    const content = retryPayload
+      ? {
+          ...sourceCard.content_data,
+          ...retryPayload,
+          question_text: retryPayload.question_text || retryPayload.text || sourceCard.content_data?.question_text,
+        }
+      : sourceCard.content_data;
+    const reaskCard = {
+      ...sourceCard,
+      id: `reask-${sourceCard.id}-${Date.now()}`,
+      title: 'Try this again',
+      content_data: content,
+      psc_likelihood_tag: '🔁',
+    };
+    const targetIndex = currentIndex + 4;
+    const updatedCards = [...cards];
+    if (targetIndex >= updatedCards.length) {
+      updatedCards.push(reaskCard);
+    } else {
+      updatedCards.splice(targetIndex, 0, reaskCard);
+    }
+    if (feedData) {
+      mutateFeed({
+        ...feedData,
+        cards: updatedCards
+      }, { revalidate: false });
     }
   };
 
@@ -233,51 +263,44 @@ export default function StudyFeedPage() {
         refreshProfile().catch(err => console.error("Error refreshing profile:", err));
       }
 
-      // If user got the answer wrong, re-inject this question card 3 cards later
       if (!correct) {
-        const reaskCard = {
-          ...currentCard,
-          id: `reask-${currentCard.id}-${Date.now()}`,
-        };
-        const targetIndex = currentIndex + 4; // Inserts it 3 cards later (e.g. current index + 4)
-        const updatedCards = [...cards];
-        if (targetIndex >= updatedCards.length) {
-          updatedCards.push(reaskCard);
-        } else {
-          updatedCards.splice(targetIndex, 0, reaskCard);
-        }
-        if (feedData) {
-          mutateFeed({
-            ...feedData,
-            cards: updatedCards
-          }, { revalidate: false });
-        }
+        injectReask(currentCard, res.data?.retry);
       }
     } catch {
       const correct = selectedOption === currentCard.content_data?.correct_answer;
       setIsCorrect(correct);
       setIsAnswered(true);
-
-      // Re-inject on connection failure too
       if (!correct) {
-        const reaskCard = {
-          ...currentCard,
-          id: `reask-${currentCard.id}-${Date.now()}`,
-        };
-        const targetIndex = currentIndex + 4;
-        const updatedCards = [...cards];
-        if (targetIndex >= updatedCards.length) {
-          updatedCards.push(reaskCard);
-        } else {
-          updatedCards.splice(targetIndex, 0, reaskCard);
-        }
-        if (feedData) {
-          mutateFeed({
-            ...feedData,
-            cards: updatedCards
-          }, { revalidate: false });
-        }
+        injectReask(currentCard);
       }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDontKnow = async () => {
+    if (!currentCard || isAnswered || isSubmitting) return;
+    setIsSubmitting(true);
+    const questionId = currentCard.content_data?.question_id;
+    try {
+      const res = questionId
+        ? await apiClient.post('/submit-answer/', {
+            question: questionId,
+            selected_option: 'S',
+          })
+        : null;
+      setIsCorrect(false);
+      setAnswerResult(res?.data || null);
+      setIsAnswered(true);
+      if (res?.data?.gamification?.xp_earned) {
+        setXpNotif(res.data.gamification.xp_earned);
+      }
+      mutateProfile();
+      injectReask(currentCard, res?.data?.retry);
+    } catch {
+      setIsCorrect(false);
+      setIsAnswered(true);
+      injectReask(currentCard);
     } finally {
       setIsSubmitting(false);
     }
@@ -367,30 +390,6 @@ export default function StudyFeedPage() {
       </Box>
     );
   }
-
-  const getOptionStyle = (key: string) => {
-    if (!isAnswered) {
-      return {
-        border: `2px solid ${selectedOption === key ? '#2E8B57' : 'rgba(136,146,164,0.15)'}`,
-        background: selectedOption === key ? 'rgba(27,107,58,0.15)' : 'transparent',
-        bgcolor: selectedOption === key ? 'rgba(27,107,58,0.15)' : 'surface.card',
-        transform: selectedOption === key ? 'translateX(4px)' : 'none',
-      };
-    }
-    const isCorrectOpt = key === currentCard.content_data?.correct_answer;
-    const isSelected = key === selectedOption;
-    if (isCorrectOpt) return {
-      border: '2px solid #22c55e',
-      background: 'rgba(34,197,94,0.12)',
-      animation: 'correctPulse 0.6s ease forwards',
-    };
-    if (isSelected && !isCorrectOpt) return {
-      border: '2px solid #EF4444',
-      background: 'rgba(239,68,68,0.1)',
-      animation: 'shakeWrong 0.5s ease',
-    };
-    return { border: '2px solid rgba(136,146,164,0.08)', bgcolor: 'surface.card', opacity: 0.6 };
-  };
 
   const cardTypeColor: Record<string, string> = {
     question: '#2E8B57',
@@ -564,47 +563,15 @@ export default function StudyFeedPage() {
                   <Typography sx={{ fontWeight: 600, color: 'text.primary', mb: 2.5, fontSize: '1rem', lineHeight: 1.6 }}>
                     {currentCard.content_data?.question_text}
                   </Typography>
-                  <Stack spacing={1.25}>
-                    {currentCard.content_data?.options &&
-                      Object.entries(currentCard.content_data.options).map(([key, val]: any) => {
-                        const isCorrectOpt = key === currentCard.content_data?.correct_answer;
-                        const isSelected = key === selectedOption;
-                        return (
-                          <Box
-                            key={key}
-                            onClick={() => !isAnswered && setSelectedOption(key)}
-                            sx={{
-                              minHeight: 52, px: 2, py: 1.25,
-                              borderRadius: '12px',
-                              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                              cursor: isAnswered ? 'default' : 'pointer',
-                              transition: 'all 0.2s ease',
-                              userSelect: 'none',
-                              ...getOptionStyle(key),
-                            }}
-                          >
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                              <Box sx={{
-                                width: 26, height: 26, borderRadius: '8px', flexShrink: 0,
-                                background: isAnswered && isCorrectOpt ? 'rgba(34,197,94,0.2)'
-                                  : isAnswered && isSelected ? 'rgba(239,68,68,0.2)'
-                                  : isSelected ? 'rgba(46,139,87,0.2)' : 'rgba(136,146,164,0.12)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontFamily: "'JetBrains Mono'", fontWeight: 700, fontSize: '0.75rem',
-                                color: isAnswered && isCorrectOpt ? '#22c55e' : isSelected ? '#2E8B57' : '#8892A4',
-                              }}>
-                                {key}
-                              </Box>
-                              <Typography sx={{ fontSize: '0.9rem', color: 'text.primary', lineHeight: 1.4 }}>
-                                {val}
-                              </Typography>
-                            </Box>
-                            {isAnswered && isCorrectOpt && <CheckCircleIcon sx={{ fontSize: 20, color: '#22c55e', flexShrink: 0 }} />}
-                            {isAnswered && isSelected && !isCorrectOpt && <CancelIcon sx={{ fontSize: 20, color: '#EF4444', flexShrink: 0 }} />}
-                          </Box>
-                        );
-                      })}
-                  </Stack>
+                  <KpscOptionList
+                    options={currentCard.content_data?.options}
+                    selected={selectedOption}
+                    correctAnswer={currentCard.content_data?.correct_answer}
+                    revealed={isAnswered}
+                    disabled={isAnswered}
+                    onSelect={(key) => !isAnswered && setSelectedOption(key)}
+                    enableKeys
+                  />
                 </Box>
               )}
 
@@ -613,7 +580,7 @@ export default function StudyFeedPage() {
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
                   <Box sx={{ mt: 2.5, p: 2.5, borderRadius: '12px', background: isCorrect ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)', border: `1px solid ${isCorrect ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)'}` }}>
                     <Typography sx={{ fontWeight: 700, color: isCorrect ? 'success.main' : 'error.main', mb: 1 }}>
-                      {isCorrect ? '✓ Correct!' : '✗ Wrong!'}
+                      {isCorrect ? '✓ Correct!' : '✗ Wrong — we will ask this again shortly'}
                       {answerResult?.gamification?.xp_earned && (
                         <Box component="span" sx={{ ml: 1.5, fontSize: '0.8rem', color: 'secondary.light', fontFamily: "'JetBrains Mono'" }}>
                           +{answerResult.gamification.xp_earned} XP
@@ -644,10 +611,7 @@ export default function StudyFeedPage() {
                       </Button>
                       <Button
                         variant="outlined"
-                        onClick={() => {
-                          setIsAnswered(true);
-                          setIsCorrect(false);
-                        }}
+                        onClick={handleDontKnow}
                         sx={{
                           py: 1.5,
                           fontSize: '0.85rem',

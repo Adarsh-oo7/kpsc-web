@@ -12,6 +12,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
 import ReportQuestionButton from '@/components/ReportQuestionButton';
+import { sanitizeQuestion } from '@/lib/questionSanitizer';
+import KpscOptionList from '@/components/KpscOptionList';
 
 // Icon imports
 import HistoryEduIcon from '@mui/icons-material/HistoryEdu';
@@ -186,7 +188,7 @@ export default function TopicStudyPage() {
       });
       
       setSessionId(res.data.session_id);
-      setQuestions(res.data.questions || []);
+      setQuestions((res.data.questions || []).map((q: any) => sanitizeQuestion(q)));
       setCurrentIdx(0);
       setAnsweredMap({});
       setSelectedOpt('');
@@ -568,68 +570,15 @@ export default function TopicStudyPage() {
                   {questions[currentIdx].text}
                 </Typography>
 
-                {/* Option list */}
-                <Stack spacing={1.25}>
-                  {Object.entries(questions[currentIdx].options).map(([key, val]) => {
-                    const isCorrect = key === questions[currentIdx].correct_answer;
-                    const isSelected = key === selectedOpt;
-                    let borderStyle = isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)';
-                    let bgStyle = theme.palette.surface.card;
-
-                    if (isIdxAnswered) {
-                      if (isCorrect) {
-                        borderStyle = '1px solid #22c55e';
-                        bgStyle = 'rgba(34,197,94,0.08)';
-                      } else if (isSelected) {
-                        borderStyle = '1px solid #EF4444';
-                        bgStyle = 'rgba(239,68,68,0.08)';
-                      } else {
-                        bgStyle = theme.palette.surface.main;
-                        borderStyle = isDark ? '1px solid rgba(255,255,255,0.03)' : '1px solid rgba(0,0,0,0.03)';
-                      }
-                    } else if (isSelected) {
-                      borderStyle = '1px solid #2E8B57';
-                      bgStyle = 'rgba(27,107,58,0.15)';
-                    }
-
-                    return (
-                      <Box
-                        key={key}
-                        onClick={() => handleSelectOption(key)}
-                        sx={{
-                          p: 2,
-                          borderRadius: '12px',
-                          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                          cursor: isIdxAnswered ? 'default' : 'pointer',
-                          transition: 'all 0.15s ease',
-                          border: borderStyle,
-                          bgcolor: bgStyle,
-                          '&:hover': {
-                            border: isIdxAnswered ? borderStyle : '1px solid rgba(255,255,255,0.15)'
-                          }
-                        }}
-                      >
-                        <Stack direction="row" spacing={2} alignItems="center">
-                          <Box sx={{
-                            width: 28, height: 28, borderRadius: '8px',
-                            bgcolor: isSelected ? 'rgba(46,139,87,0.2)' : 'rgba(255,255,255,0.04)',
-                            color: isSelected ? '#2E8B57' : '#8892A4',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontFamily: "'JetBrains Mono'", fontWeight: 800, fontSize: '0.8rem'
-                          }}>
-                            {key}
-                          </Box>
-                           <Typography sx={{ fontSize: '0.9rem', color: isIdxAnswered && !isCorrect && !isSelected ? '#8892A4' : '#F0F4F8' }}>
-                            {val as string}
-                          </Typography>
-                        </Stack>
-
-                        {isIdxAnswered && isCorrect && <CheckCircleIcon sx={{ color: '#22c55e', fontSize: 18 }} />}
-                        {isIdxAnswered && isSelected && !isCorrect && <CancelIcon sx={{ color: '#EF4444', fontSize: 18 }} />}
-                      </Box>
-                    );
-                  })}
-                </Stack>
+                <KpscOptionList
+                  options={questions[currentIdx].options}
+                  selected={selectedOpt}
+                  correctAnswer={questions[currentIdx].correct_answer}
+                  revealed={isIdxAnswered}
+                  disabled={isIdxAnswered}
+                  onSelect={handleSelectOption}
+                  enableKeys
+                />
 
                 {/* Question Explanation */}
                 {isIdxAnswered && questions[currentIdx].explanation && (
@@ -810,38 +759,13 @@ export default function TopicStudyPage() {
                     {idx + 1}. {qData.text}
                   </Typography>
 
-                  <Stack spacing={1}>
-                    {Object.entries(qData.options).map(([optKey, optVal]) => {
-                      const isCorrectOpt = optKey === qData.correct_answer;
-                      const isSelectedOpt = optKey === selected;
-                      let bg = 'transparent';
-                      let border = '1px solid transparent';
-                      let textColor = theme.palette.text.secondary;
-
-                      if (isCorrectOpt) {
-                        bg = 'rgba(34,197,94,0.06)';
-                        border = '1px solid rgba(34,197,94,0.2)';
-                        textColor = isDark ? '#86efac' : '#145228';
-                      } else if (isSelectedOpt) {
-                        bg = 'rgba(239,68,68,0.06)';
-                        border = '1px solid rgba(239,68,68,0.2)';
-                        textColor = isDark ? '#fca5a5' : '#EF4444';
-                      }
-
-                      return (
-                        <Box key={optKey} sx={{
-                          p: 1.25, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                          bgcolor: bg, border
-                        }}>
-                          <Typography sx={{ fontSize: '0.8rem', color: textColor }}>
-                            <strong>{optKey}.</strong> {optVal as string}
-                          </Typography>
-                          {isCorrectOpt && <CheckCircleIcon sx={{ color: '#22c55e', fontSize: 16 }} />}
-                          {isSelectedOpt && !isCorrectOpt && <CancelIcon sx={{ color: '#EF4444', fontSize: 16 }} />}
-                        </Box>
-                      );
-                    })}
-                  </Stack>
+                  <KpscOptionList
+                    options={qData.options}
+                    selected={selected}
+                    correctAnswer={qData.correct_answer}
+                    revealed
+                    disabled
+                  />
 
                   {qData.explanation && (
                     <Box sx={{ mt: 2, p: 1.5, borderRadius: '8px', bgcolor: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.12)' }}>

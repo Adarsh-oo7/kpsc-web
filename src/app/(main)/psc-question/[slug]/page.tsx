@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { Box, Typography, Card, CardContent, Button, Stack, Chip, Divider } from '@mui/material';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { sanitizeQuestion } from '@/lib/questionSanitizer';
+import KpscOptionList from '@/components/KpscOptionList';
 
 // Helper to fetch data on the server
 async function getQuestion(slug: string) {
@@ -48,9 +50,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function QuestionSEOPage({ params }: PageProps) {
   const { slug } = await params;
-  const question = await getQuestion(slug);
+  const rawQuestion = await getQuestion(slug);
 
-  if (!question) {
+  if (!rawQuestion) {
     return (
       <Box sx={{ p: 4, textAlign: 'center', color: 'white' }}>
         <Typography variant="h5" gutterBottom>Question Not Found</Typography>
@@ -65,6 +67,8 @@ export default async function QuestionSEOPage({ params }: PageProps) {
       </Box>
     );
   }
+
+  const question = sanitizeQuestion(rawQuestion);
 
   // Create JSON-LD Q&A Schema
   const jsonLd = {
@@ -106,7 +110,7 @@ export default async function QuestionSEOPage({ params }: PageProps) {
         <CardContent sx={{ p: 4 }}>
           <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
             <HelpOutlineIcon color="primary" />
-            <Chip label={question.difficulty.toUpperCase()} color={question.difficulty === 'easy' ? 'success' : question.difficulty === 'medium' ? 'warning' : 'error'} size="small" />
+            <Chip label={(question.difficulty || 'medium').toUpperCase()} color={question.difficulty === 'easy' ? 'success' : question.difficulty === 'medium' ? 'warning' : 'error'} size="small" />
             {question.sub_topic && <Chip label={question.sub_topic} variant="outlined" size="small" sx={{ borderColor: 'rgba(255,255,255,0.2)', color: 'grey.300' }} />}
           </Stack>
 
@@ -116,32 +120,13 @@ export default async function QuestionSEOPage({ params }: PageProps) {
 
           <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)', mb: 3 }} />
 
-          {/* Options Display */}
-          <Stack spacing={2} sx={{ mb: 4 }}>
-            {Object.entries(question.options || {}).map(([key, val]) => {
-              const isCorrect = key.toUpperCase() === question.correct_answer.toUpperCase();
-              return (
-                <Box
-                  key={key}
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    border: '1px solid',
-                    borderColor: isCorrect ? 'success.main' : 'rgba(255,255,255,0.1)',
-                    bgcolor: isCorrect ? 'rgba(76, 175, 80, 0.1)' : 'rgba(255,255,255,0.02)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 2
-                  }}
-                >
-                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: isCorrect ? 'success.main' : 'primary.light' }}>
-                    Option {key.toUpperCase()}:
-                  </Typography>
-                  <Typography variant="body1">{String(val)}</Typography>
-                </Box>
-              );
-            })}
-          </Stack>
+          <KpscOptionList
+            options={question.options}
+            selected={question.correct_answer}
+            correctAnswer={question.correct_answer}
+            revealed
+            disabled
+          />
 
           {/* Explanation block */}
           <Box sx={{ p: 3, borderRadius: 3, bgcolor: 'rgba(25, 118, 210, 0.1)', border: '1px solid rgba(25, 118, 210, 0.2)' }}>

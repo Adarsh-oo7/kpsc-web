@@ -17,14 +17,21 @@ import { useRouter } from 'next/navigation';
 
 interface WeakTopic {
   id?: number;
-  name: string;
+  name?: string;
+  title?: string;
   accuracy: number;
   slug?: string;
+  key?: string;
+  marks?: number;
 }
 
 interface WeakAreaInterventionCardProps {
   weakTopics?: WeakTopic[];
   examName?: string;
+}
+
+function displayName(topic: WeakTopic) {
+  return topic.name || topic.title || 'This section';
 }
 
 export default function WeakAreaInterventionCard({
@@ -33,14 +40,23 @@ export default function WeakAreaInterventionCard({
 }: WeakAreaInterventionCardProps) {
   const router = useRouter();
 
-  // Fallback defaults if user hasn't attempted enough quizzes yet
-  const defaultWeakTopics: WeakTopic[] = [
-    { id: 1, name: 'Kerala History & Renaissance Movement', accuracy: 42, slug: 'kerala-history' },
-    { id: 2, name: 'Simple Arithmetic & Percentage', accuracy: 48, slug: 'simple-arithmetic' },
-    { id: 3, name: 'General Science & SCERT Chemistry', accuracy: 45, slug: 'general-science' },
-  ];
+  const topicsToDisplay = (weakTopics || []).filter((topic) => displayName(topic)).slice(0, 3);
 
-  const topicsToDisplay = weakTopics.length > 0 ? weakTopics.slice(0, 3) : defaultWeakTopics;
+  const goPractice = (topic: WeakTopic) => {
+    if (topic.key) {
+      router.push(`/quiz?section=${encodeURIComponent(topic.key)}&limit=15`);
+      return;
+    }
+    if (topic.slug) {
+      router.push(`/topics/${topic.slug}`);
+      return;
+    }
+    if (topic.id) {
+      router.push(`/quiz?topic_id=${topic.id}`);
+      return;
+    }
+    router.push('/topics');
+  };
 
   return (
     <Paper
@@ -73,14 +89,19 @@ export default function WeakAreaInterventionCard({
         </Box>
         <Box>
           <Typography variant="h6" sx={{ fontWeight: 900, fontFamily: "'Outfit', sans-serif", color: 'text.primary' }}>
-            Identified Weak Topics in {examName}
+            Focus these {examName} sections
           </Typography>
           <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-            Target these low-accuracy topics to boost your cut-off score by +15 marks.
+            Practise the paper parts that are pulling your cut-off down.
           </Typography>
         </Box>
       </Stack>
 
+      {topicsToDisplay.length === 0 ? (
+        <Button variant="contained" onClick={() => router.push('/topics')} sx={{ textTransform: 'none', fontWeight: 800, borderRadius: 3 }}>
+          Open syllabus and start
+        </Button>
+      ) : (
       <Grid container spacing={2} sx={{ mt: 1 }}>
         {topicsToDisplay.map((topic, idx) => (
           <Grid item xs={12} sm={4} key={idx}>
@@ -93,14 +114,14 @@ export default function WeakAreaInterventionCard({
                 bgcolor: 'background.paper',
                 display: 'flex',
                 flexDirection: 'column',
-                justify: 'space-between',
+                justifyContent: 'space-between',
                 height: '100%'
               }}
             >
               <Box>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
                   <Chip
-                    label={`${Math.round(topic.accuracy)}% Accuracy`}
+                    label={`${Math.round(topic.accuracy || 0)}% Accuracy`}
                     size="small"
                     sx={{
                       bgcolor: 'rgba(239, 68, 68, 0.12)',
@@ -112,7 +133,8 @@ export default function WeakAreaInterventionCard({
                   <AutoFixHighIcon sx={{ fontSize: 16, color: '#EF4444' }} />
                 </Stack>
                 <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'text.primary', lineHeight: 1.3, mb: 2 }}>
-                  {topic.name}
+                  {displayName(topic)}
+                  {topic.marks ? ` · ${topic.marks} marks` : ''}
                 </Typography>
               </Box>
 
@@ -120,7 +142,7 @@ export default function WeakAreaInterventionCard({
                 variant="contained"
                 size="small"
                 fullWidth
-                onClick={() => router.push(`/quiz?topic_id=${topic.id || 1}`)}
+                onClick={() => goPractice(topic)}
                 endIcon={<ArrowForwardIcon sx={{ fontSize: '0.85rem !important' }} />}
                 sx={{
                   bgcolor: '#EF4444',
@@ -131,12 +153,13 @@ export default function WeakAreaInterventionCard({
                   '&:hover': { bgcolor: '#DC2626' }
                 }}
               >
-                Fix Weak Area
+                Practise this section
               </Button>
             </Paper>
           </Grid>
         ))}
       </Grid>
+      )}
     </Paper>
   );
 }

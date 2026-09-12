@@ -10,6 +10,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useAppContext } from '@/context/AppContext';
+import { sanitizeQuestion } from '@/lib/questionSanitizer';
+import KpscOptionList from '@/components/KpscOptionList';
 
 export default function WrongAnswersPage() {
   const { user, fetcher, isLoading: ctxLoading } = useAppContext();
@@ -85,7 +87,7 @@ export default function WrongAnswersPage() {
         <Stack spacing={2.5}>
           <AnimatePresence mode="popLayout">
             {wrongAnswers.map((wa: any, idx: number) => {
-              const q = wa.question;
+              const q = wa.question ? sanitizeQuestion(wa.question) : null;
               if (!q) return null;
               const isExpanded = expandedId === wa.id;
 
@@ -146,49 +148,13 @@ export default function WrongAnswersPage() {
                       <Collapse in={isExpanded} timeout="auto" unmountOnExit sx={{ mt: 3 }}>
                         <Divider sx={{ borderColor: 'divider', mb: 2.5 }} />
 
-                        {/* Options Display */}
-                        <Stack spacing={1.25} sx={{ mb: 2.5 }}>
-                          {q.options && Object.entries(q.options).map(([key, val]: any) => {
-                            const isCorrectOption = key === q.correct_answer;
-                            const isSelectedOption = key === wa.selected_option;
-                            
-                            let optionBorder = isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)';
-                            let optionBg = isDark ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.02)';
-                            let optionColor = theme.palette.text.primary;
-
-                            if (isCorrectOption) {
-                              optionBorder = '1px solid rgba(46, 139, 87, 0.4)';
-                              optionBg = 'rgba(27, 107, 58, 0.08)';
-                              optionColor = '#22c55e';
-                            } else if (isSelectedOption) {
-                              optionBorder = '1px solid rgba(239, 68, 68, 0.4)';
-                              optionBg = 'rgba(239, 68, 68, 0.08)';
-                              optionColor = '#EF4444';
-                            }
-
-                            return (
-                              <Box key={key} sx={{
-                                p: 1.75, borderRadius: '12px',
-                                border: optionBorder, background: optionBg, color: optionColor,
-                                display: 'flex', alignItems: 'center', justifyContent: 'space-between'
-                              }}>
-                                <Typography sx={{ fontSize: '0.85rem', fontWeight: 700 }}>
-                                  {key}) {val}
-                                </Typography>
-                                {isCorrectOption && (
-                                  <Typography sx={{ fontSize: '0.7rem', fontWeight: 900, ml: 'auto', bgcolor: 'rgba(34,197,94,0.12)', px: 1, py: 0.25, borderRadius: '4px' }}>
-                                    CORRECT
-                                  </Typography>
-                                )}
-                                {isSelectedOption && !isCorrectOption && (
-                                  <Typography sx={{ fontSize: '0.7rem', fontWeight: 900, ml: 'auto', bgcolor: 'rgba(239,68,68,0.12)', px: 1, py: 0.25, borderRadius: '4px' }}>
-                                    YOUR ANSWER
-                                  </Typography>
-                                )}
-                              </Box>
-                            );
-                          })}
-                        </Stack>
+                        <KpscOptionList
+                          options={q.options}
+                          selected={wa.selected_option}
+                          correctAnswer={q.correct_answer}
+                          revealed
+                          disabled
+                        />
 
                         {q.explanation && (
                           <Box sx={{ p: 2, background: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', border: '1px solid', borderColor: 'divider', borderRadius: '12px' }}>

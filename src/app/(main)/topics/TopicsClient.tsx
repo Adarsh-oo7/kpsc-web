@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import {
   Box, Typography, Grid, Alert, CircularProgress, Paper,
-  TextField, InputAdornment, Container, Fade, Skeleton, Stack
+  TextField, InputAdornment, Container, Skeleton, Stack,
+  Button, Chip, LinearProgress, Accordion, AccordionSummary, AccordionDetails
 } from '@mui/material';
 import { useAppContext } from '@/context/AppContext';
 import { motion } from 'framer-motion';
@@ -19,6 +20,9 @@ import GavelIcon from '@mui/icons-material/Gavel';
 import CalculateIcon from '@mui/icons-material/Calculate';
 import TranslateIcon from '@mui/icons-material/Translate';
 import CategoryIcon from '@mui/icons-material/Category';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 // A predefined list of attractive gradients
 const gradients = [
@@ -144,10 +148,14 @@ const TopicCardSkeleton = () => (
 );
 
 export default function TopicsClient() {
-  const { setTopicId, fetcher } = useAppContext();
+  const { fetcher, user } = useAppContext();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
 
+  const { data: syllabus, error: syllabusError, isLoading: syllabusLoading } = useSWR(
+    user ? '/syllabus-sections/' : null,
+    fetcher
+  );
   const { data: topics, error, isLoading } = useSWR('/topics/', fetcher);
 
   const filteredTopics = useMemo(() => {
@@ -158,53 +166,71 @@ export default function TopicsClient() {
     );
   }, [topics, searchQuery]);
 
+  const visibleSections = useMemo(() => {
+    const sections = syllabus?.sections || [];
+    if (!searchQuery.trim()) return sections;
+    const q = searchQuery.toLowerCase();
+    return sections
+      .map((section: any) => ({
+        ...section,
+        topics: (section.topics || []).filter((topic: any) =>
+          `${section.title} ${topic.name}`.toLowerCase().includes(q)
+        ),
+      }))
+      .filter((section: any) =>
+        section.title.toLowerCase().includes(q) || (section.topics || []).length > 0
+      );
+  }, [syllabus, searchQuery]);
+
   const handleTopicSelect = (slug: string) => {
     router.push(`/topics/${slug}`);
   };
 
+  const focus = syllabus?.focus_section;
+  const weakSections = syllabus?.weak_sections || [];
+
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }} 
-        animate={{ opacity: 1, y: 0 }} 
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
         <Box sx={{ textAlign: 'center', mb: 4 }}>
-          <Typography 
-            variant="h3" 
-            component="h1" 
-            sx={{ 
-              fontWeight: 800, 
-              color: 'white',
+          <Typography
+            variant="h3"
+            component="h1"
+            sx={{
+              fontWeight: 800,
+              color: 'text.primary',
               fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' }
             }}
           >
-            Explore Topics
+            {syllabus?.exam_name || 'PSC Syllabus'}
           </Typography>
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              color: 'rgba(255,255,255,0.8)', 
+          <Typography
+            variant="h6"
+            sx={{
+              color: 'text.secondary',
               fontWeight: 400,
               fontSize: { xs: '1rem', sm: '1.25rem' }
             }}
           >
-            Choose a subject to start your learning journey.
+            Official paper sections — practise the part you are weakest in.
           </Typography>
         </Box>
-        
-        <Box sx={{ maxWidth: 600, mx: 'auto', mb: 5 }}>
+
+        <Box sx={{ maxWidth: 600, mx: 'auto', mb: 4 }}>
           <TextField
             fullWidth
             variant="outlined"
-            placeholder="Search for any topic..."
+            placeholder="Search a subject or chapter..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             sx={{
               '& .MuiOutlinedInput-root': {
                 borderRadius: '50px',
                 bgcolor: 'background.paper',
-                '& fieldset': { borderColor: 'rgba(255,255,255,0.2)' },
               }
             }}
             InputProps={{
@@ -218,45 +244,146 @@ export default function TopicsClient() {
         </Box>
       </motion.div>
 
-      {/* Fixed Grid with Equal Squares */}
-      <Grid 
-        container 
-        spacing={{ xs: 2, sm: 2.5, md: 3 }}
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: {
-            xs: 'repeat(2, 1fr)',      // 2 columns on mobile
-            sm: 'repeat(3, 1fr)',      // 3 columns on small screens
-            md: 'repeat(4, 1fr)',      // 4 columns on medium screens
-            lg: 'repeat(5, 1fr)',      // 5 columns on large screens
-            xl: 'repeat(6, 1fr)'       // 6 columns on extra large screens
-          },
-          gap: { xs: 2, sm: 2.5, md: 3 }
-        }}
-      >
-        {isLoading ? (
-          Array.from({ length: 12 }).map((_, index) => (
-            <Box key={index}>
-              <TopicCardSkeleton />
+      {focus && (
+        <Paper
+          sx={{
+            mb: 3,
+            p: 2.5,
+            borderRadius: 4,
+            border: '1px solid',
+            borderColor: 'rgba(239,68,68,0.25)',
+            bgcolor: 'background.paper',
+          }}
+        >
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'center' }} justifyContent="space-between">
+            <Box>
+              <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+                <WarningAmberIcon sx={{ color: '#EF4444', fontSize: 20 }} />
+                <Typography sx={{ fontWeight: 800 }}>Focus for the exam</Typography>
+                <Chip size="small" label={`${focus.marks} marks`} sx={{ fontWeight: 800 }} />
+              </Stack>
+              <Typography sx={{ fontWeight: 700, color: 'text.primary' }}>
+                {focus.title}{focus.title_ml ? ` · ${focus.title_ml}` : ''}
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                {focus.attempted > 0
+                  ? `${focus.accuracy}% accuracy from ${focus.attempted} answers. This section can swing ${focus.marks} marks.`
+                  : `You have not practised this ${focus.marks}-mark section yet.`}
+              </Typography>
             </Box>
-          ))
-        ) : filteredTopics && filteredTopics.length > 0 ? (
-          filteredTopics.map((topic: any) => (
-            <Box key={topic.id}>
-              <TopicCard 
-                topic={topic} 
-                onClick={() => handleTopicSelect(topic.slug)} 
-              />
-            </Box>
-          ))
+            <Button
+              variant="contained"
+              startIcon={<PlayArrowIcon />}
+              onClick={() => router.push(`/quiz?section=${encodeURIComponent(focus.key)}&limit=15`)}
+              sx={{ textTransform: 'none', fontWeight: 800, borderRadius: 3, bgcolor: '#EF4444', '&:hover': { bgcolor: '#DC2626' } }}
+            >
+              Practise this section
+            </Button>
+          </Stack>
+        </Paper>
+      )}
+
+      {user && (syllabusLoading || syllabus) ? (
+        syllabusLoading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress size={32} /></Box>
         ) : (
-          <Box sx={{ gridColumn: '1 / -1' }}>
-            <Alert severity="info">
-              {searchQuery ? 'No topics match your search.' : 'No topics available at the moment.'}
-            </Alert>
-          </Box>
-        )}
-      </Grid>
+          <Stack spacing={1.5}>
+            {visibleSections.map((section: any) => (
+              <Accordion
+                key={section.key}
+                defaultExpanded={section.is_weak || section.key === focus?.key}
+                elevation={0}
+                sx={{
+                  border: '1px solid',
+                  borderColor: section.is_weak ? 'rgba(239,68,68,0.35)' : 'divider',
+                  borderRadius: '16px !important',
+                  '&:before': { display: 'none' },
+                  bgcolor: 'background.paper',
+                }}
+              >
+                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: '100%', pr: 1 }}>
+                    <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: section.color, flexShrink: 0 }} />
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography sx={{ fontWeight: 800 }}>
+                        {section.title}
+                        {section.title_ml ? (
+                          <Box component="span" sx={{ color: 'text.secondary', fontWeight: 600, ml: 1, fontSize: '0.85rem' }}>
+                            {section.title_ml}
+                          </Box>
+                        ) : null}
+                      </Typography>
+                      <LinearProgress
+                        variant="determinate"
+                        value={section.attempted ? Math.min(100, section.accuracy) : 0}
+                        sx={{ mt: 0.75, height: 6, borderRadius: 4, bgcolor: 'divider', '& .MuiLinearProgress-bar': { bgcolor: section.color } }}
+                      />
+                    </Box>
+                    <Chip size="small" label={`${section.marks} marks`} sx={{ fontWeight: 800, bgcolor: `${section.color}18`, color: section.color }} />
+                    <Chip
+                      size="small"
+                      label={section.attempted ? `${section.accuracy}%` : 'New'}
+                      sx={{
+                        fontWeight: 800,
+                        bgcolor: section.is_weak ? 'rgba(239,68,68,0.12)' : 'rgba(34,197,94,0.12)',
+                        color: section.is_weak ? '#EF4444' : '#16A34A',
+                      }}
+                    />
+                  </Stack>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 2 }}>
+                    <Button
+                      variant="contained"
+                      startIcon={<PlayArrowIcon />}
+                      onClick={() => router.push(`/quiz?section=${encodeURIComponent(section.key)}&limit=15`)}
+                      sx={{ textTransform: 'none', fontWeight: 800, borderRadius: 2, bgcolor: section.color }}
+                    >
+                      Practise {section.title}
+                    </Button>
+                    <Typography variant="body2" sx={{ color: 'text.secondary', alignSelf: 'center' }}>
+                      {section.attempted} answers · {section.topics?.length || 0} chapters
+                    </Typography>
+                  </Stack>
+                  <Grid container spacing={1.5}>
+                    {(section.topics || []).slice(0, 12).map((topic: any) => (
+                      <Grid item xs={12} sm={6} md={4} key={topic.id}>
+                        <Paper
+                          variant="outlined"
+                          onClick={() => handleTopicSelect(topic.slug)}
+                          sx={{ p: 1.5, borderRadius: 2, cursor: 'pointer', '&:hover': { borderColor: section.color } }}
+                        >
+                          <Typography sx={{ fontWeight: 700, fontSize: '0.85rem' }}>{topic.name}</Typography>
+                          <Typography variant="caption" sx={{ color: topic.is_weak ? '#EF4444' : 'text.secondary' }}>
+                            {topic.attempted ? `${topic.accuracy}% · ${topic.question_count} Qs` : `${topic.question_count} Qs`}
+                          </Typography>
+                        </Paper>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </AccordionDetails>
+              </Accordion>
+            ))}
+            {weakSections.length === 0 && !syllabusError ? null : null}
+          </Stack>
+        )
+      ) : isLoading ? (
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 2 }}>
+          {Array.from({ length: 8 }).map((_, index) => (
+            <TopicCardSkeleton key={index} />
+          ))}
+        </Box>
+      ) : filteredTopics && filteredTopics.length > 0 ? (
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', md: 'repeat(4, 1fr)' }, gap: 2 }}>
+          {filteredTopics.map((topic: any) => (
+            <TopicCard key={topic.id} topic={topic} onClick={() => handleTopicSelect(topic.slug)} />
+          ))}
+        </Box>
+      ) : (
+        <Alert severity="info">
+          {searchQuery ? 'No topics match your search.' : error ? 'Could not load topics.' : 'No topics available at the moment.'}
+        </Alert>
+      )}
     </Container>
   );
 }

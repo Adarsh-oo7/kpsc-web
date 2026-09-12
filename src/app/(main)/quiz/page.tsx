@@ -11,14 +11,13 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import ReportQuestionButton from '@/components/ReportQuestionButton';
 import { sanitizeQuestion } from '@/lib/questionSanitizer';
+import KpscOptionList from '@/components/KpscOptionList';
 
 // ───────────────────────────────────────────────
 // Types
@@ -198,30 +197,13 @@ function ResultsScreen({ resultData, answers, onRetry, originalQuestions }: { re
                   </Typography>
                   <ReportQuestionButton questionId={q.id} questionText={q.text} />
                 </Box>
-                <Stack spacing={0.75}>
-                  {Object.entries(q.options).map(([key, val]) => {
-                    const isCorrectOpt = key === q.correct_answer;
-                    const isUserAns = key === userAns;
-                    return (
-                      <Box key={key} sx={{
-                        px: 2, py: 1, borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        background: isCorrectOpt ? 'rgba(34,197,94,0.08)' : isUserAns ? 'rgba(239,68,68,0.08)' : 'transparent',
-                        border: isCorrectOpt ? '1px solid rgba(34,197,94,0.25)' : isUserAns ? '1px solid rgba(239,68,68,0.2)' : '1px solid transparent',
-                      }}>
-                        <Typography sx={{ fontSize: '0.8rem', color: isCorrectOpt ? (isDark ? '#86efac' : '#145228') : isUserAns ? (isDark ? '#fca5a5' : '#EF4444') : 'text.secondary' }}>
-                          <strong>{key}.</strong> {val}
-                          {isUserAns && (
-                            <Box component="span" sx={{ ml: 1, fontWeight: 700, fontSize: '0.75rem', color: isCorrectOpt ? '#22c55e' : '#EF4444' }}>
-                              (Your Answer)
-                            </Box>
-                          )}
-                        </Typography>
-                        {isCorrectOpt && <CheckCircleIcon sx={{ fontSize: 16, color: '#22c55e' }} />}
-                        {isUserAns && !isCorrectOpt && <CancelIcon sx={{ fontSize: 16, color: '#EF4444' }} />}
-                      </Box>
-                    );
-                  })}
-                </Stack>
+                <KpscOptionList
+                  options={q.options}
+                  selected={userAns}
+                  correctAnswer={q.correct_answer}
+                  revealed
+                  disabled
+                />
                 {!userAns && <Alert severity="warning" sx={{ mt: 1.5, py: 0 }}>Not answered</Alert>}
                 {q.explanation && (
                   <Box sx={{ mt: 1.5, p: 1.5, borderRadius: '8px', background: isDark ? 'rgba(59,130,246,0.08)' : 'rgba(59,130,246,0.04)', border: '1px solid', borderColor: 'divider' }}>
@@ -283,6 +265,7 @@ function QuizContent() {
 
   const examParam = searchParams.get('exam') || searchParams.get('exam_id');
   const topicParam = searchParams.get('topic') || searchParams.get('topic_id') || searchParams.get('topic_name');
+  const sectionParam = searchParams.get('section');
   const modeParam = searchParams.get('mode');
   const limitParam = searchParams.get('limit') || '15';
   const currentAffairsParam = searchParams.get('current_affairs');
@@ -290,8 +273,8 @@ function QuizContent() {
   const isWeeklyCurrentAffairs = currentAffairsParam === 'weekly';
   const isMockExam = modeParam === 'mock';
   const isPracticeQuiz = !!examParam && !isMockExam;
-  const isTopicPractice = !!topicParam;
-  const isDailyQuiz = !examParam && !topicParam && !isWeeklyCurrentAffairs && !modeParam;
+  const isTopicPractice = !!topicParam || !!sectionParam;
+  const isDailyQuiz = !examParam && !topicParam && !sectionParam && !isWeeklyCurrentAffairs && !modeParam;
 
   const [timeLeft, setTimeLeft] = useState(15 * 60);
   const [hasInitializedTime, setHasInitializedTime] = useState(false);
@@ -307,9 +290,10 @@ function QuizContent() {
     let url = `/questions/?limit=${limitParam}&language=${language}`;
     if (examParam) url += `&exam=${encodeURIComponent(examParam)}`;
     if (topicParam) url += `&topic=${encodeURIComponent(topicParam)}`;
+    if (sectionParam) url += `&section=${encodeURIComponent(sectionParam)}`;
     if (modeParam) url += `&mode=${encodeURIComponent(modeParam)}`;
     return url;
-  }, [examParam, topicParam, modeParam, limitParam, language, isWeeklyCurrentAffairs]);
+  }, [examParam, topicParam, sectionParam, modeParam, limitParam, language, isWeeklyCurrentAffairs]);
 
   const { data: rawQuizData, error, isLoading } = useSWR(apiUrl, fetcher, { revalidateOnFocus: false });
 
@@ -352,8 +336,11 @@ function QuizContent() {
     if (isWeeklyCurrentAffairs) {
       return "Weekly Current Affairs Quiz";
     }
+    if (sectionParam) {
+      return `${sectionParam.replace(/-/g, ' ')} Practice`;
+    }
     return "Daily Quiz";
-  }, [isMockExam, isPracticeQuiz, isTopicPractice, isWeeklyCurrentAffairs, rawQuizData, questions]);
+  }, [isMockExam, isPracticeQuiz, isTopicPractice, isWeeklyCurrentAffairs, sectionParam, rawQuizData, questions]);
 
   useEffect(() => {
     if (rawQuizData && !hasInitializedTime) {
@@ -377,6 +364,7 @@ function QuizContent() {
       const res = await apiClient.post('/submit-exam/', {
         answers,
         question_ids: questions?.map((q: Question) => q.id) || [],
+        shuffle: !isMockExam,
       });
       setResultData({ ...res.data, timeTaken });
       setIsFinished(true);
@@ -387,7 +375,7 @@ function QuizContent() {
       alert('Error submitting quiz.');
       setIsSubmitting(false);
     }
-  }, [answers, timeLeft, isFinished, questions, examDuration]);
+  }, [answers, timeLeft, isFinished, questions, examDuration, isMockExam]);
 
   // Timer
   useEffect(() => {
@@ -476,23 +464,6 @@ function QuizContent() {
   const secs = timeLeft % 60;
   const progress = ((currentQ) / questions.length) * 100;
   const timerColor = timeLeft < 60 ? '#EF4444' : timeLeft < 300 ? '#F59E0B' : '#2E8B57';
-
-  const getOptionStyle = (key: string) => {
-    if (isMockExam) {
-      const isSelected = answers[q.id] === key;
-      return {
-        border: `2px solid ${isSelected ? '#2E8B57' : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)')}`,
-        background: isSelected ? 'rgba(27,107,58,0.15)' : (isDark ? '#1C2230' : '#F1F5F9'),
-      };
-    }
-    if (!isAnswered) return {
-      border: `2px solid ${selectedOption === key ? '#2E8B57' : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)')}`,
-      background: selectedOption === key ? 'rgba(27,107,58,0.15)' : (isDark ? '#1C2230' : '#F1F5F9'),
-    };
-    if (key === q.correct_answer) return { border: '2px solid #22c55e', background: 'rgba(34,197,94,0.1)', animation: 'correctPulse 0.6s ease' };
-    if (key === selectedOption) return { border: '2px solid #EF4444', background: 'rgba(239,68,68,0.1)', animation: 'shakeWrong 0.5s ease' };
-    return { border: isDark ? '2px solid rgba(255,255,255,0.04)' : '2px solid rgba(0,0,0,0.04)', background: isDark ? '#1C2230' : '#F1F5F9', opacity: 0.55 };
-  };
 
   return (
     <Box sx={{ maxWidth: 640, mx: 'auto' }}>
@@ -614,41 +585,22 @@ function QuizContent() {
               {q.text}
             </Typography>
 
-            {/* Options */}
-            <Stack spacing={1.25}>
-              {Object.entries(q.options).map(([key, val]) => (
-                <Box
-                  key={key}
-                  onClick={() => handleSelectAnswer(key)}
-                  sx={{
-                    minHeight: 52, px: 2, py: 1.5,
-                    borderRadius: '12px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    cursor: isMockExam ? 'pointer' : (isAnswered ? 'default' : 'pointer'),
-                    transition: 'all 0.2s ease',
-                    userSelect: 'none',
-                    ...getOptionStyle(key),
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <Box sx={{
-                      width: 28, height: 28, borderRadius: '8px', flexShrink: 0,
-                      background: (isMockExam ? answers[q.id] === key : selectedOption === key && !isAnswered) ? 'rgba(46,139,87,0.2)' : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'),
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontFamily: "'JetBrains Mono'", fontWeight: 700, fontSize: '0.8rem',
-                      color: (isMockExam ? answers[q.id] === key : selectedOption === key && !isAnswered) ? '#2E8B57' : 'text.secondary',
-                    }}>
-                      {key}
-                    </Box>
-                    <Typography sx={{ fontSize: '0.9rem', color: 'text.primary', lineHeight: 1.4 }}>{val as string}</Typography>
-                  </Box>
-                  {isAnswered && key === q.correct_answer && <CheckCircleIcon sx={{ fontSize: 20, color: '#22c55e', flexShrink: 0 }} />}
-                  {isAnswered && key === selectedOption && key !== q.correct_answer && <CancelIcon sx={{ fontSize: 20, color: '#EF4444', flexShrink: 0 }} />}
-                </Box>
-              ))}
-            </Stack>
+            <KpscOptionList
+              options={q.options}
+              selected={isMockExam ? answers[q.id] : selectedOption}
+              correctAnswer={q.correct_answer}
+              revealed={!isMockExam && isAnswered}
+              disabled={!isMockExam && isAnswered}
+              onSelect={handleSelectAnswer}
+              enableKeys
+            />
 
             {/* Inline explanation after answering */}
+            {isAnswered && !isMockExam && selectedOption !== q.correct_answer && (
+              <Typography sx={{ mt: 2, fontSize: '0.85rem', fontWeight: 700, color: 'error.main' }}>
+                Missed this one — it will come back in your next practice with shuffled options.
+              </Typography>
+            )}
             {isAnswered && q.explanation && (
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
                 <Box sx={{

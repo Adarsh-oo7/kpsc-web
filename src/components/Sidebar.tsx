@@ -23,6 +23,7 @@ import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import ForumIcon from '@mui/icons-material/Forum';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
+import MenuBookIcon from '@mui/icons-material/MenuBook';
 import PersonIcon from '@mui/icons-material/Person';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import BoltIcon from '@mui/icons-material/Bolt';
@@ -37,6 +38,7 @@ interface SidebarProps {
 
 const navItems = [
   { text: 'Home', icon: <HomeIcon />, path: '/home', section: 'study' },
+  { text: 'Syllabus', icon: <MenuBookIcon />, path: '/topics', section: 'study' },
   { text: 'Study Feed', icon: <DynamicFeedIcon />, path: '/feed', section: 'study' },
   { text: 'Daily Quiz', icon: <QuizIcon />, path: '/quiz', section: 'study' },
   { text: 'Mock Tests', icon: <AssignmentIcon />, path: '/exams', section: 'study' },

@@ -9,6 +9,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import LightbulbIcon from '@mui/icons-material/Lightbulb';
 import { sanitizeQuestion } from '@/lib/questionSanitizer';
+import KpscOptionList from '@/components/KpscOptionList';
 
 export default function StudyModePage() {
     const params = useParams();
@@ -42,13 +43,15 @@ export default function StudyModePage() {
                 <Typography color="text.secondary">Question {currentIndex + 1} of {questions.length}</Typography>
                 <Typography variant="h5" sx={{ my: 3, minHeight: '100px' }}>{currentQuestion.text}</Typography>
                 
-                <Stack spacing={1} sx={{mb: 3}}>
-                    {Object.entries(currentQuestion.options).map(([key, value]) => (
-                        <Paper key={key} variant="outlined" sx={{ p: 2, bgcolor: showAnswer && key === currentQuestion.correct_answer ? 'success.light' : 'action.hover' }}>
-                            <Typography>{value as string}</Typography>
-                        </Paper>
-                    ))}
-                </Stack>
+                <KpscOptionList
+                    options={currentQuestion.options}
+                    selected={showAnswer ? currentQuestion.correct_answer : undefined}
+                    correctAnswer={currentQuestion.correct_answer}
+                    revealed={showAnswer}
+                    disabled={!showAnswer}
+                    onSelect={() => setShowAnswer(true)}
+                    enableKeys
+                />
 
                 <Button variant="contained" onClick={() => setShowAnswer(!showAnswer)} startIcon={<LightbulbIcon/>}>
                     {showAnswer ? "Hide Answer" : "Show Answer"}

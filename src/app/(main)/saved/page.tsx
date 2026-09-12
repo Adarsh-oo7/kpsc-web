@@ -12,6 +12,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
+import { sanitizeQuestion } from '@/lib/questionSanitizer';
 
 export default function SavedPage() {
   const { user, fetcher, isLoading: ctxLoading } = useAppContext();
@@ -93,7 +94,7 @@ export default function SavedPage() {
         <Stack spacing={2.5}>
           <AnimatePresence mode="popLayout">
             {bookmarks.map((b: any, idx: number) => {
-              const q = b.question;
+              const q = b.question ? sanitizeQuestion(b.question) : null;
               if (!q) return null;
 
               return (
@@ -148,7 +149,7 @@ export default function SavedPage() {
                           Correct Option: {q.correct_answer}
                         </Typography>
                         <Typography sx={{ color: 'text.primary', fontSize: '0.85rem' }}>
-                          {q.options?.[q.correct_answer] || q.options?.options_list?.[q.correct_answer] || 'Option ' + q.correct_answer}
+                          {q.options?.[q.correct_answer] || 'Option ' + q.correct_answer}
                         </Typography>
                       </Box>
 
