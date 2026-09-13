@@ -267,8 +267,12 @@ function QuizContent() {
   const isDark = theme.palette.mode === 'dark';
 
   useEffect(() => {
-    if (!ctxLoading && !user) router.push('/login');
-  }, [user, ctxLoading, router]);
+    if (!ctxLoading && !user) {
+      const query = searchParams.toString();
+      const next = query ? `/quiz?${query}` : '/quiz';
+      router.push(`/login?next=${encodeURIComponent(next)}`);
+    }
+  }, [user, ctxLoading, router, searchParams]);
 
   const [answers, setAnswers] = useState<UserAnswers>({});
   const [currentQ, setCurrentQ] = useState(0);

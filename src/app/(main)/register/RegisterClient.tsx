@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Box,
@@ -13,27 +13,37 @@ import {
   CircularProgress,
   Link as MuiLink,
   Paper,
-  Stack
+  Stack,
+  IconButton,
 } from '@mui/material';
 import Link from 'next/link';
 import Image from 'next/image';
 import PersonOutline from '@mui/icons-material/PersonOutline';
+import BadgeOutlined from '@mui/icons-material/BadgeOutlined';
 import MailOutline from '@mui/icons-material/MailOutline';
 import LockOutlined from '@mui/icons-material/LockOutlined';
 import PhoneOutlined from '@mui/icons-material/PhoneOutlined';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { motion } from 'framer-motion';
 import apiClient from '@/lib/apiClient';
 import { useAppContext } from '@/context/AppContext';
 import GoogleSignInButton from '@/components/GoogleSignInButton';
+import {
+  afterAuthPath,
+  apiErrorMessage,
+  fieldErrorsFromApi,
+  isValidIndianMobile,
+  safeNextPath,
+  suggestUsername,
+} from '@/lib/auth';
 
-
-// Styled component for a consistent, premium theme text field design
 const StyledTextField = styled(TextField)(({ theme }) => ({
   '& .MuiInputBase-root': {
     backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)',
     borderRadius: '14px',
     color: theme.palette.text.primary,
-    height: '56px',
+    minHeight: '56px',
     border: '1px solid',
     borderColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
     transition: 'all 0.3s ease',
@@ -48,7 +58,7 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
     },
     '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
   },
-  '& .MuiInputBase-input': { 
+  '& .MuiInputBase-input': {
     paddingLeft: '10px',
     fontFamily: "'Satoshi', sans-serif",
     '&::placeholder': {
@@ -56,103 +66,138 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
       opacity: 1,
     },
     '&:-webkit-autofill': {
-      WebkitBoxShadow: theme.palette.mode === 'dark' 
-        ? '0 0 0 1000px #161B22 inset !important' 
+      WebkitBoxShadow: theme.palette.mode === 'dark'
+        ? '0 0 0 1000px #161B22 inset !important'
         : '0 0 0 1000px #ffffff inset !important',
       WebkitTextFillColor: `${theme.palette.text.primary} !important`,
       transition: 'background-color 5000s ease-in-out 0s',
     }
   },
   '& .MuiInputAdornment-root': { color: theme.palette.text.secondary, marginRight: '8px', marginLeft: '8px' },
+  '& .MuiFormHelperText-root': {
+    marginLeft: '6px',
+    fontFamily: "'Satoshi', sans-serif",
+  },
 }));
 
-export default function RegisterClient() {
-  const [name, setName] = useState('');
+type FieldKey = 'full_name' | 'username' | 'email' | 'phone_number' | 'password' | 'confirmPassword';
+
+export default function RegisterClient({
+  nextParam = null,
+}: {
+  nextParam?: string | null;
+}) {
+  const [fullName, setFullName] = useState('');
+  const [username, setUsername] = useState('');
+  const [usernameTouched, setUsernameTouched] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<FieldKey, string>>>({});
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { login } = useAppContext();
+  const { login, user, profile, isLoading } = useAppContext();
+  const nextPath = safeNextPath(nextParam);
+
+  const passwordHint = useMemo(() => {
+    if (!password) return 'At least 8 characters. Avoid using your name.';
+    if (password.length < 8) return `${8 - password.length} more character${password.length === 7 ? '' : 's'} needed.`;
+    if (password !== confirmPassword && confirmPassword) return 'Passwords match? Check confirm password below.';
+    return 'Looks good.';
+  }, [password, confirmPassword]);
+
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.replace(afterAuthPath(profile, nextPath));
+    }
+  }, [isLoading, user, profile, nextPath, router]);
+
+  if (isLoading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: 'background.default' }}>
+        <CircularProgress sx={{ color: '#2E8B57' }} />
+      </Box>
+    );
+  }
+
+  const applyUsernameFrom = (nameValue: string, emailValue: string) => {
+    if (!usernameTouched) {
+      setUsername(suggestUsername(nameValue, emailValue));
+    }
+  };
 
   const handleGoogleSuccess = async (credential: string) => {
     setError('');
-    setSuccess('');
     setLoading(true);
     try {
       const response = await apiClient.post('/auth/google/', { credential });
-      const { access, refresh, has_preferred_exams } = response.data;
-
+      const { access, refresh } = response.data;
       const profileData = await login(access, refresh);
-
-      if (profileData?.is_owner === true) {
-        router.push('/institute/dashboard');
-      } else if (!has_preferred_exams || !profileData?.preferred_exams || profileData.preferred_exams.length === 0) {
-        router.push('/onboarding');
-      } else {
-        router.push('/home');
-      }
+      router.replace(afterAuthPath(profileData, nextPath));
     } catch (err: any) {
-      console.error(err);
-      if (err.response?.data?.error) {
-        setError(err.response.data.error);
-      } else {
-        setError('Google Sign-In failed. Please try again.');
-      }
+      setError(apiErrorMessage(err, 'Google Sign-In failed. Please try again, or use email.'));
     } finally {
       setLoading(false);
     }
   };
-
-  const handleGoogleError = (errorMsg: string) => {
-    setError(errorMsg);
-  };
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
-
-    // Password match validation
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
+    const nextErrors: Partial<Record<FieldKey, string>> = {};
+    if (!fullName.trim()) nextErrors.full_name = 'Enter your full name.';
+    if (!username.trim() || username.trim().length < 3) {
+      nextErrors.username = 'Choose a username with at least 3 letters or numbers, no spaces.';
+    } else if (!/^[a-zA-Z0-9._]{3,30}$/.test(username.trim())) {
+      nextErrors.username = 'Use only letters, numbers, dots, or underscores.';
     }
+    if (!email.trim()) nextErrors.email = 'Enter your email.';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) nextErrors.email = 'Enter a valid email, like name@gmail.com.';
+    if (phoneNumber && !isValidIndianMobile(phoneNumber)) {
+      nextErrors.phone_number = 'Enter a 10-digit Indian mobile number, or leave this blank.';
+    }
+    if (!password) nextErrors.password = 'Create a password.';
+    else if (password.length < 8) nextErrors.password = 'Use at least 8 characters.';
+    if (password !== confirmPassword) nextErrors.confirmPassword = 'Passwords do not match.';
+
+    setFieldErrors(nextErrors);
+    setError('');
+    if (Object.keys(nextErrors).length) return;
 
     setLoading(true);
-
     try {
-      // Backend expects 'username', so we map name to username.
-      await apiClient.post('/auth/register/', {
-        username: name,
-        email,
+      const response = await apiClient.post('/auth/register/', {
+        full_name: fullName.trim(),
+        username: username.trim().toLowerCase(),
+        email: email.trim(),
         password,
-        phone_number: phoneNumber,
+        phone_number: phoneNumber.trim(),
       });
 
-      setSuccess('Registration successful! Redirecting to login...');
-
-      // Redirect to the login page after a short delay
-      setTimeout(() => {
-        router.push('/login');
-      }, 1500);
-
-    } catch (err: any) {
-      console.error(err);
-      if (err.response?.data?.error) {
-        setError(err.response.data.error);
-      } else {
-        setError('Registration failed. Please try again.');
+      let access = response.data.access;
+      let refresh = response.data.refresh;
+      if (!access || !refresh) {
+        const tokenResponse = await apiClient.post('/auth/token/', {
+          username: username.trim().toLowerCase(),
+          password,
+        });
+        access = tokenResponse.data.access;
+        refresh = tokenResponse.data.refresh;
       }
+
+      const profileData = await login(access, refresh);
+      router.replace(afterAuthPath(profileData, nextPath));
+    } catch (err: any) {
+      setFieldErrors(fieldErrorsFromApi(err));
+      setError(apiErrorMessage(err, 'Could not create your account. Check the fields and try again.'));
     } finally {
       setLoading(false);
     }
   };
+
+  const loginHref = nextPath ? `/login?next=${encodeURIComponent(nextPath)}` : '/login';
 
   return (
     <Box
@@ -170,9 +215,8 @@ export default function RegisterClient() {
       }}
     >
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={false}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         style={{ width: '100%', maxWidth: '440px' }}
       >
         <Paper
@@ -187,8 +231,7 @@ export default function RegisterClient() {
             width: '100%',
           }}
         >
-          {/* Logo & Header */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3.5 }}>
             <Box sx={{
               width: 80, height: 80,
               bgcolor: 'white',
@@ -207,23 +250,23 @@ export default function RegisterClient() {
                 style={{ objectFit: 'contain' }}
               />
             </Box>
-            
+
             <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 900, color: 'text.primary', letterSpacing: '-0.02em' }}>
-              Create Account
+              Create your account
             </Typography>
-            <Typography sx={{ color: 'text.secondary', fontSize: '0.85rem', mt: 0.5 }}>
-              സൈൻ അപ്പ്
+            <Typography sx={{ color: 'text.secondary', fontSize: '0.85rem', mt: 0.5, textAlign: 'center' }}>
+              Free for students. Next you’ll pick your exam — about 30 seconds.
             </Typography>
           </Box>
 
           {error && (
-            <Alert 
-              severity="error" 
-              sx={{ 
-                mb: 3, 
+            <Alert
+              severity="error"
+              sx={{
+                mb: 3,
                 borderRadius: '12px',
-                bgcolor: 'rgba(239, 68, 68, 0.1)', 
-                color: '#EF4444', 
+                bgcolor: 'rgba(239, 68, 68, 0.1)',
+                color: '#EF4444',
                 border: '1px solid rgba(239, 68, 68, 0.2)',
                 '& .MuiAlert-icon': { color: '#EF4444' }
               }}
@@ -232,33 +275,40 @@ export default function RegisterClient() {
             </Alert>
           )}
 
-          {success && (
-            <Alert 
-              severity="success" 
-              sx={{ 
-                mb: 3, 
-                borderRadius: '12px',
-                bgcolor: 'rgba(46, 139, 87, 0.1)', 
-                color: '#22c55e', 
-                border: '1px solid rgba(46, 139, 87, 0.2)',
-                '& .MuiAlert-icon': { color: '#22c55e' }
-              }}
-            >
-              {success}
-            </Alert>
-          )}
-
-          <form onSubmit={handleSubmit}>
-            <Stack spacing={2.5}>
+          <form onSubmit={handleSubmit} noValidate>
+            <Stack spacing={2.25}>
               <StyledTextField
-                placeholder="Name (as Username)"
+                placeholder="Full name"
                 fullWidth
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
+                value={fullName}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFullName(value);
+                  applyUsernameFrom(value, email);
+                  setFieldErrors((prev) => ({ ...prev, full_name: undefined }));
+                }}
                 autoFocus
+                autoComplete="name"
+                error={Boolean(fieldErrors.full_name)}
+                helperText={fieldErrors.full_name || 'Your real name, as you want it on the leaderboard.'}
                 InputProps={{
                   startAdornment: <InputAdornment position="start"><PersonOutline /></InputAdornment>,
+                }}
+              />
+              <StyledTextField
+                placeholder="Username"
+                fullWidth
+                value={username}
+                onChange={(e) => {
+                  setUsernameTouched(true);
+                  setUsername(e.target.value.trim().toLowerCase());
+                  setFieldErrors((prev) => ({ ...prev, username: undefined }));
+                }}
+                autoComplete="username"
+                error={Boolean(fieldErrors.username)}
+                helperText={fieldErrors.username || 'No spaces. You can also log in with your email.'}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><BadgeOutlined /></InputAdornment>,
                 }}
               />
               <StyledTextField
@@ -266,62 +316,97 @@ export default function RegisterClient() {
                 type="email"
                 fullWidth
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setEmail(value);
+                  applyUsernameFrom(fullName, value);
+                  setFieldErrors((prev) => ({ ...prev, email: undefined }));
+                }}
+                autoComplete="email"
+                error={Boolean(fieldErrors.email)}
+                helperText={fieldErrors.email || 'Used to log in and recover your account.'}
                 InputProps={{
                   startAdornment: <InputAdornment position="start"><MailOutline /></InputAdornment>,
                 }}
               />
               <StyledTextField
-                placeholder="WhatsApp / Phone Number (ഫോൺ നമ്പർ)"
+                placeholder="WhatsApp number (optional)"
                 type="tel"
                 fullWidth
                 value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
+                onChange={(e) => {
+                  setPhoneNumber(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, phone_number: undefined }));
+                }}
+                autoComplete="tel"
+                error={Boolean(fieldErrors.phone_number)}
+                helperText={fieldErrors.phone_number || 'Optional. 10-digit number for study reminders.'}
                 InputProps={{
                   startAdornment: <InputAdornment position="start"><PhoneOutlined /></InputAdornment>,
                 }}
               />
               <StyledTextField
                 placeholder="Password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 fullWidth
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, password: undefined }));
+                }}
+                autoComplete="new-password"
+                error={Boolean(fieldErrors.password)}
+                helperText={fieldErrors.password || passwordHint}
                 InputProps={{
                   startAdornment: <InputAdornment position="start"><LockOutlined /></InputAdornment>,
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        type="button"
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
                 }}
               />
               <StyledTextField
-                placeholder="Confirm Password"
-                type="password"
+                placeholder="Confirm password"
+                type={showPassword ? 'text' : 'password'}
                 fullWidth
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, confirmPassword: undefined }));
+                }}
+                autoComplete="new-password"
+                error={Boolean(fieldErrors.confirmPassword)}
+                helperText={fieldErrors.confirmPassword || ' '}
                 InputProps={{
                   startAdornment: <InputAdornment position="start"><LockOutlined /></InputAdornment>,
                 }}
               />
-              
+
               <Button
                 type="submit"
                 variant="contained"
                 fullWidth
                 disabled={loading}
                 sx={{
-                  borderRadius: '14px', 
-                  height: '56px', 
-                  mt: 1.5,
-                  background: 'linear-gradient(135deg, #1B6B3A 0%, #2E8B57 100%)', 
-                  textTransform: 'none', 
+                  borderRadius: '14px',
+                  height: '56px',
+                  mt: 0.5,
+                  background: 'linear-gradient(135deg, #1B6B3A 0%, #2E8B57 100%)',
+                  textTransform: 'none',
                   fontSize: '1rem',
                   fontWeight: 700,
                   boxShadow: '0 4px 14px rgba(27, 107, 58, 0.3)',
                   transition: 'all 0.2s ease',
-                  '&:hover': { 
-                    background: 'linear-gradient(135deg, #1B6B3A 0%, #2E8B57 100%)', 
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #1B6B3A 0%, #2E8B57 100%)',
                     filter: 'brightness(1.1)',
                     boxShadow: '0 6px 20px rgba(27, 107, 58, 0.4)',
                   },
@@ -330,12 +415,11 @@ export default function RegisterClient() {
                   }
                 }}
               >
-                {loading ? <CircularProgress size={24} color="inherit" /> : 'Create Account'}
+                {loading ? <CircularProgress size={24} color="inherit" /> : 'Create account & continue'}
               </Button>
             </Stack>
           </form>
 
-          {/* Google Sign In Option */}
           <Box sx={{ display: 'flex', alignItems: 'center', my: 2.5 }}>
             <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
             <Typography variant="caption" sx={{ px: 2, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -344,27 +428,26 @@ export default function RegisterClient() {
             <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
           </Box>
 
-          <GoogleSignInButton 
-            onSuccess={handleGoogleSuccess} 
-            onError={handleGoogleError} 
+          <GoogleSignInButton
+            onSuccess={handleGoogleSuccess}
+            onError={setError}
           />
 
-          {/* Bottom link */}
           <Box sx={{ mt: 3, textAlign: 'center' }}>
             <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               Already have an account?{' '}
-              <MuiLink 
-                component={Link} 
-                href="/login" 
-                sx={{ 
-                  color: 'primary.main', 
-                  fontWeight: 700, 
+              <MuiLink
+                component={Link}
+                href={loginHref}
+                sx={{
+                  color: 'primary.main',
+                  fontWeight: 700,
                   textDecoration: 'none',
                   transition: 'color 0.2s',
-                  '&:hover': { color: 'primary.dark', textDecoration: 'underline' } 
+                  '&:hover': { color: 'primary.dark', textDecoration: 'underline' }
                 }}
               >
-                Login Here
+                Log in
               </MuiLink>
             </Typography>
           </Box>

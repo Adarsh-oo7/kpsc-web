@@ -91,6 +91,7 @@ export default function ProfilePage() {
     preferred_exams_ids: [] as number[],
     preferred_difficulty: '',
     preferred_language: '',
+    practice_mode: 'full',
     bio: '',
   });
 
@@ -122,6 +123,7 @@ export default function ProfilePage() {
         preferred_exams_ids: profileData.preferred_exams?.map((e: any) => e.id) || [],
         preferred_difficulty: profileData.preferred_difficulty || '',
         preferred_language: profileData.preferred_language || '',
+        practice_mode: profileData.practice_mode === 'focus' ? 'focus' : 'full',
         bio: profileData.bio || '',
       }));
 
@@ -163,6 +165,7 @@ export default function ProfilePage() {
     if (formData.district) data.append('district', formData.district);
     if (formData.preferred_difficulty) data.append('preferred_difficulty', formData.preferred_difficulty);
     if (formData.preferred_language) data.append('preferred_language', formData.preferred_language);
+    if (formData.practice_mode) data.append('practice_mode', formData.practice_mode);
     if (formData.bio) data.append('bio', formData.bio);
 
     formData.preferred_topics_ids.forEach(id => data.append('preferred_topics_ids', id.toString()));
@@ -637,6 +640,29 @@ export default function ProfilePage() {
                         >
                           <MenuItem value="en">English</MenuItem>
                           <MenuItem value="ml">Malayalam</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+
+                    <Grid size={12}>
+                      <FormControl fullWidth sx={{
+                        '& .MuiInputLabel-root': { color: 'text.secondary' },
+                        '& .MuiOutlinedInput-root': {
+                          '& fieldset': { borderColor: 'divider' },
+                          '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' },
+                          '&.Mui-focused fieldset': { borderColor: '#2E8B57' },
+                        },
+                        bgcolor: isDark ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.01)',
+                        borderRadius: '12px'
+                      }}>
+                        <InputLabel>Question mix</InputLabel>
+                        <Select
+                          value={formData.practice_mode}
+                          onChange={(e) => setFormData({ ...formData, practice_mode: e.target.value as string })}
+                          sx={{ color: 'text.primary' }}
+                        >
+                          <MenuItem value="full">Full syllabus — mixed questions from my exam</MenuItem>
+                          <MenuItem value="focus">Focus areas — more from weak / important sections</MenuItem>
                         </Select>
                       </FormControl>
                     </Grid>

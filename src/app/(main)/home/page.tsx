@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import {
@@ -16,6 +16,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import NewspaperIcon from '@mui/icons-material/Newspaper';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { useAppContext } from '@/context/AppContext';
+import apiClient from '@/lib/apiClient';
 import MasterPlanRoadmap from '@/components/MasterPlanRoadmap';
 import ExamCountdownBanner from '@/components/ExamCountdownBanner';
 import WeakAreaInterventionCard from '@/components/WeakAreaInterventionCard';
@@ -53,13 +54,14 @@ const quickActions = [
 
 export default function HomePage() {
   const theme = useTheme();
-  const { profile, fetcher, user, isLoading: ctxLoading } = useAppContext();
+  const { profile, fetcher, user, isLoading: ctxLoading, refreshProfile } = useAppContext();
   const router = useRouter();
+  const [savingMode, setSavingMode] = useState(false);
 
   useEffect(() => {
     if (!ctxLoading) {
       if (!user) {
-        router.push('/login');
+        router.push('/login?next=/home');
       } else if (profile?.is_owner !== true && (!profile?.preferred_exams || profile.preferred_exams.length === 0)) {
         router.push('/onboarding');
       }
@@ -85,6 +87,23 @@ export default function HomePage() {
   const goalProgress = Math.min(Math.round((answeredToday / dailyGoal) * 100), 100);
   const focusSection = syllabusData?.focus_section || syllabusData?.weak_sections?.[0] || dashData?.weakest_topics?.[0];
   const focusName = focusSection?.title || focusSection?.name || focusSection?.title;
+  const practiceMode = profile?.practice_mode === 'focus' ? 'focus' : 'full';
+  const focusQuizPath = focusSection?.key
+    ? `/quiz?section=${encodeURIComponent(focusSection.key)}&limit=15`
+    : '/quiz';
+  const todayQuizPath = practiceMode === 'focus' ? focusQuizPath : '/quiz';
+
+  const setPracticeMode = async (mode: 'full' | 'focus') => {
+    if (mode === practiceMode || savingMode) return;
+    setSavingMode(true);
+    try {
+      await apiClient.patch('/auth/profile/', { practice_mode: mode });
+      await refreshProfile();
+    } finally {
+      setSavingMode(false);
+    }
+  };
+
   const mission = (() => {
     if (streak > 0 && answeredToday === 0) {
       return {
@@ -97,15 +116,13 @@ export default function HomePage() {
     }
     if (answeredToday < dailyGoal) {
       return {
-        eyebrow: `Today's paper pace`,
+        eyebrow: practiceMode === 'focus' ? 'Focus practice' : 'Full syllabus mix',
         title: `${goalRemaining} left for today's ${dailyGoal}-question goal`,
-        body: focusName
-          ? `Next set: ${focusName}. Short sessions beat weekend marathons.`
-          : 'Twenty questions is one LDC-style section. Finish this, then stop or go again.',
-        cta: focusSection?.key ? `Practice ${focusName}` : 'Start today's set',
-        path: focusSection?.key
-          ? `/quiz?section=${encodeURIComponent(focusSection.key)}&limit=15`
-          : '/quiz',
+        body: practiceMode === 'focus' && focusName
+          ? `Next set: ${focusName}. More from the sections that cost you marks.`
+          : 'Mixed questions from your exam paper. Short sessions beat weekend marathons.',
+        cta: practiceMode === 'focus' && focusName ? `Practice ${focusName}` : "Start today's set",
+        path: todayQuizPath,
       };
     }
     if (focusSection?.key || focusSection?.slug) {
@@ -122,7 +139,7 @@ export default function HomePage() {
     return {
       eyebrow: 'Daily goal locked',
       title: 'Open a mock or current affairs',
-      body: 'Habit is done. Growth is a full paper or today's CA set.',
+      body: "Habit is done. Growth is a full paper or today's CA set.",
       cta: 'Mock tests',
       path: '/exams',
     };
@@ -178,9 +195,38 @@ export default function HomePage() {
               '& .MuiLinearProgress-bar': { background: 'linear-gradient(90deg, #1B6B3A, #22c55e)', borderRadius: 4 },
             }}
           />
-          <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary', mb: 2 }}>
+          <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary', mb: 1.5 }}>
             {answeredToday}/{dailyGoal} questions today · streak {streak} day{streak === 1 ? '' : 's'}
           </Typography>
+          <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+            {[
+              { key: 'full', label: 'Full syllabus' },
+              { key: 'focus', label: 'Focus areas' },
+            ].map((item) => {
+              const active = practiceMode === item.key;
+              return (
+                <Button
+                  key={item.key}
+                  size="small"
+                  disabled={savingMode}
+                  onClick={() => setPracticeMode(item.key as 'full' | 'focus')}
+                  variant={active ? 'contained' : 'outlined'}
+                  sx={{
+                    flex: 1,
+                    textTransform: 'none',
+                    fontWeight: 700,
+                    borderRadius: 2,
+                    py: 0.75,
+                    ...(active
+                      ? { background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)' }
+                      : { borderColor: 'divider', color: 'text.secondary' }),
+                  }}
+                >
+                  {item.label}
+                </Button>
+              );
+            })}
+          </Stack>
           <Button
             variant="contained"
             fullWidth

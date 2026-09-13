@@ -54,9 +54,9 @@ export default async function CurrentAffairSEOPage({ params }: PageProps) {
         <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
           The article you are looking for does not exist or has been removed.
         </Typography>
-        <Link href="/" style={{ textDecoration: 'none' }}>
+        <Link href="/current-affairs" style={{ textDecoration: 'none' }}>
           <Button variant="contained" startIcon={<ArrowBackIcon />}>
-            Back to Home
+            Back to Current Affairs
           </Button>
         </Link>
       </Box>
@@ -104,7 +104,7 @@ export default async function CurrentAffairSEOPage({ params }: PageProps) {
             {item.psc_likelihood === 'high' && (
               <Chip 
                 icon={<LocalFireDepartmentIcon style={{ color: '#ff9800' }} />}
-                label="High PSC Likelihood" 
+                label="Likely in PSC" 
                 variant="outlined" 
                 size="small"
                 sx={{ borderColor: 'warning.main', color: 'warning.main', bgcolor: 'rgba(255, 152, 0, 0.05)' }} 
@@ -128,7 +128,7 @@ export default async function CurrentAffairSEOPage({ params }: PageProps) {
           {item.ai_summary && (
             <Box sx={{ p: 3, mb: 4, borderRadius: 3, bgcolor: 'rgba(255, 152, 0, 0.05)', border: '1px solid rgba(255, 152, 0, 0.15)' }}>
               <Typography variant="subtitle2" sx={{ fontWeight: 'bold', color: 'warning.main', mb: 1 }}>
-                Quick AI Summary (Malayalam / English study highlight)
+                PSC takeaway
               </Typography>
               <Typography variant="body1" sx={{ color: 'text.primary', lineHeight: 1.6, fontStyle: 'italic' }}>
                 {item.ai_summary}
@@ -140,18 +140,39 @@ export default async function CurrentAffairSEOPage({ params }: PageProps) {
           <Typography variant="body1" sx={{ color: 'text.primary', lineHeight: 1.8, fontSize: '1.05rem', whiteSpace: 'pre-line' }}>
             {item.content}
           </Typography>
+
+          {item.mcq?.question && (
+            <Box sx={{ mt: 4, p: 3, borderRadius: 3, border: '1px solid', borderColor: 'divider' }}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1.5, color: 'primary.main' }}>
+                Practice this question
+              </Typography>
+              <Typography sx={{ fontWeight: 700, mb: 1.5 }}>{item.mcq.question}</Typography>
+              <Stack spacing={0.75}>
+                {(Array.isArray(item.mcq.options) ? item.mcq.options : Object.values(item.mcq.options || {})).map((option: string, index: number) => (
+                  <Typography key={index} sx={{ color: 'text.secondary' }}>
+                    {['A', 'B', 'C', 'D'][index] || index + 1}) {option}
+                  </Typography>
+                ))}
+              </Stack>
+              {item.mcq.explanation && (
+                <Typography sx={{ mt: 2, color: 'text.secondary', fontSize: '0.95rem' }}>
+                  {item.mcq.explanation}
+                </Typography>
+              )}
+            </Box>
+          )}
         </CardContent>
       </Card>
 
       <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Link href="/" style={{ textDecoration: 'none' }}>
+        <Link href="/current-affairs" style={{ textDecoration: 'none' }}>
           <Button variant="outlined">
-            Back to Home
+            Back to Current Affairs
           </Button>
         </Link>
-        <Link href="/register" style={{ textDecoration: 'none' }}>
+        <Link href="/quiz?current_affairs=weekly" style={{ textDecoration: 'none' }}>
           <Button variant="contained">
-            Subscribe for Daily AI Summaries
+            This week's quiz
           </Button>
         </Link>
       </Box>

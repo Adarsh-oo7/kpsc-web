@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import {
   Box,
   Typography,
@@ -15,7 +15,8 @@ import {
   Paper,
   Stack,
   Tabs,
-  Tab
+  Tab,
+  IconButton,
 } from '@mui/material';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -23,12 +24,14 @@ import PersonOutline from '@mui/icons-material/PersonOutline';
 import LockOutlined from '@mui/icons-material/LockOutlined';
 import SchoolOutlinedIcon from '@mui/icons-material/SchoolOutlined';
 import PersonPinOutlinedIcon from '@mui/icons-material/PersonPinOutlined';
-import { motion, AnimatePresence } from 'framer-motion';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { motion } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
 import GoogleSignInButton from '@/components/GoogleSignInButton';
+import { afterAuthPath, apiErrorMessage, safeNextPath } from '@/lib/auth';
 
-// Styled text field that dynamically updates focused border color based on tab active state
 const StyledTextField = styled(TextField, {
   shouldForwardProp: (prop) => prop !== 'activeTab',
 })<{ activeTab: number }>(({ theme, activeTab }) => ({
@@ -36,7 +39,7 @@ const StyledTextField = styled(TextField, {
     backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.02)',
     borderRadius: '14px',
     color: theme.palette.text.primary,
-    height: '56px',
+    minHeight: '56px',
     border: '1px solid',
     borderColor: theme.palette.mode === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)',
     transition: 'all 0.3s ease',
@@ -51,7 +54,7 @@ const StyledTextField = styled(TextField, {
     },
     '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
   },
-  '& .MuiInputBase-input': { 
+  '& .MuiInputBase-input': {
     paddingLeft: '10px',
     fontFamily: "'Satoshi', sans-serif",
     '&::placeholder': {
@@ -59,82 +62,90 @@ const StyledTextField = styled(TextField, {
       opacity: 1,
     },
     '&:-webkit-autofill': {
-      WebkitBoxShadow: theme.palette.mode === 'dark' 
-        ? '0 0 0 1000px #161B22 inset !important' 
+      WebkitBoxShadow: theme.palette.mode === 'dark'
+        ? '0 0 0 1000px #161B22 inset !important'
         : '0 0 0 1000px #ffffff inset !important',
       WebkitTextFillColor: `${theme.palette.text.primary} !important`,
       transition: 'background-color 5000s ease-in-out 0s',
     }
   },
   '& .MuiInputAdornment-root': { color: theme.palette.text.secondary, marginRight: '8px', marginLeft: '8px' },
+  '& .MuiFormHelperText-root': {
+    marginLeft: '6px',
+    fontFamily: "'Satoshi', sans-serif",
+  },
 }));
 
-export default function LoginClient() {
+export default function LoginClient({
+  nextParam = null,
+  tabParam = null,
+  typeParam = null,
+}: {
+  nextParam?: string | null;
+  tabParam?: string | null;
+  typeParam?: string | null;
+}) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { login, user, profile, isLoading } = useAppContext();
+  const { login, logout, user, profile, isLoading } = useAppContext();
+  const nextPath = safeNextPath(nextParam);
 
-  // Tab indices: 0 = Student Login, 1 = Institute Login
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(
+    tabParam === '1' || typeParam === 'institute' ? 1 : 0
+  );
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{ username?: string; password?: string }>({});
   const [loading, setLoading] = useState(false);
 
-  // Set default tab based on query param
-  useEffect(() => {
-    const tabParam = searchParams.get('tab');
-    if (tabParam === '1' || searchParams.get('type') === 'institute') {
-      setActiveTab(1);
-    } else {
-      setActiveTab(0);
-    }
-  }, [searchParams]);
-
-  // Redirect if user is already logged in
   useEffect(() => {
     if (!isLoading && user) {
-      if (profile?.is_owner === true) {
-        router.push('/institute/dashboard');
-      } else if (!profile?.preferred_exams || profile.preferred_exams.length === 0) {
-        router.push('/onboarding');
-      } else {
-        router.push('/home');
-      }
+      router.replace(afterAuthPath(profile, nextPath));
     }
-  }, [user, profile, isLoading, router]);
+  }, [user, profile, isLoading, router, nextPath]);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
     setError('');
+    setFieldErrors({});
     setUsername('');
     setPassword('');
   };
 
+  const finishLogin = async (access: string, refresh: string) => {
+    const profileData = await login(access, refresh);
+    if (activeTab === 1 && profileData?.is_owner !== true) {
+      logout();
+      setError('This is a student account. Use Student Login, or register your academy from Institute Login.');
+      return;
+    }
+    if (activeTab === 0 && profileData?.is_owner === true) {
+      router.replace('/institute/dashboard');
+      return;
+    }
+    router.replace(afterAuthPath(profileData, nextPath));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const nextErrors: { username?: string; password?: string } = {};
+    if (!username.trim()) nextErrors.username = 'Enter the email or username you used to sign up.';
+    if (!password) nextErrors.password = 'Enter your password.';
+    setFieldErrors(nextErrors);
     setError('');
+    if (Object.keys(nextErrors).length) return;
+
     setLoading(true);
-
     try {
-      const tokenResponse = await apiClient.post('/auth/token/', { username, password });
+      const tokenResponse = await apiClient.post('/auth/token/', {
+        username: username.trim(),
+        password,
+      });
       const { access, refresh } = tokenResponse.data;
-
-      const profileData = await login(access, refresh);
-
-      if (profileData?.is_owner === true) {
-        router.push('/institute/dashboard');
-      } else if (activeTab === 1 && profileData?.is_owner !== true) {
-        setError('This account is not registered as an Institute Owner.');
-      } else if (!profileData?.preferred_exams || profileData.preferred_exams.length === 0) {
-        router.push('/onboarding');
-      } else {
-        router.push('/home');
-      }
-
+      await finishLogin(access, refresh);
     } catch (err: any) {
-      console.error(err);
-      setError('Login failed. Please check your username and password.');
+      setError(apiErrorMessage(err, 'Login failed. Please check your email/username and password.'));
     } finally {
       setLoading(false);
     }
@@ -145,46 +156,30 @@ export default function LoginClient() {
     setLoading(true);
     try {
       const response = await apiClient.post('/auth/google/', { credential });
-      const { access, refresh, has_preferred_exams } = response.data;
-
-      const profileData = await login(access, refresh);
-
-      if (profileData?.is_owner === true) {
-        router.push('/institute/dashboard');
-      } else if (!has_preferred_exams || !profileData?.preferred_exams || profileData.preferred_exams.length === 0) {
-        router.push('/onboarding');
-      } else {
-        router.push('/home');
-      }
+      const { access, refresh } = response.data;
+      await finishLogin(access, refresh);
     } catch (err: any) {
-      console.error(err);
-      if (err.response?.data?.error) {
-        setError(err.response.data.error);
-      } else {
-        setError('Google Sign-In failed. Please try again.');
-      }
+      setError(apiErrorMessage(err, 'Google Sign-In failed. Please try again, or use email.'));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleError = (errorMsg: string) => {
-    setError(errorMsg);
-  };
-
   if (isLoading) {
     return (
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh', 
-        bgcolor: 'background.default' 
+      <Box sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        bgcolor: 'background.default'
       }}>
         <CircularProgress sx={{ color: activeTab === 0 ? '#2E8B57' : '#8B5CF6' }} />
       </Box>
     );
   }
+
+  const registerHref = nextPath ? `/register?next=${encodeURIComponent(nextPath)}` : '/register';
 
   return (
     <Box
@@ -201,19 +196,17 @@ export default function LoginClient() {
             return theme.palette.mode === 'dark'
               ? 'radial-gradient(circle at 80% 20%, rgba(27, 107, 58, 0.12) 0%, transparent 50%), radial-gradient(circle at 15% 80%, rgba(245, 158, 11, 0.08) 0%, transparent 50%)'
               : 'radial-gradient(circle at 80% 20%, rgba(27, 107, 58, 0.06) 0%, transparent 50%), radial-gradient(circle at 15% 80%, rgba(245, 158, 11, 0.04) 0%, transparent 50%)';
-          } else {
-            return theme.palette.mode === 'dark'
-              ? 'radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%), radial-gradient(circle at 15% 80%, rgba(46, 139, 87, 0.08) 0%, transparent 50%)'
-              : 'radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%), radial-gradient(circle at 15% 80%, rgba(46, 139, 87, 0.04) 0%, transparent 50%)';
           }
+          return theme.palette.mode === 'dark'
+            ? 'radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%), radial-gradient(circle at 15% 80%, rgba(46, 139, 87, 0.08) 0%, transparent 50%)'
+            : 'radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%), radial-gradient(circle at 15% 80%, rgba(46, 139, 87, 0.04) 0%, transparent 50%)';
         },
         transition: 'background-image 0.5s ease',
       }}
     >
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={false}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         style={{ width: '100%', maxWidth: '450px' }}
       >
         <Paper
@@ -228,7 +221,6 @@ export default function LoginClient() {
             width: '100%',
           }}
         >
-          {/* Logo & Header */}
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3.5 }}>
             <Box sx={{
               width: 80, height: 80,
@@ -250,7 +242,6 @@ export default function LoginClient() {
               />
             </Box>
 
-            {/* Custom MUI Tabs switcher for student/institute portal */}
             <Tabs
               value={activeTab}
               onChange={handleTabChange}
@@ -284,36 +275,38 @@ export default function LoginClient() {
                 }
               }}
             >
-              <Tab 
-                label="Student Login" 
-                icon={<PersonPinOutlinedIcon sx={{ fontSize: 18 }} />} 
+              <Tab
+                label="Student Login"
+                icon={<PersonPinOutlinedIcon sx={{ fontSize: 18 }} />}
                 iconPosition="start"
                 sx={{ flex: 1 }}
               />
-              <Tab 
-                label="Institute Login" 
-                icon={<SchoolOutlinedIcon sx={{ fontSize: 18 }} />} 
+              <Tab
+                label="Institute Login"
+                icon={<SchoolOutlinedIcon sx={{ fontSize: 18 }} />}
                 iconPosition="start"
                 sx={{ flex: 1 }}
               />
             </Tabs>
-            
+
             <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 900, color: 'text.primary', letterSpacing: '-0.02em', textAlign: 'center' }}>
-              {activeTab === 0 ? 'Welcome Back' : 'Institute Portal'}
+              {activeTab === 0 ? 'Welcome back' : 'Institute portal'}
             </Typography>
             <Typography sx={{ color: 'text.secondary', fontSize: '0.875rem', mt: 0.5, textAlign: 'center' }}>
-              {activeTab === 0 ? 'Login to continue your PSC preparation' : 'Coaching Center Owner Login'}
+              {activeTab === 0
+                ? 'Use your email or username. After login we take you to today’s practice.'
+                : 'For coaching-centre owners only. Students should use Student Login.'}
             </Typography>
           </Box>
 
           {error && (
-            <Alert 
-              severity="error" 
-              sx={{ 
-                mb: 3, 
+            <Alert
+              severity="error"
+              sx={{
+                mb: 3,
                 borderRadius: '12px',
-                bgcolor: 'rgba(239, 68, 68, 0.1)', 
-                color: '#EF4444', 
+                bgcolor: 'rgba(239, 68, 68, 0.1)',
+                color: '#EF4444',
                 border: '1px solid rgba(239, 68, 68, 0.2)',
                 '& .MuiAlert-icon': { color: '#EF4444' }
               }}
@@ -322,58 +315,80 @@ export default function LoginClient() {
             </Alert>
           )}
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} noValidate>
             <Stack spacing={2.5}>
               <StyledTextField
-                placeholder="Username"
+                placeholder={activeTab === 0 ? 'Email or username' : 'Institute username'}
                 fullWidth
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, username: undefined }));
+                }}
                 autoFocus
+                autoComplete="username"
                 activeTab={activeTab}
+                error={Boolean(fieldErrors.username)}
+                helperText={fieldErrors.username || (activeTab === 0 ? 'The email you signed up with also works here.' : 'Use the academy owner username.')}
                 InputProps={{
                   startAdornment: <InputAdornment position="start"><PersonOutline /></InputAdornment>,
                 }}
               />
               <StyledTextField
                 placeholder="Password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 fullWidth
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setFieldErrors((prev) => ({ ...prev, password: undefined }));
+                }}
+                autoComplete="current-password"
                 activeTab={activeTab}
+                error={Boolean(fieldErrors.password)}
+                helperText={fieldErrors.password || ' '}
                 InputProps={{
                   startAdornment: <InputAdornment position="start"><LockOutlined /></InputAdornment>,
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        type="button"
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
                 }}
               />
-              
+
               <Button
                 type="submit"
                 variant="contained"
                 fullWidth
                 disabled={loading}
                 sx={{
-                  borderRadius: '14px', 
-                  height: '56px', 
-                  mt: 1.5,
-                  background: activeTab === 0 
+                  borderRadius: '14px',
+                  height: '56px',
+                  mt: 0.5,
+                  background: activeTab === 0
                     ? 'linear-gradient(135deg, #1B6B3A 0%, #2E8B57 100%)'
-                    : 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)', 
-                  textTransform: 'none', 
+                    : 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)',
+                  textTransform: 'none',
                   fontSize: '1rem',
                   fontWeight: 700,
-                  boxShadow: activeTab === 0 
+                  boxShadow: activeTab === 0
                     ? '0 4px 14px rgba(27, 107, 58, 0.3)'
                     : '0 4px 14px rgba(139, 92, 246, 0.3)',
                   transition: 'all 0.3s ease',
-                  '&:hover': { 
-                    background: activeTab === 0 
+                  '&:hover': {
+                    background: activeTab === 0
                       ? 'linear-gradient(135deg, #1B6B3A 0%, #2E8B57 100%)'
-                      : 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)', 
+                      : 'linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%)',
                     filter: 'brightness(1.1)',
-                    boxShadow: activeTab === 0 
+                    boxShadow: activeTab === 0
                       ? '0 6px 20px rgba(27, 107, 58, 0.4)'
                       : '0 6px 20px rgba(139, 92, 246, 0.4)',
                   },
@@ -382,12 +397,11 @@ export default function LoginClient() {
                   }
                 }}
               >
-                {loading ? <CircularProgress size={24} color="inherit" /> : 'Log In'}
+                {loading ? <CircularProgress size={24} color="inherit" /> : 'Log in'}
               </Button>
             </Stack>
           </form>
 
-          {/* Render Google Sign In button only for student tab */}
           {activeTab === 0 && (
             <>
               <Box sx={{ display: 'flex', alignItems: 'center', my: 2.5 }}>
@@ -398,14 +412,13 @@ export default function LoginClient() {
                 <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
               </Box>
 
-              <GoogleSignInButton 
-                onSuccess={handleGoogleSuccess} 
-                onError={handleGoogleError} 
+              <GoogleSignInButton
+                onSuccess={handleGoogleSuccess}
+                onError={setError}
               />
             </>
           )}
 
-          {/* Divider */}
           <Box sx={{ display: 'flex', alignItems: 'center', mt: 3, mb: activeTab === 0 ? 3 : 2 }}>
             <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
             <Typography variant="caption" sx={{ px: 2, color: 'text.disabled', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
@@ -417,40 +430,38 @@ export default function LoginClient() {
           <Stack spacing={1.5} sx={{ alignItems: 'center' }}>
             {activeTab === 0 ? (
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                Don’t have an account?{' '}
-                <MuiLink 
-                  component={Link} 
-                  href="/register" 
-                  sx={{ 
-                    color: 'primary.main', 
-                    fontWeight: 700, 
+                New here?{' '}
+                <MuiLink
+                  component={Link}
+                  href={registerHref}
+                  sx={{
+                    color: 'primary.main',
+                    fontWeight: 700,
                     textDecoration: 'none',
                     transition: 'color 0.2s',
-                    '&:hover': { color: 'primary.dark', textDecoration: 'underline' } 
+                    '&:hover': { color: 'primary.dark', textDecoration: 'underline' }
                   }}
                 >
-                  Create Account
+                  Create a free student account
                 </MuiLink>
               </Typography>
             ) : (
-              <>
-                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                  Don’t have an account?{' '}
-                  <MuiLink 
-                    component={Link} 
-                    href="/institute/register" 
-                    sx={{ 
-                      color: '#8B5CF6', 
-                      fontWeight: 700, 
-                      textDecoration: 'none',
-                      transition: 'color 0.2s',
-                      '&:hover': { color: '#6D28D9', textDecoration: 'underline' } 
-                    }}
-                  >
-                    Register Academy Here
-                  </MuiLink>
-                </Typography>
-              </>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                Don’t have an academy account?{' '}
+                <MuiLink
+                  component={Link}
+                  href="/institute/register"
+                  sx={{
+                    color: '#8B5CF6',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    transition: 'color 0.2s',
+                    '&:hover': { color: '#6D28D9', textDecoration: 'underline' }
+                  }}
+                >
+                  Register academy
+                </MuiLink>
+              </Typography>
             )}
           </Stack>
         </Paper>

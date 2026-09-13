@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import {
-  Box, Typography, CircularProgress, Stack, Grid, IconButton, Button, Dialog, DialogContent, DialogTitle, Radio, RadioGroup, FormControlLabel, Chip
+  Box, Typography, CircularProgress, Stack, IconButton, Button, Dialog, DialogContent, DialogTitle, Radio, RadioGroup, FormControlLabel, Chip, Alert
 } from '@mui/material';
 import { motion, AnimatePresence } from 'framer-motion';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
@@ -12,7 +12,6 @@ import BookmarkIcon from '@mui/icons-material/Bookmark';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import { useAppContext } from '@/context/AppContext';
-import { alpha } from '@mui/material/styles';
 
 interface MCQ {
   question: string;
@@ -28,51 +27,79 @@ function getParsedMcq(newsItem: any): MCQ | null {
     try {
       mcq = JSON.parse(mcq);
     } catch (e) {
-      console.error("Failed to parse MCQ JSON string:", e);
       return null;
     }
   }
-  if (
-    mcq &&
-    typeof mcq.question === 'string' &&
-    Array.isArray(mcq.options) &&
-    mcq.options.length >= 3 &&
-    typeof mcq.correct_index === 'number'
-  ) {
-    return mcq as MCQ;
+  if (!mcq || typeof mcq !== 'object') return null;
+
+  let options: string[] = [];
+  if (Array.isArray(mcq.options)) {
+    options = mcq.options.map((opt: unknown) => String(opt || '')).filter(Boolean);
+  } else if (mcq.options && typeof mcq.options === 'object') {
+    options = ['A', 'B', 'C', 'D']
+      .map((letter) => String(mcq.options[letter] || mcq.options[letter.toLowerCase()] || ''))
+      .filter(Boolean);
   }
-  return null;
+  if (options.length < 4) return null;
+
+  let correctIndex = typeof mcq.correct_index === 'number' ? mcq.correct_index : -1;
+  const letter = String(mcq.correct_answer || '').trim().toUpperCase();
+  if (correctIndex < 0 && ['A', 'B', 'C', 'D'].includes(letter)) {
+    correctIndex = letter.charCodeAt(0) - 65;
+  }
+  if (correctIndex < 0 || correctIndex > 3) return null;
+  if (typeof mcq.question !== 'string' || !mcq.question.trim()) return null;
+
+  return {
+    question: mcq.question,
+    options,
+    correct_index: correctIndex,
+    explanation: mcq.explanation || '',
+  };
+}
+
+function localISODate(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function dateLabel(dateStr: string) {
+  return new Date(`${dateStr}T12:00:00`).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+}
+
+function unwrapAffairs(payload: any): any[] {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.results)) return payload.results;
+  return [];
 }
 
 export default function CurrentAffairsClient() {
   const router = useRouter();
   const { fetcher } = useAppContext();
-  const [selectedDate, setSelectedDate] = useState(() => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
-  });
+  const [selectedDate, setSelectedDate] = useState(localISODate);
   const [savedArticles, setSavedArticles] = useState<number[]>([]);
   const [activeMcqNews, setActiveMcqNews] = useState<any | null>(null);
   const [mcqAnswer, setMcqAnswer] = useState<string>('');
   const [showExplanation, setShowExplanation] = useState(false);
 
-  // Fetch current affairs from the backend endpoint
   const { data, error, isLoading } = useSWR(
     '/public/current-affairs/',
     fetcher
   );
+  const allNews = unwrapAffairs(data);
 
-  // Automatically select the most recent date with news if selectedDate has no news
   useEffect(() => {
-    if (data && data.length > 0) {
-      const dates = Array.from(new Set(data.map((n: any) => n.publication_date)))
-        .sort()
-        .reverse() as string[];
-      if (dates.length > 0 && !dates.includes(selectedDate)) {
-        setSelectedDate(dates[0]);
-      }
+    if (allNews.length === 0) return;
+    const dates = Array.from(new Set(allNews.map((n: any) => n.publication_date)))
+      .filter(Boolean)
+      .sort()
+      .reverse() as string[];
+    if (dates.length > 0 && !dates.includes(selectedDate)) {
+      setSelectedDate(dates[0]);
     }
-  }, [data, selectedDate]);
+  }, [allNews, selectedDate]);
 
   const toggleSaveArticle = (id: number) => {
     setSavedArticles(prev =>
@@ -94,38 +121,35 @@ export default function CurrentAffairsClient() {
     );
   }
 
-  // Filter items matching the selected date (or show all if none match exactly)
-  const allNews = data || [];
   const filteredNews = allNews.filter((item: any) => item.publication_date === selectedDate);
   const displayNews = filteredNews.length > 0 ? filteredNews : allNews.slice(0, 10);
-
-  // Get date choices for the selector (last 5 active dates from API, or last 5 calendar days)
   const dateOptions = Array.from(new Set(allNews.map((n: any) => n.publication_date)))
+    .filter(Boolean)
     .sort()
     .reverse()
-    .slice(0, 5) as string[];
-
-  // Fallback dates if API list is empty
-  if (dateOptions.length === 0) {
-    for (let i = 0; i < 5; i++) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      dateOptions.push(d.toISOString().split('T')[0]);
-    }
-  }
+    .slice(0, 7) as string[];
+  const weekCutoff = new Date();
+  weekCutoff.setDate(weekCutoff.getDate() - 7);
+  const weekHighlight = allNews
+    .filter((item: any) => item.publication_date && new Date(`${item.publication_date}T12:00:00`) >= weekCutoff)
+    .sort((a: any, b: any) => {
+      const rank = (item: any) => (item.psc_likelihood === 'high' ? 0 : item.psc_likelihood === 'medium' ? 1 : 2);
+      return rank(a) - rank(b);
+    })
+    .slice(0, 3);
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', pb: 6 }}>
       {/* Title */}
       <Box sx={{ mb: 4 }}>
         <Typography sx={{ fontSize: '0.8rem', color: '#2563EB', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-          Current Affairs 📰
+          Current Affairs
         </Typography>
         <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 950, color: 'text.primary', mt: 0.5 }}>
-          Daily News Feed
+          Today's PSC news
         </Typography>
         <Typography sx={{ color: 'text.secondary', fontSize: '0.9rem', mt: 0.5 }}>
-          Read carefully curated news updates with probability tags indicating high-yield PSC topics.
+          Read the day's news, practise the MCQ, then take this week's quiz. Tags mark items more likely to appear in Kerala PSC.
         </Typography>
       </Box>
 
@@ -133,8 +157,7 @@ export default function CurrentAffairsClient() {
       <Stack direction="row" spacing={1} overflow="auto" sx={{ pb: 2, mb: 4, scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>
         {dateOptions.map((dateStr) => {
           const isSelected = selectedDate === dateStr;
-          const dt = new Date(dateStr);
-          const label = dt.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+          const label = dateLabel(dateStr);
           return (
             <Button
               key={dateStr}
@@ -176,24 +199,43 @@ export default function CurrentAffairsClient() {
           <Stack direction="row" alignItems="center" spacing={1.5} sx={{ mb: 2 }}>
             <EmojiEventsIcon sx={{ color: '#F59E0B' }} />
             <Typography variant="subtitle1" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: 'text.primary' }}>
-              Weekly Digest Overview
+              This week's quiz
             </Typography>
           </Stack>
-          <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary', lineHeight: 1.6 }}>
-            • India ranking in Global Innovation Index 2026: <strong>39th Position</strong><br />
-            • New Governor of Reserve Bank of India appointed<br />
-            • Kerala budget proposals announce infrastructure push of ₹2.3 Lakh Cr
-          </Typography>
+          {weekHighlight.length > 0 ? (
+            <Stack spacing={0.5}>
+              {weekHighlight.map((item: any) => (
+                <Typography key={item.id} sx={{ fontSize: '0.8rem', color: 'text.secondary', lineHeight: 1.6 }}>
+                  • {item.title}
+                </Typography>
+              ))}
+            </Stack>
+          ) : (
+            <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary', lineHeight: 1.6 }}>
+              Recent Current Affairs questions from this week. Same A–D pattern as the PSC paper.
+            </Typography>
+          )}
           <Button
             variant="text"
             size="small"
             onClick={() => router.push('/quiz?current_affairs=weekly')}
             sx={{ color: '#F59E0B', textTransform: 'none', fontWeight: 700, mt: 1.5, p: 0 }}
           >
-            Take Weekly News Quiz →
+            Take this week's Current Affairs quiz →
           </Button>
         </Box>
       </motion.div>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 3, borderRadius: '16px' }}>
+          Could not load Current Affairs. Check your connection and try again.
+        </Alert>
+      )}
+      {!error && displayNews.length === 0 && (
+        <Alert severity="info" sx={{ mb: 3, borderRadius: '16px' }}>
+          No Current Affairs for this date yet. Try another day, or take this week’s quiz above.
+        </Alert>
+      )}
 
       {/* News List */}
       <Stack spacing={3}>
@@ -231,7 +273,7 @@ export default function CurrentAffairsClient() {
                     <Stack direction="row" alignItems="center" spacing={1}>
                       {isHighChance && (
                         <Chip
-                          label="🔥 HIGH PSC PROBABILITY"
+                          label="Likely in PSC"
                           size="small"
                           sx={{
                             fontSize: '0.65rem', fontWeight: 900,
@@ -270,7 +312,7 @@ export default function CurrentAffairsClient() {
                           '&:hover': { borderColor: '#2563EB', background: 'rgba(37,99,235,0.04)' }
                         }}
                       >
-                        Solve News MCQ
+                        Practice this question
                       </Button>
                     )}
                     {news.slug && (
@@ -285,7 +327,7 @@ export default function CurrentAffairsClient() {
                           '&:hover': { color: 'text.primary' }
                         }}
                       >
-                        Read Full Analysis →
+                        Read the note →
                       </Button>
                     )}
                   </Stack>
@@ -320,7 +362,7 @@ export default function CurrentAffairsClient() {
           return (
             <>
               <DialogTitle sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: 'text.primary', pb: 1 }}>
-                💡 Practice MCQ
+                💡 Practice this question
               </DialogTitle>
               <DialogContent>
                 <Typography sx={{ fontSize: '0.9rem', color: 'text.secondary', mb: 3 }}>

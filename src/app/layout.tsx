@@ -156,7 +156,7 @@ const websiteSchema = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={jetbrainsMono.variable}>
+    <html lang="en" className={jetbrainsMono.variable} suppressHydrationWarning>
       <head>
         {/* Fontshare CDN — Cabinet Grotesk + Satoshi */}
         <link rel="preconnect" href="https://api.fontshare.com" />
@@ -175,10 +175,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Web App Manifest */}
         <link rel="manifest" href="/manifest.json" />
 
-        {/* Google Identity Services SDK */}
-        {/* eslint-disable-next-line @next/next/no-sync-scripts */}
-        <script src="https://accounts.google.com/gsi/client" async defer></script>
-
         {/* JSON-LD: Organisation + Website schema */}
         <script
           type="application/ld+json"
@@ -189,7 +185,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <Providers>
           {children}
         </Providers>

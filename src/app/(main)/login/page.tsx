@@ -1,7 +1,5 @@
 import LoginClient from './LoginClient';
 import type { Metadata } from 'next';
-import { Suspense } from 'react';
-import { Box, CircularProgress } from '@mui/material';
 
 export const metadata: Metadata = {
   title: 'Login — Student & Institute Portal | KPSC Master',
@@ -9,14 +7,17 @@ export const metadata: Metadata = {
   keywords: ['kpsc master login', 'kerala psc thulasi login', 'coaching institute portal', 'psc preparation login'],
 };
 
-export default function Page() {
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string; tab?: string; type?: string }>;
+}) {
+  const params = await searchParams;
   return (
-    <Suspense fallback={
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: 'background.default' }}>
-        <CircularProgress sx={{ color: '#2E8B57' }} />
-      </Box>
-    }>
-      <LoginClient />
-    </Suspense>
+    <LoginClient
+      nextParam={params.next ?? null}
+      tabParam={params.tab ?? null}
+      typeParam={params.type ?? null}
+    />
   );
 }

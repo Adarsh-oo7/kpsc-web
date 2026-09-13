@@ -1,7 +1,5 @@
 import RegisterClient from './RegisterClient';
 import type { Metadata } from 'next';
-import { Suspense } from 'react';
-import { Box, CircularProgress } from '@mui/material';
 
 export const metadata: Metadata = {
   title: 'Register — Create Account | KPSC Master',
@@ -9,14 +7,11 @@ export const metadata: Metadata = {
   keywords: ['kpsc master register', 'kerala psc signup', 'free psc mock tests sign up'],
 };
 
-export default function Page() {
-  return (
-    <Suspense fallback={
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: 'background.default' }}>
-        <CircularProgress sx={{ color: '#2E8B57' }} />
-      </Box>
-    }>
-      <RegisterClient />
-    </Suspense>
-  );
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const params = await searchParams;
+  return <RegisterClient nextParam={params.next ?? null} />;
 }
