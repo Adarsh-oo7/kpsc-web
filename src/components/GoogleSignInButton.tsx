@@ -57,7 +57,6 @@ export default function GoogleSignInButton({ onSuccess, onError }: GoogleSignInB
     const start = async () => {
       const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
       if (!clientId) {
-        gsiError.current('Google Sign-In is unavailable. Create an account with email instead.');
         return;
       }
 

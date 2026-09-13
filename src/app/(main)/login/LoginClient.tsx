@@ -200,6 +200,7 @@ export default function LoginClient({
   }
 
   const registerHref = nextPath ? `/register?next=${encodeURIComponent(nextPath)}` : '/register';
+  const googleEnabled = Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
 
   return (
     <Box
@@ -215,23 +216,34 @@ export default function LoginClient({
           display: { xs: 'none', md: 'flex' },
           flexDirection: 'column',
           justifyContent: 'center',
+          position: 'relative',
+          overflow: 'hidden',
           px: { md: 6, lg: 8 },
           py: 6,
-          background: isDark
-            ? `linear-gradient(160deg, rgba(27,107,58,0.28) 0%, rgba(15,17,23,0.4) 48%, rgba(245,158,11,0.12) 100%), ${theme.palette.background.default}`
-            : 'linear-gradient(160deg, #E8F5EC 0%, #F8FAFC 46%, #FFF7E8 100%)',
-          borderRight: '1px solid',
-          borderColor: isDark ? 'rgba(46,139,87,0.25)' : 'rgba(27,107,58,0.12)',
+          background: `linear-gradient(165deg, ${GREEN} 0%, #166534 48%, #134E2A 100%)`,
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            width: 420,
+            height: 420,
+            right: -120,
+            bottom: -140,
+            borderRadius: '50%',
+            background: `radial-gradient(circle, ${AMBER} 0%, rgba(245,158,11,0) 68%)`,
+            opacity: 0.28,
+            pointerEvents: 'none',
+          },
         }}
       >
         <Typography
           sx={{
             fontSize: '0.78rem',
             fontWeight: 800,
-            letterSpacing: '0.12em',
+            letterSpacing: '0.14em',
             textTransform: 'uppercase',
-            color: GREEN_LIGHT,
+            color: '#FCD34D',
             mb: 1.5,
+            position: 'relative',
           }}
         >
           Kerala PSC prep
@@ -243,18 +255,19 @@ export default function LoginClient({
             fontSize: { md: '2.4rem', lg: '2.75rem' },
             lineHeight: 1.12,
             letterSpacing: '-0.03em',
-            color: 'text.primary',
+            color: '#FFFFFF',
             maxWidth: 460,
+            position: 'relative',
           }}
         >
           {activeTab === 0 ? 'Start today’s learning in one login.' : 'Run your academy from one dashboard.'}
         </Typography>
-        <Typography sx={{ mt: 2, mb: 4, color: 'text.secondary', fontSize: '1.05rem', maxWidth: 440, lineHeight: 1.6 }}>
+        <Typography sx={{ mt: 2, mb: 4, color: 'rgba(255,255,255,0.86)', fontSize: '1.05rem', maxWidth: 440, lineHeight: 1.6, position: 'relative' }}>
           {activeTab === 0
             ? 'Log in and we take you straight to practice — daily quiz, syllabus sections, and explanations you can actually use.'
             : 'Institute owners can manage batches, students, and fees here. Students should stay on Student.'}
         </Typography>
-        <Stack spacing={2.25}>
+        <Stack spacing={2.25} sx={{ position: 'relative' }}>
           {BENEFITS.map((item) => (
             <Box key={item.title} sx={{ display: 'flex', gap: 1.75, alignItems: 'flex-start' }}>
               <Box
@@ -266,17 +279,16 @@ export default function LoginClient({
                   alignItems: 'center',
                   justifyContent: 'center',
                   flexShrink: 0,
-                  color: GREEN,
-                  bgcolor: isDark ? 'rgba(46,139,87,0.18)' : 'rgba(27,107,58,0.12)',
-                  border: '1px solid',
-                  borderColor: isDark ? 'rgba(46,139,87,0.35)' : 'rgba(27,107,58,0.18)',
+                  color: '#FCD34D',
+                  bgcolor: 'rgba(255,255,255,0.12)',
+                  border: '1px solid rgba(255,255,255,0.22)',
                 }}
               >
                 {item.icon}
               </Box>
               <Box>
-                <Typography sx={{ fontWeight: 800, color: 'text.primary', fontSize: '0.98rem' }}>{item.title}</Typography>
-                <Typography sx={{ color: 'text.secondary', fontSize: '0.9rem', lineHeight: 1.45 }}>{item.detail}</Typography>
+                <Typography sx={{ fontWeight: 800, color: '#FFFFFF', fontSize: '0.98rem' }}>{item.title}</Typography>
+                <Typography sx={{ color: 'rgba(255,255,255,0.78)', fontSize: '0.9rem', lineHeight: 1.45 }}>{item.detail}</Typography>
               </Box>
             </Box>
           ))}
@@ -290,14 +302,14 @@ export default function LoginClient({
             px: 1.5,
             py: 0.85,
             borderRadius: '999px',
-            bgcolor: isDark ? 'rgba(245,158,11,0.14)' : 'rgba(245,158,11,0.16)',
-            border: '1px solid',
-            borderColor: isDark ? 'rgba(245,158,11,0.35)' : 'rgba(217,119,6,0.28)',
+            bgcolor: 'rgba(245,158,11,0.18)',
+            border: '1px solid rgba(252,211,77,0.45)',
             width: 'fit-content',
+            position: 'relative',
           }}
         >
           <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: AMBER }} />
-          <Typography sx={{ fontSize: '0.82rem', fontWeight: 700, color: isDark ? '#FCD34D' : '#92400E' }}>
+          <Typography sx={{ fontSize: '0.82rem', fontWeight: 700, color: '#FEF3C7' }}>
             Free to start · Pick your exam after login
           </Typography>
         </Box>
@@ -446,7 +458,7 @@ export default function LoginClient({
                   autoComplete="username"
                   activeTab={activeTab}
                   error={Boolean(fieldErrors.username)}
-                  helperText={fieldErrors.username || ' '}
+                  helperText={fieldErrors.username}
                   InputProps={{
                     startAdornment: <InputAdornment position="start"><PersonOutline /></InputAdornment>,
                   }}
@@ -469,7 +481,7 @@ export default function LoginClient({
                   autoComplete="current-password"
                   activeTab={activeTab}
                   error={Boolean(fieldErrors.password)}
-                  helperText={fieldErrors.password || ' '}
+                  helperText={fieldErrors.password}
                   InputProps={{
                     startAdornment: <InputAdornment position="start"><LockOutlined /></InputAdornment>,
                     endAdornment: (
@@ -518,7 +530,7 @@ export default function LoginClient({
             </Stack>
           </form>
 
-          {activeTab === 0 && (
+          {activeTab === 0 && googleEnabled && (
             <>
               <Box sx={{ display: 'flex', alignItems: 'center', my: 2.5 }}>
                 <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
