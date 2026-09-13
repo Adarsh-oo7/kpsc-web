@@ -326,13 +326,16 @@ function QuizContent() {
     if (isWeeklyCurrentAffairs) {
       return `/questions/weekly-current-affairs/?language=${language}`;
     }
+    if (isMockExam && examParam) {
+      return `/generate-mock-exam/${encodeURIComponent(examParam)}/?language=${language}`;
+    }
     let url = `/questions/?limit=${limitParam}&language=${language}`;
     if (examParam) url += `&exam=${encodeURIComponent(examParam)}`;
     if (topicParam) url += `&topic=${encodeURIComponent(topicParam)}`;
     if (sectionParam) url += `&section=${encodeURIComponent(sectionParam)}`;
     if (modeParam) url += `&mode=${encodeURIComponent(modeParam)}`;
     return url;
-  }, [examParam, topicParam, sectionParam, modeParam, limitParam, language, isWeeklyCurrentAffairs]);
+  }, [examParam, topicParam, sectionParam, modeParam, limitParam, language, isWeeklyCurrentAffairs, isMockExam]);
 
   const { data: rawQuizData, error, isLoading } = useSWR(apiUrl, fetcher, { revalidateOnFocus: false });
 
@@ -387,6 +390,22 @@ function QuizContent() {
       setHasInitializedTime(true);
     }
   }, [rawQuizData, examDuration, hasInitializedTime]);
+
+  useEffect(() => {
+    if (!isFinished || !resultData?.results || !examParam) return;
+    const total = resultData.results.total || 0;
+    if (!total) return;
+    const pct = Math.round((resultData.results.score / total) * 100);
+    try {
+      const key = `best_score_${examParam}`;
+      const prev = parseFloat(localStorage.getItem(key) || '-Infinity');
+      if (Number.isFinite(pct) && pct >= prev) {
+        localStorage.setItem(key, String(pct));
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [isFinished, resultData, examParam]);
 
   // Reset answer when question changes
   useEffect(() => { setSelectedOption(''); setIsAnswered(false); }, [currentQ]);
@@ -472,7 +491,27 @@ function QuizContent() {
   };
 
   if (isLoading) return <Box sx={{ display: 'flex', justifyContent: 'center', pt: 8 }}><CircularProgress size={32} /></Box>;
-  if (error) return <Alert severity="error">Could not load quiz questions.</Alert>;
+  if (error) {
+    const status = error?.response?.status;
+    if (isMockExam && (status === 401 || status === 403)) {
+      const next = `/quiz?mode=mock&exam_id=${encodeURIComponent(examParam || '')}`;
+      return (
+        <Box sx={{ maxWidth: 480, mx: 'auto', py: 8, textAlign: 'center', px: 2 }}>
+          <Alert severity="info" sx={{ mb: 2.5, borderRadius: '14px', textAlign: 'left' }}>
+            Log in to start this full mock paper. After login we open it automatically.
+          </Alert>
+          <Button
+            variant="contained"
+            onClick={() => router.push(`/login?next=${encodeURIComponent(next)}`)}
+            sx={{ textTransform: 'none', fontWeight: 800, borderRadius: '12px', background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)' }}
+          >
+            Continue to login
+          </Button>
+        </Box>
+      );
+    }
+    return <Alert severity="error">Could not load quiz questions.</Alert>;
+  }
   if (!apiUrl) {
     return (
       <Box sx={{ textAlign: 'center', py: 8 }}>

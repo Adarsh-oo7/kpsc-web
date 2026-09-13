@@ -126,7 +126,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return {
     title: `Kerala PSC ${exam.name} Mock Tests 2026 — Free Online Practice`,
-    description: `Access official Kerala PSC ${exam.name} syllabus details, marking schemes, and start a timed mock test simulation with 100 questions. No sign-up required.`,
+    description: `Access official Kerala PSC ${exam.name} syllabus details, marking schemes, and start a timed mock test simulation with 100 questions.`,
     alternates: {
       canonical: `/exams/${examId}`,
     }
@@ -281,7 +281,7 @@ export default async function ExamDetailPage({ params }: PageProps) {
           </Grid>
           
           <Grid size={{ xs: 12, md: 4 }} sx={{ textAlign: { md: 'right' } }}>
-            <Link href={`/register`} style={{ textDecoration: 'none' }}>
+            <Link href={`/login?next=${encodeURIComponent(`/quiz?mode=mock&exam_id=${exam.id}`)}`} style={{ textDecoration: 'none' }}>
               <Button
                 variant="contained"
                 sx={{
@@ -299,7 +299,7 @@ export default async function ExamDetailPage({ params }: PageProps) {
                   }
                 }}
               >
-                Start Free Mock Test — No Signup
+                Start full mock paper
               </Button>
             </Link>
           </Grid>
