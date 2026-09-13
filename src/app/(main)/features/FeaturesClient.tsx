@@ -159,25 +159,6 @@ const featuresList = [
     },
   },
   {
-    Icon: Icons.Bot,
-    title: 'AI Doubt Solver',
-    tagline: '24/7 personal tutor',
-    desc: 'Instant explanations in Malayalam + English, powered by AI.',
-    color: '#dc2626',
-    details: [
-      'Step-by-step answers',
-      'Math problem solving',
-      'Concept breakdowns',
-      'Instant help system',
-    ],
-    insight: {
-      Icon: Icons.Sparkles,
-      title: 'AI-powered learning',
-      subtitle: 'Instant concept clarity anytime',
-      color: '#dc2626',
-    },
-  },
-  {
     Icon: Icons.Trophy,
     title: 'Leaderboard System',
     tagline: 'Competitive learning',

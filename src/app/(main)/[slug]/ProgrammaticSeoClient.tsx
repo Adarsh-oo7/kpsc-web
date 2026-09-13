@@ -424,7 +424,7 @@ export default function ProgrammaticSeoClient({
                     <TableBody>
                       {[
                         { f: 'Daily Tests', k: 'Unlimited, Free', o: 'Weekly' },
-                        { f: 'AI Doubt Solver', k: '24/7 Malayalam', o: 'Limited teachers' },
+                        { f: 'Wrong-answer loop', k: 'Re-asked until it sticks', o: 'One-time homework' },
                         { f: 'Leaderboard', k: 'Live district ranks', o: 'Classroom only' },
                         { f: 'Syllabus Coverage', k: 'Adaptive & SCERT', o: 'Fixed speed lectures' },
                         { f: 'Pricing', k: 'Affordable / Free tier', o: '₹15,000 - ₹30,000' }

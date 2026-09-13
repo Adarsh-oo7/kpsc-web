@@ -19,7 +19,6 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import TrackChangesIcon from '@mui/icons-material/TrackChanges';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import ForumIcon from '@mui/icons-material/Forum';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
@@ -50,7 +49,6 @@ const navItems = [
   { text: 'Saved Questions', icon: <BookmarkIcon />, path: '/saved', section: 'progress' },
   { text: 'Wrong Answers', icon: <CancelIcon />, path: '/wrong-answers', section: 'progress' },
   { divider: true, label: 'Community', section: 'community' },
-  { text: 'AI Doubt Solver', icon: <AutoAwesomeIcon />, path: '/ai-doubt', section: 'community' },
   { text: 'Community', icon: <ForumIcon />, path: '/community', section: 'community' },
   { text: 'Notifications', icon: <NotificationsIcon />, path: '/notifications', section: 'community' },
   { divider: true, label: 'Account', section: 'account' },
