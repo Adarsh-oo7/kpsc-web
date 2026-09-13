@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import SettingsClient from './SettingsClient';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Settings — Account, theme, and language | KPSC Master',
   description: 'Change appearance, study language, practice mix, and password for your KPSC Master account.',

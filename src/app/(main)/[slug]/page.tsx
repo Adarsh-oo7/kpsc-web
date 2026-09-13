@@ -2,6 +2,7 @@ import React from 'react';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import ProgrammaticSeoClient from './ProgrammaticSeoClient';
+import SettingsClient from '../settings/SettingsClient';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -144,6 +145,13 @@ function parseSlug(slug: string) {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
+  if (slug === 'settings') {
+    return {
+      title: 'Settings — Account, theme, and language | KPSC Master',
+      description: 'Change appearance, study language, practice mix, and password for your KPSC Master account.',
+      robots: { index: false, follow: false },
+    };
+  }
   const data = parseSlug(slug);
 
   if (!data) {
@@ -243,6 +251,9 @@ export async function generateStaticParams() {
 
 export default async function ProgrammaticSeoPage({ params }: PageProps) {
   const { slug } = await params;
+  if (slug === 'settings') {
+    return <SettingsClient />;
+  }
   const data = parseSlug(slug);
 
   if (!data) {

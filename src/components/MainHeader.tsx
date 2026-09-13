@@ -13,6 +13,7 @@ import BoltIcon from '@mui/icons-material/Bolt';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import { useRouter, usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { useAppContext } from '@/context/AppContext';
 import { drawerWidth } from './Sidebar';
 import Image from 'next/image';
@@ -529,7 +530,9 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
           ].map(item => (
             <ListItem key={item.path} disablePadding>
               <ListItemButton
-                onClick={() => { router.push(item.path); setProfileAnchor(null); }}
+                component={Link}
+                href={item.path}
+                onClick={() => setProfileAnchor(null)}
                 sx={{ borderRadius: '10px', py: 0.75 }}
               >
                 <ListItemText

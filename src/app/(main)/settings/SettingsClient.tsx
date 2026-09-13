@@ -34,10 +34,6 @@ export default function SettingsClient() {
   const [passwordError, setPasswordError] = useState('');
 
   useEffect(() => {
-    if (!isLoading && !user) router.replace('/login?next=/settings');
-  }, [isLoading, user, router]);
-
-  useEffect(() => {
     if (profile?.preferred_language) setLanguage(profile.preferred_language);
     if (profile?.practice_mode) setPracticeMode(profile.practice_mode === 'focus' ? 'focus' : 'full');
   }, [profile]);
@@ -90,7 +86,7 @@ export default function SettingsClient() {
     }
   };
 
-  if (isLoading || !user) {
+  if (isLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
         <CircularProgress sx={{ color: GREEN_LIGHT }} />
@@ -117,7 +113,9 @@ export default function SettingsClient() {
           Settings
         </Typography>
         <Typography sx={{ mt: 1.25, color: 'rgba(255,255,255,0.86)', maxWidth: 480, lineHeight: 1.55 }}>
-          Theme, language, practice mix, and password for {user.username}.
+          {user
+            ? `Theme, language, practice mix, and password for ${user.username}.`
+            : 'Theme works here. Log in to change language, practice mix, and password.'}
         </Typography>
       </Paper>
 
@@ -154,6 +152,29 @@ export default function SettingsClient() {
           </Stack>
         </Paper>
 
+        {!user && (
+          <Paper elevation={0} sx={{ p: { xs: 2.5, md: 3 }, borderRadius: '20px', border: '1.5px solid', borderColor: 'divider' }}>
+            <Typography sx={{ fontWeight: 800, mb: 1, color: 'text.primary' }}>Account</Typography>
+            <Typography sx={{ color: 'text.secondary', mb: 2, fontSize: '0.95rem', lineHeight: 1.55 }}>
+              Log in to change question language, practice mix, and password.
+            </Typography>
+            <Button
+              onClick={() => router.push('/login?next=/settings')}
+              variant="contained"
+              sx={{
+                textTransform: 'none',
+                fontWeight: 800,
+                borderRadius: '12px',
+                background: `linear-gradient(135deg, ${GREEN}, ${GREEN_LIGHT})`,
+              }}
+            >
+              Log in
+            </Button>
+          </Paper>
+        )}
+
+        {user && (
+        <>
         <Paper elevation={0} sx={{ p: { xs: 2.5, md: 3 }, borderRadius: '20px', border: '1.5px solid', borderColor: 'divider' }}>
           <Typography sx={{ fontWeight: 800, mb: 2, color: 'text.primary' }}>Study preferences</Typography>
           {prefsError && <Alert severity="error" sx={{ mb: 2, borderRadius: '12px' }}>{prefsError}</Alert>}
@@ -266,6 +287,8 @@ export default function SettingsClient() {
           <Divider sx={{ my: 2 }} />
           <Typography sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>{user.email}</Typography>
         </Paper>
+        </>
+        )}
       </Stack>
     </Box>
   );
