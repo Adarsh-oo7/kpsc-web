@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { Box, Toolbar } from '@mui/material';
 import Sidebar, { drawerWidth } from '@/components/Sidebar';
 import MainHeader from '@/components/MainHeader';
@@ -9,8 +9,9 @@ import { useAppContext } from '@/context/AppContext';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const router = useRouter();
+  const pathname = usePathname();
   const { user } = useAppContext();
+  const isAuthPage = pathname === '/login' || pathname === '/register';
 
   return (
     <Box sx={{
@@ -45,9 +46,9 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {/* Page content */}
         <Box sx={{
           flex: 1,
-          px: { xs: 2, sm: 3 },
-          pt: { xs: 1.5, sm: 2 },
-          pb: { xs: 2, sm: 3 },
+          px: isAuthPage ? 0 : { xs: 2, sm: 3 },
+          pt: isAuthPage ? 0 : { xs: 1.5, sm: 2 },
+          pb: isAuthPage ? 0 : { xs: 2, sm: 3 },
           maxWidth: '100%',
         }}>
           {children}
