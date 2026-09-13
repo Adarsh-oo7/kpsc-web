@@ -23,6 +23,7 @@ interface AppContextType {
   setTopicId: (id: string | null) => void;
   themeMode: 'light' | 'dark';
   toggleThemeMode: () => void;
+  setThemeMode: (mode: 'light' | 'dark') => void;
   refreshProfile: () => Promise<any>;
 }
 
@@ -51,12 +52,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  const applyThemeMode = (mode: 'light' | 'dark') => {
+    localStorage.setItem('theme_mode', mode);
+    setThemeMode(mode);
+  };
+
   const toggleThemeMode = () => {
-    setThemeMode(prev => {
-      const next = prev === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('theme_mode', next);
-      return next;
-    });
+    applyThemeMode(themeMode === 'dark' ? 'light' : 'dark');
   };
 
   // --- Core Functions ---
@@ -147,6 +149,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setTopicId,
     themeMode,
     toggleThemeMode,
+    setThemeMode: applyThemeMode,
     refreshProfile: fetchAndSetUser,
   };
 
