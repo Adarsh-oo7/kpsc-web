@@ -31,6 +31,14 @@ interface ResultData {
   results: { score: number; total: number; correct: number; wrong: number; unanswered: number };
   questions: Question[];
   timeTaken: number;
+  gamification?: {
+    xp_earned: number;
+    level_up: boolean;
+    new_level: number;
+    current_streak: number;
+    longest_streak: number;
+  };
+  next_step?: { label: string; path: string; reason: string };
 }
 
 const QUIZ_DURATION = 15 * 60; // 15 minutes
@@ -99,10 +107,15 @@ function ResultsScreen({ resultData, answers, onRetry, originalQuestions }: { re
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
   const router = useRouter();
-  const { results, questions: backendQuestions, timeTaken } = resultData;
+  const { results, questions: backendQuestions, timeTaken, gamification, next_step } = resultData;
   const scorePercent = Math.max(0, Math.min(100, Math.round((results.score / results.total) * 100)));
   const mins = Math.floor(timeTaken / 60);
   const secs = timeTaken % 60;
+  const growthLine = scorePercent >= 70
+    ? 'Rank-file range. Lock this section with one more set tomorrow.'
+    : scorePercent >= 50
+      ? 'Cut-off range. Misses below will be re-asked — that is how the mark moves.'
+      : 'This set showed the leak. Review the misses now, then take 15 more from the same section.';
 
   // Create a map of backend questions for quick O(1) lookup of correct_answer and explanation
   const backendMap = useMemo(() => {
@@ -137,9 +150,22 @@ function ResultsScreen({ resultData, answers, onRetry, originalQuestions }: { re
             Quiz Complete!
           </Typography>
           <ScoreGauge score={results.score} total={results.total} />
-          <Typography sx={{ color: 'text.secondary', mt: 2, fontSize: '0.875rem' }}>
-            You beat {Math.max(0, Math.round(100 - scorePercent + 15))}% of students today
+          <Typography sx={{ color: 'text.secondary', mt: 2, fontSize: '0.875rem', lineHeight: 1.5, maxWidth: 420, mx: 'auto' }}>
+            {growthLine}
           </Typography>
+          {(gamification?.xp_earned || gamification?.current_streak) && (
+            <Stack direction="row" spacing={1} justifyContent="center" sx={{ mt: 2, flexWrap: 'wrap' }}>
+              {typeof gamification?.xp_earned === 'number' && (
+                <Chip label={`+${gamification.xp_earned} XP`} sx={{ fontWeight: 800, bgcolor: 'rgba(46,139,87,0.15)', color: '#1B6B3A' }} />
+              )}
+              {typeof gamification?.current_streak === 'number' && (
+                <Chip label={`${gamification.current_streak}-day streak`} sx={{ fontWeight: 800, bgcolor: 'rgba(255,107,43,0.12)', color: '#C2410C' }} />
+              )}
+              {gamification?.level_up && (
+                <Chip label={`Level ${gamification.new_level}`} sx={{ fontWeight: 800, bgcolor: 'rgba(245,158,11,0.18)', color: '#B45309' }} />
+              )}
+            </Stack>
+          )}
         </Box>
       </motion.div>
 
@@ -175,10 +201,19 @@ function ResultsScreen({ resultData, answers, onRetry, originalQuestions }: { re
 
       {/* Actions */}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mb: 4 }}>
-        <Button variant="contained" fullWidth onClick={() => router.push('/exams')}>Try Another Quiz</Button>
-        <Button variant="outlined" fullWidth onClick={onRetry}>Retry This Quiz</Button>
-        <Button variant="outlined" fullWidth onClick={() => router.push('/feed')}>Back to Feed</Button>
+        {next_step?.path && (
+          <Button variant="contained" fullWidth onClick={() => router.push(next_step.path)}>
+            {next_step.label}
+          </Button>
+        )}
+        <Button variant="outlined" fullWidth onClick={onRetry}>Retry this set</Button>
+        <Button variant="outlined" fullWidth onClick={() => router.push('/feed')}>Continue feed</Button>
       </Stack>
+      {next_step?.reason && (
+        <Typography sx={{ color: 'text.secondary', fontSize: '0.8rem', mb: 3, mt: -2, textAlign: 'center' }}>
+          {next_step.reason}
+        </Typography>
+      )}
 
       {/* Review */}
       <Typography sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, fontSize: '1.1rem', color: 'text.primary', mb: 2 }}>

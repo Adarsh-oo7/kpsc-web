@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import {
   Box, Typography, Button, CircularProgress, Grid,
-  LinearProgress, Stack, Chip, Avatar, IconButton, useTheme
+  LinearProgress, Stack, useTheme
 } from '@mui/material';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import BoltIcon from '@mui/icons-material/Bolt';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
@@ -15,12 +15,7 @@ import QuizIcon from '@mui/icons-material/Quiz';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import NewspaperIcon from '@mui/icons-material/Newspaper';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
-import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 import { useAppContext } from '@/context/AppContext';
-import apiClient from '@/lib/apiClient';
 import MasterPlanRoadmap from '@/components/MasterPlanRoadmap';
 import ExamCountdownBanner from '@/components/ExamCountdownBanner';
 import WeakAreaInterventionCard from '@/components/WeakAreaInterventionCard';
@@ -49,92 +44,6 @@ function StatBadge({ icon, value, label, color }: any) {
   );
 }
 
-function CircularProgressRing({ value, size = 80, color = '#2E8B57', label }: { value: number; size?: number; color?: string; label?: string }) {
-  const radius = (size - 10) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const dashOffset = circumference * (1 - value / 100);
-  return (
-    <Box sx={{ position: 'relative', width: size, height: size, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-      <svg width={size} height={size} style={{ transform: 'rotate(-90deg)', position: 'absolute' }}>
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="rgba(136,146,164,0.15)" strokeWidth={8} />
-        <circle
-          cx={size / 2} cy={size / 2} r={radius} fill="none"
-          stroke={color} strokeWidth={8}
-          strokeDasharray={circumference}
-          strokeDashoffset={dashOffset}
-          strokeLinecap="round"
-          style={{ transition: 'stroke-dashoffset 1s ease' }}
-        />
-      </svg>
-      <Box sx={{ textAlign: 'center', zIndex: 1 }}>
-        <Typography sx={{ fontFamily: "'JetBrains Mono'", fontWeight: 700, fontSize: '0.9rem', color: 'text.primary', lineHeight: 1 }}>
-          {value}%
-        </Typography>
-        {label && <Typography sx={{ fontSize: '0.55rem', color: 'text.secondary' }}>{label}</Typography>}
-      </Box>
-    </Box>
-  );
-}
-
-// Swipeable hero strip cards
-function HeroCard({ card, isActive }: { card: any; isActive: boolean }) {
-  const router = useRouter();
-  return (
-    <motion.div
-      animate={{ opacity: isActive ? 1 : 0, scale: isActive ? 1 : 0.95 }}
-      transition={{ duration: 0.3 }}
-      style={{ position: 'absolute', inset: 0 }}
-    >
-      <Box sx={{
-        height: '100%',
-        background: card.gradient,
-        borderRadius: '20px',
-        border: card.border,
-        p: 3,
-        display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-      }}>
-        <Box>
-          <Typography sx={{ fontSize: '0.7rem', fontWeight: 700, color: 'text.secondary', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-            {card.label}
-          </Typography>
-          <Typography sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, fontSize: '1.15rem', color: 'text.primary', mt: 0.5, lineHeight: 1.3 }}>
-            {card.title}
-          </Typography>
-          <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary', mt: 0.75, lineHeight: 1.5 }}>
-            {card.subtitle}
-          </Typography>
-        </Box>
-        {card.action && (
-          <Button
-            size="small"
-            variant="outlined"
-            onClick={() => router.push(card.action.path)}
-            sx={{ alignSelf: 'flex-start', color: card.actionColor, borderColor: card.actionColor, fontSize: '0.75rem', py: 0.5, px: 1.5, borderRadius: '8px', mt: 1 }}
-          >
-            {card.action.label}
-          </Button>
-        )}
-        {card.progress !== undefined && (
-          <Box>
-            <LinearProgress
-              variant="determinate"
-              value={card.progress}
-              sx={{
-                height: 6, borderRadius: 3, mt: 1.5,
-                bgcolor: 'rgba(136, 146, 164, 0.15)',
-                '& .MuiLinearProgress-bar': { background: card.progressColor, borderRadius: 3 }
-              }}
-            />
-            <Typography sx={{ fontSize: '0.7rem', color: 'text.secondary', mt: 0.5 }}>
-              {card.progressLabel}
-            </Typography>
-          </Box>
-        )}
-      </Box>
-    </motion.div>
-  );
-}
-
 const quickActions = [
   { label: 'Daily Quiz', icon: <QuizIcon />, path: '/quiz', color: '#1B6B3A', bg: 'rgba(27,107,58,0.15)', border: 'rgba(46,139,87,0.2)' },
   { label: 'Mock Tests', icon: <AssignmentIcon />, path: '/exams', color: '#7C3AED', bg: 'rgba(124,58,237,0.15)', border: 'rgba(124,58,237,0.2)' },
@@ -142,63 +51,10 @@ const quickActions = [
   { label: 'Leaderboard', icon: <LeaderboardIcon />, path: '/leaderboard', color: '#D97706', bg: 'rgba(217,119,6,0.15)', border: 'rgba(217,119,6,0.2)' },
 ];
 
-const motivationalQuotes = [
-  { text: "Arise, awake, and stop not till the goal is reached.", author: "Swami Vivekananda" },
-  { text: "You have to dream before your dreams can come true.", author: "Dr. A.P.J. Abdul Kalam" },
-  { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
-  { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
-  { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
-  { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
-  { text: "The only limit to our realization of tomorrow will be our doubts of today.", author: "Franklin D. Roosevelt" },
-  { text: "Do not wait; the time will never be 'just right.' Start where you stand.", author: "Napoleon Hill" },
-  { text: "Your talent determines what you can do. Your motivation determines how much you are willing to do.", author: "Lou Holtz" },
-  { text: "The best way to predict the future is to create it.", author: "Abraham Lincoln" },
-  { text: "Education is the most powerful weapon which you can use to change the world.", author: "Nelson Mandela" },
-  { text: "There are no shortcuts to any place worth going.", author: "Beverly Sills" },
-  { text: "If you fail, never give up because FAIL means 'First Attempt In Learning'.", author: "Dr. A.P.J. Abdul Kalam" },
-  { text: "Strength is life, weakness is death.", author: "Swami Vivekananda" },
-  { text: "It is during our darkest moments that we must focus to see the light.", author: "Aristotle" },
-  { text: "A person who never made a mistake never tried anything new.", author: "Albert Einstein" },
-  { text: "The future depends on what you do today.", author: "Mahatma Gandhi" },
-  { text: "Don't let what you cannot do interfere with what you can do.", author: "John Wooden" },
-  { text: "The only way to do great work is to love what you do.", author: "Steve Jobs" },
-  { text: "Continuous effort - not strength or intelligence - is the key to unlocking our potential.", author: "Winston Churchill" },
-  { text: "Genius is 1% talent and 99% hard work.", author: "Albert Einstein" },
-  { text: "Our greatest weakness lies in giving up. The most certain way to succeed is always to try just one more time.", author: "Thomas A. Edison" },
-  { text: "Focus on the journey, not the destination. Joy is found not in finishing an activity but in doing it.", author: "Greg Anderson" },
-  { text: "Ninety-nine percent of the failures come from people who have the habit of making excuses.", author: "George Washington Carver" },
-  { text: "Patience and perseverance have a magical effect before which difficulties disappear and obstacles vanish.", author: "John Quincy Adams" },
-  { text: "The structure of success is built on the foundation of self-discipline.", author: "Unknown" },
-  { text: "Success is the sum of small efforts, repeated day in and day out.", author: "Robert Collier" },
-  { text: "If you want to shine like a sun, first burn like a sun.", author: "Dr. A.P.J. Abdul Kalam" },
-  { text: "Concentrate all your thoughts upon the work at hand. The sun's rays do not burn until brought to a focus.", author: "Alexander Graham Bell" },
-  { text: "An investment in knowledge pays the best interest.", author: "Benjamin Franklin" }
-];
-
-// ============================================================
-// Main Component
-// ============================================================
 export default function HomePage() {
   const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
   const { profile, fetcher, user, isLoading: ctxLoading } = useAppContext();
   const router = useRouter();
-  const [heroIndex, setHeroIndex] = useState(0);
-  const [quoteIndex, setQuoteIndex] = useState(0);
-
-  // Initialize with a random quote index on component mount
-  useEffect(() => {
-    const randomIndex = Math.floor(Math.random() * motivationalQuotes.length);
-    setQuoteIndex(randomIndex);
-  }, []);
-
-  const handleNewQuote = () => {
-    let newIndex = quoteIndex;
-    while (newIndex === quoteIndex && motivationalQuotes.length > 1) {
-      newIndex = Math.floor(Math.random() * motivationalQuotes.length);
-    }
-    setQuoteIndex(newIndex);
-  };
 
   useEffect(() => {
     if (!ctxLoading) {
@@ -221,64 +77,56 @@ export default function HomePage() {
   const streak = profile?.current_streak || 0;
   const xp = profile?.total_xp || 0;
   const level = profile?.level || 1;
-  const xpInLevel = xp % 100;
   const username = profile?.user?.first_name || profile?.user?.username || 'Student';
 
-  // Today's goal progress (answered / target)
   const answeredToday = dashData?.questions_today || 0;
-  const dailyGoal = 20;
+  const dailyGoal = dashData?.daily_goal || 20;
+  const goalRemaining = Math.max(0, dailyGoal - answeredToday);
   const goalProgress = Math.min(Math.round((answeredToday / dailyGoal) * 100), 100);
-
-  // Leaderboard position (placeholder - will come from leaderboard API)
-  const leaderboardPos = dashData?.leaderboard_position || null;
-
-  const heroCards = [
-    {
-      label: "Today's Goal",
-      title: `You've answered ${answeredToday}/${dailyGoal} questions today`,
-      subtitle: goalProgress >= 100 ? "🎉 Daily goal achieved! Amazing work!" : `${dailyGoal - answeredToday} more to hit your daily goal`,
-      gradient: 'linear-gradient(135deg, rgba(27,107,58,0.25), rgba(27,107,58,0.1))',
-      border: '1px solid rgba(46,139,87,0.2)',
-      textMuted: '#8892A4',
-      progress: goalProgress,
-      progressColor: 'linear-gradient(90deg, #1B6B3A, #22c55e)',
-      progressLabel: `${goalProgress}% of daily goal`,
-      action: { label: 'Keep Going →', path: '/feed' },
-      actionColor: '#2E8B57',
-    },
-    {
-      label: streak > 0 ? `🔥 ${streak}-Day Streak` : 'Start Your Streak',
-      title: streak > 0
-        ? (answeredToday === 0 ? `⚠️ Study now or lose your ${streak}-day streak!` : `Streak safe! Keep the fire going 🔥`)
-        : 'Start your first streak today!',
-      subtitle: streak > 0 && answeredToday === 0
-        ? 'You have not studied today. Answer 1 question to save it.'
-        : `Longest: ${profile?.longest_streak || 0} days`,
-      gradient: streak > 0 && answeredToday === 0
-        ? 'linear-gradient(135deg, rgba(239,68,68,0.2), rgba(239,68,68,0.05))'
-        : 'linear-gradient(135deg, rgba(255,107,43,0.2), rgba(255,107,43,0.05))',
-      border: streak > 0 && answeredToday === 0 ? '1px solid rgba(239,68,68,0.3)' : '1px solid rgba(255,107,43,0.3)',
-      textMuted: '#8892A4',
-      action: { label: 'Study Now →', path: '/feed' },
-      actionColor: '#FF6B2B',
-    },
-    {
-      label: 'Leaderboard',
-      title: leaderboardPos ? `You're #${leaderboardPos} in Kerala 📍` : 'Join the Leaderboard',
-      subtitle: leaderboardPos ? 'Answer more questions to climb up!' : 'Answer 10 questions to enter the ranking',
-      gradient: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(245,158,11,0.05))',
-      border: '1px solid rgba(245,158,11,0.2)',
-      textMuted: '#8892A4',
-      action: { label: 'View Leaderboard →', path: '/leaderboard' },
-      actionColor: '#F59E0B',
-    },
-  ];
-
-  // Auto-cycle hero cards
-  useEffect(() => {
-    const id = setInterval(() => setHeroIndex(prev => (prev + 1) % heroCards.length), 4000);
-    return () => clearInterval(id);
-  }, [heroCards.length]);
+  const focusSection = syllabusData?.focus_section || syllabusData?.weak_sections?.[0] || dashData?.weakest_topics?.[0];
+  const focusName = focusSection?.title || focusSection?.name || focusSection?.title;
+  const mission = (() => {
+    if (streak > 0 && answeredToday === 0) {
+      return {
+        eyebrow: `${streak}-day streak at risk`,
+        title: `Save today's streak, ${username.split(' ')[0]}`,
+        body: 'One PSC question keeps the chain. Rank files are built on days you did not feel like studying.',
+        cta: 'Answer 1 question',
+        path: '/feed',
+      };
+    }
+    if (answeredToday < dailyGoal) {
+      return {
+        eyebrow: `Today's paper pace`,
+        title: `${goalRemaining} left for today's ${dailyGoal}-question goal`,
+        body: focusName
+          ? `Next set: ${focusName}. Short sessions beat weekend marathons.`
+          : 'Twenty questions is one LDC-style section. Finish this, then stop or go again.',
+        cta: focusSection?.key ? `Practice ${focusName}` : 'Start today's set',
+        path: focusSection?.key
+          ? `/quiz?section=${encodeURIComponent(focusSection.key)}&limit=15`
+          : '/quiz',
+      };
+    }
+    if (focusSection?.key || focusSection?.slug) {
+      return {
+        eyebrow: 'Daily goal locked',
+        title: `Raise ${focusName} — that is cut-off marks`,
+        body: 'You already showed up today. One weak-section drill is how rank moves this week.',
+        cta: `Drill ${focusName}`,
+        path: focusSection.key
+          ? `/quiz?section=${encodeURIComponent(focusSection.key)}&limit=15`
+          : `/topics/${focusSection.slug}`,
+      };
+    }
+    return {
+      eyebrow: 'Daily goal locked',
+      title: 'Open a mock or current affairs',
+      body: 'Habit is done. Growth is a full paper or today's CA set.',
+      cta: 'Mock tests',
+      path: '/exams',
+    };
+  })();
 
   if (ctxLoading) {
     return (
@@ -296,6 +144,52 @@ export default function HomePage() {
           <ExamCountdownBanner
             primaryExam={profile?.primary_exam_detail || profile?.preferred_exams?.[0]}
           />
+        </Box>
+      </motion.div>
+
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08, duration: 0.45 }}>
+        <Box
+          sx={{
+            mb: 3,
+            p: { xs: 2.5, md: 3 },
+            borderRadius: '20px',
+            border: '1px solid rgba(46,139,87,0.28)',
+            background: (theme) =>
+              theme.palette.mode === 'dark'
+                ? 'linear-gradient(135deg, rgba(27,107,58,0.28) 0%, rgba(15,23,42,0.9) 100%)'
+                : 'linear-gradient(135deg, rgba(27,107,58,0.12) 0%, #ffffff 100%)',
+          }}
+        >
+          <Typography sx={{ fontSize: '0.7rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#1B6B3A', mb: 0.75 }}>
+            {mission.eyebrow}
+          </Typography>
+          <Typography sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, fontSize: { xs: '1.2rem', md: '1.4rem' }, color: 'text.primary', lineHeight: 1.25 }}>
+            {mission.title}
+          </Typography>
+          <Typography sx={{ color: 'text.secondary', fontSize: '0.88rem', mt: 1, lineHeight: 1.55 }}>
+            {mission.body}
+          </Typography>
+          <LinearProgress
+            variant="determinate"
+            value={goalProgress}
+            sx={{
+              height: 8, borderRadius: 4, mt: 2, mb: 0.75,
+              bgcolor: 'rgba(136, 146, 164, 0.16)',
+              '& .MuiLinearProgress-bar': { background: 'linear-gradient(90deg, #1B6B3A, #22c55e)', borderRadius: 4 },
+            }}
+          />
+          <Typography sx={{ fontSize: '0.72rem', color: 'text.secondary', mb: 2 }}>
+            {answeredToday}/{dailyGoal} questions today · streak {streak} day{streak === 1 ? '' : 's'}
+          </Typography>
+          <Button
+            variant="contained"
+            fullWidth
+            endIcon={<PlayArrowIcon />}
+            onClick={() => router.push(mission.path)}
+            sx={{ textTransform: 'none', fontWeight: 800, py: 1.25, borderRadius: 3, background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)' }}
+          >
+            {mission.cta}
+          </Button>
         </Box>
       </motion.div>
 
@@ -326,14 +220,6 @@ export default function HomePage() {
             sx={{ mt: 1.5, textTransform: 'none', fontWeight: 800, borderRadius: 3 }}
           >
             Study by syllabus section
-          </Button>
-          <Button
-            fullWidth
-            variant="outlined"
-            onClick={() => router.push('/topics')}
-            sx={{ mt: 1.5, textTransform: 'none', fontWeight: 800, borderRadius: 3 }}
-          >
-            Study by official paper section
           </Button>
         </Box>
       </motion.div>
@@ -410,132 +296,8 @@ export default function HomePage() {
         </Stack>
       </motion.div>
 
-      {/* Daily Inspiration / Quote Card */}
-      <motion.div 
-        initial={{ opacity: 0, y: 16 }} 
-        animate={{ opacity: 1, y: 0 }} 
-        transition={{ delay: 0.24, duration: 0.5 }}
-      >
-        <Box sx={{
-          mb: 3,
-          p: 2.5,
-          position: 'relative',
-          background: (theme) => theme.palette.mode === 'dark' 
-            ? 'linear-gradient(135deg, rgba(27,107,58,0.12) 0%, rgba(27,107,58,0.04) 100%)' 
-            : 'linear-gradient(135deg, rgba(27,107,58,0.06) 0%, rgba(27,107,58,0.01) 100%)',
-          border: '1px solid',
-          borderColor: (theme) => theme.palette.mode === 'dark' ? 'rgba(46,139,87,0.2)' : 'rgba(46,139,87,0.15)',
-          borderLeft: '4px solid #2E8B57',
-          borderRadius: '16px',
-          overflow: 'hidden'
-        }}>
-          {/* Header row with Title and Button */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-              <FormatQuoteIcon sx={{ color: '#2E8B57', fontSize: '1.25rem', transform: 'rotate(180deg)' }} />
-              <Typography sx={{ 
-                fontSize: '0.7rem', 
-                fontWeight: 700, 
-                color: '#2E8B57', 
-                letterSpacing: '0.08em', 
-                textTransform: 'uppercase' 
-              }}>
-                Daily Inspiration
-              </Typography>
-            </Box>
-            <Button 
-              size="small" 
-              onClick={handleNewQuote}
-              sx={{ 
-                fontSize: '0.7rem', 
-                color: '#2E8B57', 
-                fontWeight: 700,
-                textTransform: 'none',
-                p: 0,
-                minWidth: 0,
-                height: 'auto',
-                '&:hover': { background: 'none', textDecoration: 'underline' }
-              }}
-            >
-              New Quote ⚡
-            </Button>
-          </Box>
-
-          {/* Quote Text and Author inside AnimatePresence for smooth transitions */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={quoteIndex}
-              initial={{ opacity: 0, x: 8 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -8 }}
-              transition={{ duration: 0.2 }}
-            >
-              <Typography sx={{ 
-                fontStyle: 'italic', 
-                fontSize: '0.9rem', 
-                color: 'text.primary', 
-                lineHeight: 1.5,
-                fontWeight: 500,
-                mb: 0.75
-              }}>
-                "{motivationalQuotes[quoteIndex]?.text}"
-              </Typography>
-              <Typography sx={{ 
-                fontSize: '0.75rem', 
-                color: 'text.secondary', 
-                fontWeight: 600,
-                textAlign: 'right'
-              }}>
-                — {motivationalQuotes[quoteIndex]?.author}
-              </Typography>
-            </motion.div>
-          </AnimatePresence>
-        </Box>
-      </motion.div>
-
-      {/* Hero Swipeable Strip (Goals, Streak Saver, Leaderboard) */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.26, duration: 0.5 }}>
-        <Box sx={{ mb: 3 }}>
-          <Box sx={{ position: 'relative', height: 180, mb: 1.5 }}>
-            {heroCards.map((card, i) => (
-              <HeroCard key={i} card={card} isActive={i === heroIndex} />
-            ))}
-          </Box>
-          {/* Dots + arrows */}
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-            <IconButton
-              size="small"
-              onClick={() => setHeroIndex(prev => (prev - 1 + heroCards.length) % heroCards.length)}
-              sx={{ color: isDark ? '#A0AEC0' : '#4A5568', '&:hover': { color: isDark ? '#E2E8F0' : '#718096' } }}
-            >
-              <ArrowBackIosNewIcon sx={{ fontSize: 12 }} />
-            </IconButton>
-            {heroCards.map((_, i) => (
-              <Box
-                key={i}
-                onClick={() => setHeroIndex(i)}
-                sx={{
-                  width: i === heroIndex ? 20 : 6, height: 6,
-                  borderRadius: '3px',
-                  bgcolor: i === heroIndex ? '#2E8B57' : (isDark ? '#252D3D' : '#E2E8F0'),
-                  transition: 'all 0.3s ease',
-                  cursor: 'pointer',
-                }}
-              />
-            ))}
-            <IconButton
-              size="small"
-              onClick={() => setHeroIndex(prev => (prev + 1) % heroCards.length)}
-              sx={{ color: isDark ? '#A0AEC0' : '#4A5568', '&:hover': { color: isDark ? '#E2E8F0' : '#718096' } }}
-            >
-              <ArrowForwardIosIcon sx={{ fontSize: 12 }} />
-            </IconButton>
-          </Box>
-        </Box>
-      </motion.div>
-
       {/* Study Feed CTA */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28, duration: 0.5 }}>
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.26, duration: 0.5 }}>
         <Box
           onClick={() => router.push('/feed')}
           sx={{
@@ -551,10 +313,10 @@ export default function HomePage() {
         >
           <Box>
             <Typography sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, fontSize: '1.1rem', color: 'text.primary' }}>
-              Continue Study Feed
+              Study Feed — mix, miss, repeat
             </Typography>
             <Typography sx={{ color: 'text.secondary', fontSize: '0.85rem', mt: 0.25 }}>
-              Questions, current affairs, and facts await
+              New questions plus the ones you got wrong. That loop is the rank.
             </Typography>
           </Box>
           <Button
@@ -562,7 +324,7 @@ export default function HomePage() {
             endIcon={<PlayArrowIcon />}
             sx={{ flexShrink: 0, background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)' }}
           >
-            Study
+            Open
           </Button>
         </Box>
       </motion.div>
