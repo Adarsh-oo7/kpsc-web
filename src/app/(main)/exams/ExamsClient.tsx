@@ -660,14 +660,22 @@ export default function ExamsClient() {
         open={authDialogOpen}
         onClose={() => setAuthDialogOpen(false)}
         PaperProps={{
-          sx: { bgcolor: isDark ? '#161B22' : '#fff', borderRadius: '24px', p: 1.5, maxWidth: 420 },
+          sx: {
+            bgcolor: isDark ? '#161B22' : '#FFFFFF',
+            backgroundImage: 'none',
+            color: 'text.primary',
+            borderRadius: '24px',
+            p: 1.5,
+            maxWidth: 420,
+            boxShadow: '0 28px 64px rgba(15,23,42,0.28)',
+          },
         }}
       >
-        <DialogTitle sx={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 900, textAlign: 'center', fontSize: '1.4rem', pb: 1 }}>
+        <DialogTitle sx={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 900, textAlign: 'center', fontSize: '1.4rem', pb: 1, color: 'text.primary' }}>
           Log in to start the mock
         </DialogTitle>
         <DialogContent sx={{ textAlign: 'center', pb: 2 }}>
-          <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
+          <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6, fontWeight: 500 }}>
             Full papers need an account so we can save your score, XP, and the questions you miss. After login we open this mock directly.
           </Typography>
         </DialogContent>
@@ -676,7 +684,7 @@ export default function ExamsClient() {
             variant="contained"
             fullWidth
             onClick={() => goAfterAuth(pendingPath)}
-            sx={{ py: 1.3, borderRadius: '12px', fontWeight: 800, textTransform: 'none', background: `linear-gradient(135deg, ${GREEN}, ${GREEN_LIGHT})` }}
+            sx={{ py: 1.3, borderRadius: '12px', fontWeight: 800, textTransform: 'none', color: '#fff', background: `linear-gradient(135deg, ${GREEN}, ${GREEN_LIGHT})` }}
           >
             Continue to login
           </Button>
@@ -684,7 +692,7 @@ export default function ExamsClient() {
             variant="outlined"
             fullWidth
             onClick={() => router.push(`/register?next=${encodeURIComponent(pendingPath)}`)}
-            sx={{ py: 1.3, borderRadius: '12px', fontWeight: 800, textTransform: 'none', mt: '0 !important' }}
+            sx={{ py: 1.3, borderRadius: '12px', fontWeight: 800, textTransform: 'none', mt: '0 !important', borderColor: '#CBD5E1', color: 'text.primary' }}
           >
             Create a free account
           </Button>
@@ -696,7 +704,7 @@ export default function ExamsClient() {
         onClose={() => setSyllabusOpen(false)}
         maxWidth="sm"
         fullWidth
-        PaperProps={{ sx: { bgcolor: 'background.paper', borderRadius: '24px', p: 1 } }}
+        PaperProps={{ sx: { bgcolor: isDark ? '#161B22' : '#FFFFFF', backgroundImage: 'none', borderRadius: '24px', p: 1 } }}
       >
         <DialogTitle sx={{ m: 0, p: 2.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Stack spacing={0.5}>
