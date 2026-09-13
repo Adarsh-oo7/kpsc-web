@@ -362,7 +362,7 @@ export default function TopicStudyPage() {
             <Grid size={{ xs: 12, md: 7 }}>
               <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px', height: '100%' }}>
                 <CardContent sx={{ p: 4 }}>
-                  <Typography variant="subtitle2" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: '#F0F4F8', mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography variant="subtitle2" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: 'text.primary', mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
                     <BarChartIcon sx={{ color: '#2E8B57' }} /> Difficulty Analysis
                   </Typography>
 
@@ -374,7 +374,7 @@ export default function TopicStudyPage() {
                     ].map((row, idx) => (
                       <Box key={idx}>
                         <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-                          <Typography sx={{ fontSize: '0.85rem', fontWeight: 700, color: '#D0D8E0' }}>{row.label}</Typography>
+                          <Typography sx={{ fontSize: '0.85rem', fontWeight: 700, color: 'text.secondary' }}>{row.label}</Typography>
                           <Typography sx={{ fontSize: '0.85rem', fontWeight: 800, color: row.color, fontFamily: "'JetBrains Mono'" }}>{Math.round(row.acc)}%</Typography>
                         </Stack>
                         <LinearProgress
@@ -566,7 +566,7 @@ export default function TopicStudyPage() {
                   <ReportQuestionButton questionId={questions[currentIdx].id} questionText={questions[currentIdx].text} />
                 </Stack>
 
-                <Typography sx={{ fontWeight: 700, fontSize: '1.05rem', color: '#F0F4F8', lineHeight: 1.6, mb: 3 }}>
+                <Typography sx={{ fontWeight: 700, fontSize: '1.05rem', color: 'text.primary', lineHeight: 1.6, mb: 3 }}>
                   {questions[currentIdx].text}
                 </Typography>
 
@@ -653,7 +653,7 @@ export default function TopicStudyPage() {
             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
               <Stack direction="row" spacing={1} alignItems="center">
                 <AutoAwesomeIcon sx={{ color: '#F59E0B', fontSize: 18 }} />
-                <Typography sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: '#F0F4F8' }}>
+                <Typography sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 800, color: 'text.primary' }}>
                   AI Explanation ({aiLang === 'ml' ? 'Malayalam' : 'English'})
                 </Typography>
               </Stack>
@@ -738,7 +738,7 @@ export default function TopicStudyPage() {
           </motion.div>
 
           {/* Results Question Review List */}
-          <Typography variant="h6" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: '#F0F4F8', mb: 2 }}>
+          <Typography variant="h6" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: 'text.primary', mb: 2 }}>
             Review Answers
           </Typography>
 

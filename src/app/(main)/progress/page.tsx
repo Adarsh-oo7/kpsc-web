@@ -76,7 +76,7 @@ export default function ProgressPage() {
         <motion.div initial={{opacity: 0, y: 20}} animate={{opacity: 1, y: 0}}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 4, flexWrap: 'wrap', gap: 2 }}>
                 <Box>
-                    <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>Your Performance Report</Typography>
+                    <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'text.primary' }}>Your Performance Report</Typography>
                     <Typography variant="h6" sx={{ color: 'text.secondary' }}>Analysis for: {target_exam_name}</Typography>
                 </Box>
                 <Button variant="outlined" onClick={() => router.push('/profile')}>Change Focus Exam</Button>

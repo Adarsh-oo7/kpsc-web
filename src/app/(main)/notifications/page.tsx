@@ -18,7 +18,7 @@ export default function NotificationsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!ctxLoading && !user) router.push('/login');
+    if (!ctxLoading && !user) router.push('/login?next=/notifications');
   }, [user, ctxLoading, router]);
 
   // Fetch announcements/messages
@@ -50,14 +50,14 @@ export default function NotificationsPage() {
     <Box sx={{ maxWidth: 650, mx: 'auto', pb: 6 }}>
       {/* Title */}
       <Box sx={{ mb: 4 }}>
-        <Typography sx={{ fontSize: '0.8rem', color: '#8B5CF6', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-          Inbox 🔔
+        <Typography sx={{ fontSize: '0.78rem', color: '#1B6B3A', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+          Inbox
         </Typography>
-        <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: '#F0F4F8', mt: 0.5 }}>
-          Notification Center
+        <Typography variant="h4" sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: 'text.primary', mt: 0.5 }}>
+          Notifications
         </Typography>
-        <Typography sx={{ color: '#8892A4', fontSize: '0.9rem', mt: 0.5 }}>
-          Updates from your coaches, class schedule announcements, and daily achievement rewards.
+        <Typography sx={{ color: 'text.secondary', fontSize: '0.9rem', mt: 0.5 }}>
+          Updates from your academy, class notes, and daily practice reminders.
         </Typography>
       </Box>
 
@@ -68,10 +68,10 @@ export default function NotificationsPage() {
           border: '1px solid', borderColor: 'divider'
         }}>
           <Typography sx={{ fontSize: '2.5rem', mb: 1.5 }}>🔔</Typography>
-          <Typography sx={{ fontWeight: 800, color: '#F0F4F8', fontFamily: "'Cabinet Grotesk'", mb: 0.5 }}>
+          <Typography sx={{ fontWeight: 800, color: 'text.primary', fontFamily: "'Cabinet Grotesk'", mb: 0.5 }}>
             You're all caught up!
           </Typography>
-          <Typography sx={{ color: '#8892A4', fontSize: '0.875rem' }}>
+          <Typography sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
             Come back after today's quiz to check for new alerts.
           </Typography>
         </Box>
@@ -95,7 +95,7 @@ export default function NotificationsPage() {
                         cursor: 'pointer',
                         py: 2.5, px: 3,
                         background: !isRead ? 'rgba(27,107,58,0.06)' : 'transparent',
-                        '&:hover': { background: 'rgba(255,255,255,0.02)' },
+                        '&:hover': { bgcolor: 'action.hover' },
                         display: 'flex', alignItems: 'flex-start', gap: 2,
                         transition: 'background-color 0.2s ease',
                       }}
@@ -104,25 +104,25 @@ export default function NotificationsPage() {
                         mt: 0.5,
                         width: 32, height: 32,
                         borderRadius: '50%',
-                        bgcolor: !isRead ? 'rgba(46,139,87,0.15)' : 'rgba(255,255,255,0.03)',
+                        bgcolor: !isRead ? 'rgba(46,139,87,0.15)' : 'action.hover',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        color: !isRead ? '#2E8B57' : '#8892A4'
+                        color: !isRead ? '#2E8B57' : 'text.secondary'
                       }}>
                         {!isRead ? <NotificationsIcon sx={{ fontSize: 16 }} /> : <DraftsIcon sx={{ fontSize: 16 }} />}
                       </Box>
                       <Box sx={{ flexGrow: 1 }}>
                         <Typography sx={{
                           fontWeight: !isRead ? 800 : 500,
-                          color: !isRead ? '#F0F4F8' : '#8892A4',
+                          color: !isRead ? 'text.primary' : 'text.secondary',
                           fontSize: '0.9rem',
                           fontFamily: "'Satoshi', sans-serif"
                         }}>
                           {msg.subject || msg.title || 'System Notification'}
                         </Typography>
-                        <Typography sx={{ color: '#8892A4', fontSize: '0.8rem', mt: 0.5, lineHeight: 1.5 }}>
+                        <Typography sx={{ color: 'text.secondary', fontSize: '0.8rem', mt: 0.5, lineHeight: 1.5 }}>
                           {msg.body || msg.content}
                         </Typography>
-                        <Typography sx={{ fontSize: '0.65rem', color: '#4A5568', mt: 1, fontFamily: "'JetBrains Mono'" }}>
+                        <Typography sx={{ fontSize: '0.65rem', color: 'text.secondary', mt: 1 }}>
                           {msg.sent_at ? new Date(msg.sent_at).toLocaleString() : 'Just now'}
                         </Typography>
                       </Box>
@@ -137,7 +137,7 @@ export default function NotificationsPage() {
                         </Button>
                       )}
                     </ListItem>
-                    {i < allMessages.length - 1 && <Divider sx={{ borderColor: 'rgba(255,255,255,0.04)' }} />}
+                    {i < allMessages.length - 1 && <Divider />}
                   </Box>
                 </motion.div>
               );

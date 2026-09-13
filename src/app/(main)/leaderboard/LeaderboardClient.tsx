@@ -39,7 +39,7 @@ export default function LeaderboardClient() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!ctxLoading && !user) router.push('/login');
+    if (!ctxLoading && !user) router.push('/login?next=/leaderboard');
   }, [user, ctxLoading, router]);
 
   const { data, error, isLoading, mutate } = useSWR(

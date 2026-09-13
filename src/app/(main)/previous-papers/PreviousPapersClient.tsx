@@ -112,7 +112,7 @@ export default function PreviousPapersClient() {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-            <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 4, color: 'white', display: 'flex', alignItems: 'center' }}>
+            <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 4, color: 'text.primary', display: 'flex', alignItems: 'center' }}>
                 <HistoryIcon sx={{ mr: 1.5, fontSize: '2.5rem' }} />
                 Previous Question Papers
             </Typography>
@@ -134,7 +134,7 @@ export default function PreviousPapersClient() {
             {filteredCategories && filteredCategories.length > 0 ? (
                 filteredCategories.map((category: any) => (
                 <motion.div key={category.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'white', mb: 3, borderLeft: '4px solid', borderColor: 'primary.main', pl: 2 }}>
+                    <Typography variant="h5" sx={{ fontWeight: 'bold', color: 'text.primary', mb: 3, borderLeft: '4px solid', borderColor: 'primary.main', pl: 2 }}>
                         {category.name}
                     </Typography>
                     <Grid container spacing={3}>

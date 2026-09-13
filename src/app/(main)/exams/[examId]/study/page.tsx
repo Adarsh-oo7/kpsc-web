@@ -41,7 +41,7 @@ export default function StudyModePage() {
 
     return (
         <Box>
-            <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 4, color: 'white' }}>Study Mode</Typography>
+            <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 4, color: 'text.primary' }}>Study Mode</Typography>
             <Paper sx={{ p: 4, borderRadius: 4 }}>
                 <Typography color="text.secondary">Question {currentIndex + 1} of {questions.length}</Typography>
                 <Typography variant="h5" sx={{ my: 3, minHeight: '100px' }}>{currentQuestion.text}</Typography>

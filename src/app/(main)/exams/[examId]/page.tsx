@@ -148,7 +148,7 @@ export default async function ExamDetailPage({ params }: PageProps) {
   if (!exam) {
     return (
       <Container maxWidth="md" sx={{ py: 12, textAlign: 'center' }}>
-        <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold', color: 'white' }}>Mock Paper Not Found</Typography>
+        <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold', color: 'text.primary' }}>Mock Paper Not Found</Typography>
         <Link href="/exams" style={{ textDecoration: 'none' }}>
           <Button variant="contained">
             Back to Mock Tests

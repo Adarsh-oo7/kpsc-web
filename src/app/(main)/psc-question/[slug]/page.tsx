@@ -54,9 +54,9 @@ export default async function QuestionSEOPage({ params }: PageProps) {
 
   if (!rawQuestion) {
     return (
-      <Box sx={{ p: 4, textAlign: 'center', color: 'white' }}>
-        <Typography variant="h5" gutterBottom>Question Not Found</Typography>
-        <Typography variant="body1" sx={{ mb: 3, color: 'grey.400' }}>
+      <Box sx={{ p: 4, textAlign: 'center' }}>
+        <Typography variant="h5" gutterBottom sx={{ color: 'text.primary', fontWeight: 800 }}>Question Not Found</Typography>
+        <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
           The question you are looking for does not exist or has been removed.
         </Typography>
         <Link href="/" style={{ textDecoration: 'none' }}>
@@ -106,7 +106,7 @@ export default async function QuestionSEOPage({ params }: PageProps) {
       </Box>
 
       {/* Main Question Card */}
-      <Card sx={{ bgcolor: 'rgba(255, 255, 255, 0.05)', backdropFilter: 'blur(10px)', color: 'white', borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
+      <Card sx={{ bgcolor: 'background.paper', color: 'text.primary', borderRadius: 4, border: '1px solid', borderColor: 'divider' }}>
         <CardContent sx={{ p: 4 }}>
           <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 2 }}>
             <HelpOutlineIcon color="primary" />

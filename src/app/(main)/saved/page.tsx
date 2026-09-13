@@ -20,7 +20,7 @@ export default function SavedPage() {
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!ctxLoading && !user) router.push('/login');
+    if (!ctxLoading && !user) router.push('/login?next=/saved');
   }, [user, ctxLoading, router]);
 
   // Fetch bookmarks
