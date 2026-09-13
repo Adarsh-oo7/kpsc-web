@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import SendIcon from '@mui/icons-material/Send';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import ClearIcon from '@mui/icons-material/Clear';
+import { InstitutePageHeader, greenCtaSx, asList } from '@/components/institute/pageChrome';
 
 // --- Helper Fetcher (uses apiClient — auth headers injected automatically) ---
 const fetcher = (url: string) => apiClient.get(url).then(r => r.data);
@@ -34,7 +35,8 @@ export default function MessagingPage() {
     const [isSending, setIsSending] = useState(false);
 
     // Fetch the list of students to populate the dropdown
-    const { data: students, error: studentsError } = useSWR('/institute/students/', fetcher);
+    const { data: studentsRaw, error: studentsError } = useSWR('/institute/students/', fetcher);
+    const students = asList(studentsRaw);
 
     const handleFormChange = (e: React.ChangeEvent<any>) => {
         const { name, value } = e.target;
@@ -69,7 +71,7 @@ export default function MessagingPage() {
         }
 
         // Determine the recipients
-        if (formState.recipientType === 'all' && students) {
+        if (formState.recipientType === 'all' && students.length) {
             students.forEach((student: any) => data.append('recipients', student.user.id));
         } else if (formState.recipientType === 'single' && formState.singleRecipient) {
             data.append('recipients', formState.singleRecipient);
@@ -95,9 +97,10 @@ export default function MessagingPage() {
 
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 4, color: 'white' }}>
-                Send Message / Notification
-            </Typography>
+            <InstitutePageHeader
+                title="Messaging"
+                subtitle="Send a notice to every student, or to one student."
+            />
 
             <Paper component="form" onSubmit={handleSubmit} sx={{ p: 4, borderRadius: 4 }}>
                 <Grid container spacing={3}>
@@ -141,7 +144,7 @@ export default function MessagingPage() {
                         {imagePreview ? (
                             <Box sx={{ position: 'relative', width: 'fit-content' }}>
                                 <img src={imagePreview} alt="Preview" height="100" style={{ borderRadius: '8px' }}/>
-                                <IconButton onClick={clearImage} size="small" sx={{ position: 'absolute', top: 0, right: 0, bgcolor: 'rgba(0,0,0,0.5)', color: 'white' }}>
+                                <IconButton onClick={clearImage} size="small" sx={{ position: 'absolute', top: 0, right: 0, bgcolor: 'rgba(0,0,0,0.5)', color: 'text.primary' }}>
                                     <ClearIcon fontSize="small"/>
                                 </IconButton>
                             </Box>
@@ -157,7 +160,7 @@ export default function MessagingPage() {
                     <Grid size={{ xs: 12 }}>
                         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
                         {success && <Alert severity="success" sx={{ mb: 2 }}>{success}</Alert>}
-                        <Button type="submit" variant="contained" size="large" endIcon={<SendIcon />} disabled={isSending}>
+                        <Button type="submit" variant="contained" size="large" endIcon={<SendIcon />} disabled={isSending} sx={greenCtaSx}>
                             {isSending ? <CircularProgress size={24} /> : 'Send Message'}
                         </Button>
                     </Grid>

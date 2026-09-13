@@ -53,7 +53,10 @@ apiClient.interceptors.response.use(
             // Clear expired session data
             localStorage.removeItem('access_token');
             localStorage.removeItem('refresh_token');
-            window.location.href = '/login';
+            const next = window.location.pathname.startsWith('/institute')
+              ? '/login?tab=1'
+              : '/login';
+            window.location.href = next;
           }
         }
       }

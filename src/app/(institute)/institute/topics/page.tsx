@@ -16,6 +16,7 @@ import { motion } from 'framer-motion';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { InstitutePageHeader, greenCtaSx, asList } from '@/components/institute/pageChrome';
 
 
 
@@ -30,7 +31,8 @@ const API_URL = '/institute/topics/';
 export default function ManageTopicsPage() {
     // FIXED: Use context fetcher for proper auth
     const { fetcher } = useAppContext();
-    const { data: topics, error, isLoading, mutate } = useSWR<Topic[]>(API_URL, fetcher);
+    const { data: topicsRaw, error, isLoading, mutate } = useSWR<Topic[]>(API_URL, fetcher);
+    const topics = asList(topicsRaw) as Topic[];
 
     const [dialogOpen, setDialogOpen] = useState(false);
     const [currentTopic, setCurrentTopic] = useState<Topic | null>(null);
@@ -83,14 +85,11 @@ export default function ManageTopicsPage() {
 
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-                <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>
-                    Manage Topics
-                </Typography>
-                <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
-                    Add New Topic
-                </Button>
-            </Box>
+            <InstitutePageHeader
+                title="Topics"
+                subtitle="Topics group the MCQs you create for this academy."
+                action={<Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()} sx={greenCtaSx}>Add topic</Button>}
+            />
 
             {isLoading && <CircularProgress />}
             {error && <Alert severity="error">Failed to load topics. Please try again.</Alert>}
@@ -106,7 +105,7 @@ export default function ManageTopicsPage() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {topics?.map((topic) => (
+                            {topics.map((topic) => (
                                 <TableRow key={topic.id} hover>
                                     <TableCell>#{topic.id}</TableCell>
                                     <TableCell>{topic.name}</TableCell>
@@ -124,7 +123,7 @@ export default function ManageTopicsPage() {
                                     </TableCell>
                                 </TableRow>
                             ))}
-                            {(!topics || topics.length === 0) && !isLoading && (
+                            {topics.length === 0 && !isLoading && (
                                 <TableRow>
                                     <TableCell colSpan={3} align="center" sx={{ py: 6 }}>
                                         <Typography color="text.secondary">

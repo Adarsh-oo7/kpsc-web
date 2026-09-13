@@ -16,6 +16,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import SearchIcon from '@mui/icons-material/Search';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
+import { InstitutePageHeader, greenCtaSx, asList } from '@/components/institute/pageChrome';
 
 const DIFFICULTY_COLORS: Record<string, 'success' | 'warning' | 'error'> = {
   easy: 'success',
@@ -39,8 +40,10 @@ export default function ManageQuestionsPage() {
   const { fetcher } = useAppContext();
 
   // FIXED: Use context fetcher and correct URL (no /api/ prefix)
-  const { data: questions, error, isLoading, mutate } = useSWR('/institute/questions/', fetcher, { fallbackData: [] });
-  const { data: topics } = useSWR('/institute/topics/', fetcher, { fallbackData: [] });
+  const { data: questionsRaw, error, isLoading, mutate } = useSWR('/institute/questions/', fetcher);
+  const { data: topicsRaw } = useSWR('/institute/topics/', fetcher);
+  const questions = asList(questionsRaw);
+  const topics = asList(topicsRaw);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -72,7 +75,7 @@ export default function ManageQuestionsPage() {
         correct_answer: question.correct_answer || 'A',
         explanation: question.explanation || '',
         difficulty: question.difficulty || 'medium',
-        topic: question.topic?.toString() || '',
+        topic: question.topic?.id?.toString() || question.topic?.toString() || '',
       });
     } else {
       setEditingQuestion(null);
@@ -98,12 +101,16 @@ export default function ManageQuestionsPage() {
       setFormError('Question text and all 4 options are required.');
       return;
     }
+    if (!form.topic) {
+      setFormError('Pick a topic. Create one under Topics first.');
+      return;
+    }
     setIsSubmitting(true);
     setFormError('');
     try {
       const payload = {
         ...form,
-        topic: form.topic || null,
+        topic: form.topic ? Number(form.topic) : null,
       };
       if (editingQuestion) {
         await apiClient.patch(`/institute/questions/${editingQuestion.id}/`, payload);
@@ -142,17 +149,16 @@ export default function ManageQuestionsPage() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>Question Bank</Typography>
-          <Typography variant="subtitle2" sx={{ color: 'grey.400', mt: 0.5 }}>
-            Create and manage custom mock-test questions for your students
-          </Typography>
-        </Box>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
-          Add Question
-        </Button>
-      </Box>
+      <InstitutePageHeader
+        title="Question bank"
+        subtitle="Academy MCQs for your students. Create a topic first, then add questions."
+        action={<Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()} sx={greenCtaSx}>Add question</Button>}
+      />
+      {topics.length === 0 && (
+        <Alert severity="info" sx={{ mb: 3, borderRadius: '14px' }}>
+          No topics yet. Add one under Topics, then come back here to save questions.
+        </Alert>
+      )}
 
       {/* Search */}
       <Paper sx={{ p: 2, mb: 3, borderRadius: 4, bgcolor: 'background.paper' }}>
@@ -190,13 +196,13 @@ export default function ManageQuestionsPage() {
                     <TableRow key={q.id} hover>
                       <TableCell sx={{ color: 'grey.500', fontSize: '0.8rem' }}>{idx + 1}</TableCell>
                       <TableCell sx={{ maxWidth: 350 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 600, color: 'white', lineHeight: 1.4 }}>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.primary', lineHeight: 1.4 }}>
                           {qText.length > 100 ? `${qText.slice(0, 100)}...` : qText}
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        {topics?.find((t: any) => t.id === q.topic)?.name ? (
-                          <Chip label={topics.find((t: any) => t.id === q.topic).name} size="small" variant="outlined" />
+                        {q.topic_name || topics.find((t: any) => t.id === q.topic || t.id === q.topic?.id)?.name ? (
+                          <Chip label={q.topic_name || topics.find((t: any) => t.id === q.topic || t.id === q.topic?.id)?.name} size="small" variant="outlined" />
                         ) : (
                           <Typography variant="caption" color="text.secondary">—</Typography>
                         )}
@@ -300,9 +306,9 @@ export default function ManageQuestionsPage() {
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <FormControl fullWidth>
-                  <InputLabel>Topic (Optional)</InputLabel>
-                  <Select name="topic" value={form.topic} label="Topic (Optional)" onChange={handleFormChange}>
-                    <MenuItem value="">No Topic</MenuItem>
+                  <InputLabel>Topic *</InputLabel>
+                  <Select name="topic" value={form.topic} label="Topic *" onChange={handleFormChange}>
+                    <MenuItem value="">Select a topic</MenuItem>
                     {topics?.map((t: any) => (
                       <MenuItem key={t.id} value={t.id.toString()}>{t.name}</MenuItem>
                     ))}

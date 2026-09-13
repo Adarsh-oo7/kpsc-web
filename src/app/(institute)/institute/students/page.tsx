@@ -16,6 +16,7 @@ import PaymentsIcon from '@mui/icons-material/Payments';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
+import { InstitutePageHeader, greenCtaSx } from '@/components/institute/pageChrome';
 
 // Initial state for the student creation form
 const initialCreateFormState = { 
@@ -29,6 +30,7 @@ export default function ManageStudentsPage() {
     const { fetcher } = useAppContext();
     const router = useRouter();
     const { data: students, error, isLoading, mutate } = useSWR('/institute/students/', fetcher);
+    const studentList = Array.isArray(students) ? students : [];
 
     const [dialogOpen, setDialogOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -43,14 +45,14 @@ export default function ManageStudentsPage() {
 
     // Client-side filtering logic for the search field
     const filteredStudents = useMemo(() => {
-        if (!students) return [];
-        if (!searchQuery.trim()) return students;
-        return students.filter((profile: any) =>
-            profile.user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            profile.user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (profile.user.full_name || '').toLowerCase().includes(searchQuery.toLowerCase())
+        if (!studentList.length) return [];
+        if (!searchQuery.trim()) return studentList;
+        return studentList.filter((profile: any) =>
+            (profile.user?.username || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (profile.user?.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (profile.user?.full_name || '').toLowerCase().includes(searchQuery.toLowerCase())
         );
-    }, [students, searchQuery]);
+    }, [studentList, searchQuery]);
 
     const handleOpenDialog = () => setDialogOpen(true);
     const handleCloseDialog = () => {
@@ -127,15 +129,11 @@ export default function ManageStudentsPage() {
     
     return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-                <Box>
-                    <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>Manage Students</Typography>
-                    <Typography variant="subtitle2" sx={{ color: 'grey.400', mt: 0.5 }}>
-                        {students?.length || 0} student{students?.length !== 1 ? 's' : ''} enrolled
-                    </Typography>
-                </Box>
-                <Button variant="contained" onClick={handleOpenDialog} startIcon={<AddIcon />}>Add Student</Button>
-            </Box>
+            <InstitutePageHeader
+                title="Students"
+                subtitle={`${studentList.length} student${studentList.length !== 1 ? 's' : ''} enrolled in this academy.`}
+                action={<Button variant="contained" onClick={handleOpenDialog} startIcon={<AddIcon />} sx={greenCtaSx}>Add student</Button>}
+            />
 
             <Paper sx={{ p: 2, mb: 4, borderRadius: 4, bgcolor: 'background.paper' }}>
                 <TextField
@@ -238,7 +236,7 @@ export default function ManageStudentsPage() {
                                 <TextField name="last_name" label="Last Name" value={createForm.last_name} onChange={handleCreateFormChange} fullWidth />
                                 <TextField name="username" label="Username" value={createForm.username} onChange={handleCreateFormChange} fullWidth required />
                                 <TextField name="email" label="Email" type="email" value={createForm.email} onChange={handleCreateFormChange} fullWidth required />
-                                <TextField name="password" label="Password" type="password" value={createForm.password} onChange={handleCreateFormChange} fullWidth required helperText="Password must be secure."/>
+                                <TextField name="password" label="Password" type="password" value={createForm.password} onChange={handleCreateFormChange} fullWidth required helperText="At least 8 characters."/>
                             </Stack>
                         </DialogContent>
                         <DialogActions sx={{ p: 3 }}>

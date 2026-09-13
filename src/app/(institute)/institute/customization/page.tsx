@@ -11,6 +11,7 @@ import {
 } from '@mui/material';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import { motion, AnimatePresence } from 'framer-motion';
+import { InstitutePageHeader, greenCtaSx } from '@/components/institute/pageChrome';
 
 // --- Styled component for the image upload area ---
 const ImageUploadBox = styled(Box)(({ theme }) => ({
@@ -38,7 +39,7 @@ const UploadOverlay = styled(Box)({
     position: 'absolute',
     top: 0, left: 0, width: '100%', height: '100%',
     backgroundColor: 'rgba(0,0,0,0.6)',
-    color: 'white',
+    color: '#fff',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -68,11 +69,16 @@ export default function CustomizationPage() {
     // Set initial previews from fetched data
     useEffect(() => {
         if (instituteData) {
+            const abs = (url?: string | null) => {
+                if (!url) return null;
+                if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:')) return url;
+                return `${BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
+            };
             const initialPreviews = {
-                login_bg_image: instituteData.login_bg_image ? `${BASE_URL}${instituteData.login_bg_image}` : null,
-                login_image_1: instituteData.login_image_1 ? `${BASE_URL}${instituteData.login_image_1}` : null,
-                login_image_2: instituteData.login_image_2 ? `${BASE_URL}${instituteData.login_image_2}` : null,
-                login_image_3: instituteData.login_image_3 ? `${BASE_URL}${instituteData.login_image_3}` : null,
+                login_bg_image: abs(instituteData.login_bg_image),
+                login_image_1: abs(instituteData.login_image_1),
+                login_image_2: abs(instituteData.login_image_2),
+                login_image_3: abs(instituteData.login_image_3),
             };
             setPreviews(initialPreviews);
         }
@@ -128,9 +134,10 @@ export default function CustomizationPage() {
     
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 4, color: 'white' }}>
-                Student Login Page Customization
-            </Typography>
+            <InstitutePageHeader
+                title="Login branding"
+                subtitle="Images on the student login screen for this academy."
+            />
             <Paper component="form" onSubmit={handleSubmit} sx={{ p: {xs: 2, md: 4}, borderRadius: 4, bgcolor: 'background.paper' }}>
                 <Grid container spacing={3}>
                     {imageFields.map(field => (
@@ -157,7 +164,7 @@ export default function CustomizationPage() {
                             {error && <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Alert severity="error" sx={{ mb: 2 }}>{error}</Alert></motion.div>}
                             {success && <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Alert severity="success" sx={{ mb: 2 }}>{success}</Alert></motion.div>}
                         </AnimatePresence>
-                        <Button type="submit" variant="contained" size="large" disabled={loading} fullWidth>
+                        <Button type="submit" variant="contained" size="large" disabled={loading} fullWidth sx={greenCtaSx}>
                             {loading ? <CircularProgress size={24} color="inherit" /> : 'Save Customization'}
                         </Button>
                     </Grid>

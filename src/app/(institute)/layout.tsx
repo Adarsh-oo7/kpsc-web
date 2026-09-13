@@ -34,30 +34,34 @@ export default function InstitutePortalLayout({ children }: { children: React.Re
   if (isLoading || !user || !isInstituteOwner) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', bgcolor: 'background.default' }}>
-        <CircularProgress />
+        <CircularProgress sx={{ color: '#2E8B57' }} />
       </Box>
     );
   }
 
   // If authorized, show the portal layout
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: 'background.default' }}>
       <CssBaseline />
       <InstituteHeader onDrawerToggle={() => setMobileOpen(!mobileOpen)} />
       <InstituteSidebar
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
-        onNavigate={(path) => router.push(path)}
+        onNavigate={(path) => {
+          setMobileOpen(false);
+          router.push(path);
+        }}
       />
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
+          p: { xs: 2, md: 3 },
           width: '100%',
+          bgcolor: 'background.default',
+          minHeight: '100vh',
         }}
       >
-        {/* This Toolbar adds space to push content below the fixed header */}
         <Toolbar />
         {children}
       </Box>

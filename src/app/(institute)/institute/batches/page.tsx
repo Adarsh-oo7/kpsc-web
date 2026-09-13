@@ -14,12 +14,14 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
+import { InstitutePageHeader, greenCtaSx, asList } from '@/components/institute/pageChrome';
 
 export default function BatchesPage() {
   const { fetcher } = useAppContext();
   const router = useRouter();
 
-  const { data: batches, error, isLoading, mutate } = useSWR('/institute/batches/', fetcher);
+  const { data: batchesRaw, error, isLoading, mutate } = useSWR('/institute/batches/', fetcher);
+  const batches = asList(batchesRaw);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [form, setForm] = useState({ name: '', description: '' });
@@ -57,23 +59,11 @@ export default function BatchesPage() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>
-            Batch Management
-          </Typography>
-          <Typography variant="subtitle1" sx={{ color: 'grey.300' }}>
-            Organize student cohorts, track attendance, and assign notes
-          </Typography>
-        </Box>
-        <Button 
-          variant="contained" 
-          startIcon={<AddIcon />} 
-          onClick={handleOpenDialog}
-        >
-          Create Batch
-        </Button>
-      </Box>
+      <InstitutePageHeader
+        title="Batches"
+        subtitle="Group students, mark attendance, and share notes by class."
+        action={<Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenDialog} sx={greenCtaSx}>Create batch</Button>}
+      />
 
       {/* Batches Table */}
       <Paper sx={{ borderRadius: 4, bgcolor: 'background.paper', overflow: 'hidden' }}>

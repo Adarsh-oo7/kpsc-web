@@ -138,14 +138,14 @@ export default function StudentFeesPage() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             {/* Header */}
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-                <IconButton onClick={handleBackClick} sx={{ mr: 2, color: 'white' }}>
+                <IconButton onClick={handleBackClick} sx={{ mr: 2, color: 'text.primary' }}>
                     <ArrowBackIcon />
                 </IconButton>
                 <Box sx={{ flexGrow: 1 }}>
-                    <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>
+                    <Typography variant="h4" sx={{ fontWeight: 800, color: 'text.primary' }}>
                         Fee Management
                     </Typography>
-                    <Typography variant="h6" sx={{ color: 'grey.300' }}>
+                    <Typography variant="h6" sx={{ color: 'text.secondary' }}>
                         {student.user.username} ({student.user.email})
                     </Typography>
                 </Box>
@@ -160,7 +160,7 @@ export default function StudentFeesPage() {
 
             {/* Fee Summary Cards */}
             <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 2, mb: 4 }}>
-                <Card sx={{ bgcolor: 'primary.main', color: 'white' }}>
+                <Card sx={{ bgcolor: 'primary.main', color: '#fff' }}>
                     <CardContent>
                         <Typography variant="h6">Total Fees</Typography>
                         <Typography variant="h4">
@@ -168,7 +168,7 @@ export default function StudentFeesPage() {
                         </Typography>
                     </CardContent>
                 </Card>
-                <Card sx={{ bgcolor: 'success.main', color: 'white' }}>
+                <Card sx={{ bgcolor: 'success.main', color: '#fff' }}>
                     <CardContent>
                         <Typography variant="h6">Paid</Typography>
                         <Typography variant="h4">
@@ -176,7 +176,7 @@ export default function StudentFeesPage() {
                         </Typography>
                     </CardContent>
                 </Card>
-                <Card sx={{ bgcolor: 'error.main', color: 'white' }}>
+                <Card sx={{ bgcolor: 'error.main', color: '#fff' }}>
                     <CardContent>
                         <Typography variant="h6">Outstanding</Typography>
                         <Typography variant="h4">

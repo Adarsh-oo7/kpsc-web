@@ -18,6 +18,7 @@ import ColorLensIcon from '@mui/icons-material/ColorLens';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
+import { InstitutePageHeader, greenCtaSx } from '@/components/institute/pageChrome';
 
 export default function InstituteSettingsPage() {
   const [formData, setFormData] = useState({
@@ -114,14 +115,10 @@ export default function InstituteSettingsPage() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>
-          Institute Settings
-        </Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
-          Manage your institute's public profile, contact details, and branding.
-        </Typography>
-      </Box>
+      <InstitutePageHeader
+        title="Academy settings"
+        subtitle="Public name, contact, and colours students see for this centre."
+      />
 
       <AnimatePresence>
         {error && <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}><Alert severity="error" sx={{ mb: 2 }}>{error}</Alert></motion.div>}
@@ -131,7 +128,7 @@ export default function InstituteSettingsPage() {
       <Box component="form" onSubmit={handleSubmit} noValidate>
         {/* Logo Upload Section */}
         <Paper sx={{ p: { xs: 2, md: 4 }, bgcolor: 'background.paper', borderRadius: 4, mb: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 3, color: 'white' }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 3, color: 'text.primary' }}>
             Institute Logo
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, flexWrap: 'wrap' }}>
@@ -145,7 +142,7 @@ export default function InstituteSettingsPage() {
                 </Avatar>
                 <Box sx={{
                   position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
-                  bgcolor: 'rgba(0,0,0,0.5)', color: 'white', display: 'flex',
+                  bgcolor: 'rgba(0,0,0,0.5)', color: 'text.primary', display: 'flex',
                   alignItems: 'center', justifyContent: 'center', borderRadius: '50%',
                   opacity: 0, transition: 'opacity 0.3s ease', '&:hover': { opacity: 1 }
                 }}>
@@ -155,7 +152,7 @@ export default function InstituteSettingsPage() {
             </label>
             <Input id="logo-upload" type="file" sx={{ display: 'none' }} onChange={(e: any) => handleFileChange(e.target.files?.[0] || null)} inputProps={{ accept: 'image/*' }} />
             <Box>
-              <Typography variant="body2" sx={{ color: 'grey.300' }}>Click the logo to change it</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>Click the logo to change it</Typography>
               <Typography variant="caption" color="text.secondary">Recommended: Square image, at least 200x200px</Typography>
             </Box>
           </Box>
@@ -163,7 +160,7 @@ export default function InstituteSettingsPage() {
 
         {/* Basic Info Section */}
         <Paper sx={{ p: { xs: 2, md: 4 }, bgcolor: 'background.paper', borderRadius: 4, mb: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 3, color: 'white' }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 3, color: 'text.primary' }}>
             Basic Information
           </Typography>
           <Grid container spacing={3}>
@@ -206,7 +203,7 @@ export default function InstituteSettingsPage() {
 
         {/* Contact Details Section */}
         <Paper sx={{ p: { xs: 2, md: 4 }, bgcolor: 'background.paper', borderRadius: 4, mb: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 3, color: 'white' }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 3, color: 'text.primary' }}>
             Contact Details
           </Typography>
           <Grid container spacing={3}>
@@ -261,7 +258,7 @@ export default function InstituteSettingsPage() {
 
         {/* Branding Colors Section */}
         <Paper sx={{ p: { xs: 2, md: 4 }, bgcolor: 'background.paper', borderRadius: 4, mb: 3 }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1, color: 'white' }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1, color: 'text.primary' }}>
             Brand Colors
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
@@ -271,7 +268,7 @@ export default function InstituteSettingsPage() {
             <Grid size={{ xs: 12, sm: 6 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Box
-                  sx={{ width: 48, height: 48, borderRadius: 2, bgcolor: formData.primary_color, border: '2px solid rgba(255,255,255,0.2)', flexShrink: 0 }}
+                  sx={{ width: 48, height: 48, borderRadius: 2, bgcolor: formData.primary_color, border: '2px solid', borderColor: 'divider', flexShrink: 0 }}
                 />
                 <TextField
                   name="primary_color"
@@ -293,7 +290,7 @@ export default function InstituteSettingsPage() {
             <Grid size={{ xs: 12, sm: 6 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Box
-                  sx={{ width: 48, height: 48, borderRadius: 2, bgcolor: formData.accent_color, border: '2px solid rgba(255,255,255,0.2)', flexShrink: 0 }}
+                  sx={{ width: 48, height: 48, borderRadius: 2, bgcolor: formData.accent_color, border: '2px solid', borderColor: 'divider', flexShrink: 0 }}
                 />
                 <TextField
                   name="accent_color"
@@ -317,7 +314,7 @@ export default function InstituteSettingsPage() {
 
         {/* Save Button */}
         <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <Button type="submit" variant="contained" size="large" disabled={loading} sx={{ py: 1.5, px: 6, fontWeight: 'bold', minWidth: 200 }}>
+          <Button type="submit" variant="contained" size="large" disabled={loading} sx={{ ...greenCtaSx, py: 1.5, px: 6, minWidth: 200 }}>
             {loading ? <CircularProgress size={24} color="inherit" /> : 'Save Changes'}
           </Button>
         </Box>

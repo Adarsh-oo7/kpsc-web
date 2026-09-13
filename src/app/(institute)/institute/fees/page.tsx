@@ -15,13 +15,15 @@ import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import { useAppContext } from '@/context/AppContext';
+import { InstitutePageHeader, asList } from '@/components/institute/pageChrome';
 
 export default function GeneralFeesDashboard() {
   const { fetcher } = useAppContext();
   const router = useRouter();
   
   // Fetch the list of all students under this institute
-  const { data: students, error, isLoading } = useSWR('/institute/students/', fetcher);
+  const { data: studentsRaw, error, isLoading } = useSWR('/institute/students/', fetcher);
+  const students = asList(studentsRaw);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Calculate aggregated stats
@@ -46,9 +48,9 @@ export default function GeneralFeesDashboard() {
     if (!students) return [];
     if (!searchQuery.trim()) return students;
     return students.filter((profile: any) =>
-      profile.user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      profile.user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      profile.user.full_name.toLowerCase().includes(searchQuery.toLowerCase())
+      (profile.user?.username || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (profile.user?.email || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (profile.user?.full_name || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [students, searchQuery]);
 
@@ -58,14 +60,10 @@ export default function GeneralFeesDashboard() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       {/* Title */}
-      <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>
-          Fee Management
-        </Typography>
-        <Typography variant="subtitle1" sx={{ color: 'grey.300' }}>
-          Track tuition dues, process offline payments, and manage invoices across all students.
-        </Typography>
-      </Box>
+      <InstitutePageHeader
+        title="Fee management"
+        subtitle="Track dues and record payments for students in this academy."
+      />
 
       {/* KPI Cards Grid */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
@@ -73,14 +71,14 @@ export default function GeneralFeesDashboard() {
           <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px' }}>
             <CardContent sx={{ p: 3 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                <Typography sx={{ fontSize: '0.75rem', fontWeight: 800, color: '#8892A4', textTransform: 'uppercase' }}>
+                <Typography sx={{ fontSize: '0.75rem', fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>
                   Total Fees Assigned
                 </Typography>
                 <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(139,92,246,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <AttachMoneyIcon sx={{ color: '#8B5CF6' }} />
                 </Box>
               </Stack>
-              <Typography variant="h4" sx={{ fontWeight: 900, color: '#F0F4F8' }}>
+              <Typography variant="h4" sx={{ fontWeight: 900, color: 'text.primary' }}>
                 ₹{stats.totalAssigned.toLocaleString('en-IN')}
               </Typography>
             </CardContent>
@@ -90,14 +88,14 @@ export default function GeneralFeesDashboard() {
           <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px' }}>
             <CardContent sx={{ p: 3 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                <Typography sx={{ fontSize: '0.75rem', fontWeight: 800, color: '#8892A4', textTransform: 'uppercase' }}>
+                <Typography sx={{ fontSize: '0.75rem', fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>
                   Total Collected
                 </Typography>
                 <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(46,139,87,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <CheckCircleOutlineIcon sx={{ color: '#2E8B57' }} />
                 </Box>
               </Stack>
-              <Typography variant="h4" sx={{ fontWeight: 900, color: '#F0F4F8' }}>
+              <Typography variant="h4" sx={{ fontWeight: 900, color: 'text.primary' }}>
                 ₹{stats.totalPaid.toLocaleString('en-IN')}
               </Typography>
             </CardContent>
@@ -107,14 +105,14 @@ export default function GeneralFeesDashboard() {
           <Card sx={{ background: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: '20px' }}>
             <CardContent sx={{ p: 3 }}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                <Typography sx={{ fontSize: '0.75rem', fontWeight: 800, color: '#8892A4', textTransform: 'uppercase' }}>
+                <Typography sx={{ fontSize: '0.75rem', fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase' }}>
                   Outstanding Dues
                 </Typography>
                 <Box sx={{ width: 36, height: 36, borderRadius: '10px', bgcolor: 'rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <ErrorOutlineIcon sx={{ color: '#EF4444' }} />
                 </Box>
               </Stack>
-              <Typography variant="h4" sx={{ fontWeight: 900, color: '#F0F4F8' }}>
+              <Typography variant="h4" sx={{ fontWeight: 900, color: 'text.primary' }}>
                 ₹{stats.totalOutstanding.toLocaleString('en-IN')}
               </Typography>
             </CardContent>
@@ -182,8 +180,8 @@ export default function GeneralFeesDashboard() {
                         <Stack direction="row" spacing={2} alignItems="center">
                           <Avatar src={profile.profile_photo || ''} sx={{ width: 40, height: 40 }} />
                           <Box>
-                            <Typography variant="body1" sx={{ fontWeight: 'bold', color: 'white' }}>
-                              {profile.user.full_name}
+                            <Typography variant="body1" sx={{ fontWeight: 800, color: 'text.primary' }}>
+                              {profile.user?.full_name || profile.user?.username}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
                               @{profile.user.username}
@@ -191,9 +189,9 @@ export default function GeneralFeesDashboard() {
                           </Box>
                         </Stack>
                       </TableCell>
-                      <TableCell sx={{ color: 'white' }}>₹{total.toLocaleString('en-IN')}</TableCell>
+                      <TableCell sx={{ color: 'text.primary' }}>₹{total.toLocaleString('en-IN')}</TableCell>
                       <TableCell sx={{ color: '#2E8B57' }}>₹{paid.toLocaleString('en-IN')}</TableCell>
-                      <TableCell sx={{ color: balance > 0 ? '#EF4444' : 'grey.400' }}>
+                      <TableCell sx={{ color: balance > 0 ? '#EF4444' : 'text.secondary' }}>
                         ₹{balance.toLocaleString('en-IN')}
                       </TableCell>
                       <TableCell>

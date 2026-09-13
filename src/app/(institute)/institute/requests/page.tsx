@@ -4,7 +4,8 @@ import useSWR from 'swr';
 import { Box, Typography, Button, Paper, List, ListItem, ListItemText, ListItemAvatar, Avatar, Stack, CircularProgress, Alert } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext'; // Import the global context
-import apiClient from '@/lib/apiClient'; // Import the central API client
+import apiClient from '@/lib/apiClient';
+import { InstitutePageHeader, asList, GREEN, GREEN_LIGHT } from '@/components/institute/pageChrome';
 
 export default function ManageRequestsPage() {
     // Get the universal fetcher from our global context.
@@ -12,7 +13,8 @@ export default function ManageRequestsPage() {
     const { fetcher } = useAppContext();
 
     // Use the context's fetcher and the short URL. This will now work correctly.
-    const { data: requests, error, isLoading, mutate } = useSWR('/institute/join-requests/', fetcher);
+    const { data: requestsRaw, error, isLoading, mutate } = useSWR('/institute/join-requests/', fetcher);
+    const requests = asList(requestsRaw);
 
     const handleProcessRequest = async (requestId: number, action: 'approve' | 'decline') => {
         try {
@@ -36,12 +38,13 @@ export default function ManageRequestsPage() {
 
     return (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 4, color: 'white' }}>
-                Student Join Requests
-            </Typography>
+            <InstitutePageHeader
+                title="Join requests"
+                subtitle="Students who asked to join this academy from the public Institutes page."
+            />
             <Paper sx={{ borderRadius: 4, p: 2, bgcolor: 'background.paper' }}>
                 <List>
-                    {requests && requests.length > 0 ? requests.map((req: any) => (
+                    {requests.length > 0 ? requests.map((req: any) => (
                         <ListItem key={req.id} divider sx={{py: 2}}>
                             <ListItemAvatar>
                                 <Avatar src={req.profile_photo || ''} />
@@ -51,7 +54,7 @@ export default function ManageRequestsPage() {
                                 secondary={req.user?.email || ''}
                             />
                             <Stack direction="row" spacing={1}>
-                                <Button variant="contained" color="success" onClick={() => handleProcessRequest(req.id, 'approve')}>
+                                <Button variant="contained" onClick={() => handleProcessRequest(req.id, 'approve')} sx={{ textTransform: 'none', fontWeight: 800, background: `linear-gradient(135deg, ${GREEN}, ${GREEN_LIGHT})` }}>
                                     Approve
                                 </Button>
                                 <Button variant="outlined" color="error" onClick={() => handleProcessRequest(req.id, 'decline')}>

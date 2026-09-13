@@ -14,6 +14,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { motion } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
+import { InstitutePageHeader, greenCtaSx, asList } from '@/components/institute/pageChrome';
 
 export default function NotesPage() {
   const { fetcher } = useAppContext();
@@ -22,13 +23,15 @@ export default function NotesPage() {
   const [filterBatchId, setFilterBatchId] = useState('');
 
   // Fetch notes list (scoped by batch if selected)
-  const { data: notes, error: notesError, isLoading: notesLoading, mutate: mutateNotes } = useSWR(
+  const { data: notesRaw, error: notesError, isLoading: notesLoading, mutate: mutateNotes } = useSWR(
     `/institute/notes/${filterBatchId ? `?batch_id=${filterBatchId}` : ''}`,
     fetcher
   );
+  const notes = asList(notesRaw);
 
   // Fetch batches list for filter and form dropdowns
-  const { data: batches } = useSWR('/institute/batches/', fetcher);
+  const { data: batchesRaw } = useSWR('/institute/batches/', fetcher);
+  const batches = asList(batchesRaw);
 
   // Form states
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -96,35 +99,22 @@ export default function NotesPage() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>
-            Study Materials (Notes)
-          </Typography>
-          <Typography variant="subtitle1" sx={{ color: 'grey.300' }}>
-            Upload notes, lectures, or syllabuses in PDF/Image formats
-          </Typography>
-        </Box>
-        <Button 
-          variant="contained" 
-          startIcon={<AddIcon />} 
-          onClick={handleOpenDialog}
-          sx={{ mt: { xs: 2, sm: 0 } }}
-        >
-          Upload Note
-        </Button>
-      </Box>
+      <InstitutePageHeader
+        title="Study materials"
+        subtitle="Upload PDFs, notes, and worksheets for a batch or for every student."
+        action={<Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenDialog} sx={greenCtaSx}>Upload note</Button>}
+      />
 
       {/* Filter and Content */}
       <Box sx={{ display: 'flex', gap: 2, mb: 3, maxWidth: 300 }}>
         <FormControl fullWidth size="small">
-          <InputLabel id="batch-filter-label" sx={{ color: 'grey.400' }}>Filter by Batch</InputLabel>
+          <InputLabel id="batch-filter-label">Filter by Batch</InputLabel>
           <Select
             labelId="batch-filter-label"
             value={filterBatchId}
             label="Filter by Batch"
             onChange={(e) => setFilterBatchId(e.target.value as string)}
-            sx={{ color: 'white', '.MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255,255,255,0.2)' } }}
+            sx={{ color: 'text.primary', '.MuiOutlinedInput-notchedOutline': { borderColor: 'divider' } }}
           >
             <MenuItem value="">All Batches</MenuItem>
             {batches?.map((b: any) => (

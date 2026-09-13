@@ -84,14 +84,14 @@ export default function BatchDetailPage() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-        <IconButton onClick={() => router.push('/institute/batches')} sx={{ mr: 2, color: 'white' }}>
+        <IconButton onClick={() => router.push('/institute/batches')} sx={{ mr: 2, color: 'text.primary' }}>
           <ArrowBackIcon />
         </IconButton>
         <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>
+          <Typography variant="h4" sx={{ fontWeight: 800, color: 'text.primary' }}>
             Batch: {batch.name}
           </Typography>
-          <Typography variant="subtitle1" sx={{ color: 'grey.300' }}>
+          <Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
             {batch.description || 'No description provided.'}
           </Typography>
         </Box>
@@ -105,7 +105,7 @@ export default function BatchDetailPage() {
       </Box>
 
       {/* Enrolled Students Table */}
-      <Typography variant="h6" sx={{ color: 'white', mb: 2, fontWeight: 'bold' }}>
+      <Typography variant="h6" sx={{ color: 'text.primary', mb: 2, fontWeight: 'bold' }}>
         Enrolled Students ({batch.students?.length || 0})
       </Typography>
       

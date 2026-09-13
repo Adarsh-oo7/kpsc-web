@@ -47,8 +47,18 @@ const DrawerContent = ({ onNavigate }: { onNavigate: (path: string) => void }) =
         alignItems: 'center',
         gap: 1.5,
         background: 'linear-gradient(180deg, #0D1117 0%, #111820 100%)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        borderBottom: '1px solid rgba(46,139,87,0.35)',
         minHeight: 72,
+        position: 'relative',
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: 2,
+          background: 'linear-gradient(90deg, #1B6B3A, #F59E0B)',
+        },
       }}>
         {/* Logo Image */}
         <Box sx={{

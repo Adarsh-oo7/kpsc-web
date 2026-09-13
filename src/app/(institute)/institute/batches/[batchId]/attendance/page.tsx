@@ -88,14 +88,14 @@ export default function BatchAttendancePage() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 2 }}>
-        <IconButton onClick={() => router.push('/institute/batches')} sx={{ mr: 2, color: 'white' }}>
+        <IconButton onClick={() => router.push('/institute/batches')} sx={{ mr: 2, color: 'text.primary' }}>
           <ArrowBackIcon />
         </IconButton>
         <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'white' }}>
+          <Typography variant="h4" sx={{ fontWeight: 800, color: 'text.primary' }}>
             Roll Call: {batch.name}
           </Typography>
-          <Typography variant="subtitle1" sx={{ color: 'grey.300' }}>
+          <Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
             Mark student attendance daily
           </Typography>
         </Box>
@@ -107,7 +107,7 @@ export default function BatchAttendancePage() {
             onChange={(e) => setDate(e.target.value)}
             InputLabelProps={{ shrink: true }}
             size="small"
-            sx={{ bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 1, '& input': { color: 'white' } }}
+            sx={{ bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 1, '& input': { color: 'text.primary' } }}
           />
           <Button 
             variant="contained" 

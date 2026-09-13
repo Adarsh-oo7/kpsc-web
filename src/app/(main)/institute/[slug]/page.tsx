@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { Box, Typography, Card, CardContent, Button, Stack, Avatar, Paper, Divider } from '@mui/material';
+import { Box, Typography, Button, Stack, Avatar, Paper, Divider } from '@mui/material';
 import ContactMailIcon from '@mui/icons-material/ContactMail';
 import PhoneIcon from '@mui/icons-material/Phone';
 import LanguageIcon from '@mui/icons-material/Language';
@@ -8,16 +8,19 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import SchoolIcon from '@mui/icons-material/School';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
+const GREEN = '#1B6B3A';
+const GREEN_LIGHT = '#2E8B57';
+
 async function getInstitute(slug: string) {
   try {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
     const res = await fetch(`${apiUrl}/api/institute/public/detail/${slug}/`, {
-      next: { revalidate: 3600 }
+      next: { revalidate: 3600 },
     });
     if (!res.ok) return null;
     return await res.json();
   } catch (error) {
-    console.error("Error fetching institute:", error);
+    console.error('Error fetching institute:', error);
     return null;
   }
 }
@@ -29,7 +32,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const inst = await getInstitute(slug);
-  
+
   if (!inst) {
     return {
       title: 'Institute Not Found | KPSC Master',
@@ -39,10 +42,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return {
     title: `${inst.name} | Kerala PSC Coaching Academy`,
-    description: inst.tagline || `Join ${inst.name} branded learning space on KPSC Master and start your exam preparation.`,
+    description: inst.tagline || `Join ${inst.name} on KPSC Master and start your exam preparation.`,
     alternates: {
       canonical: `/institute/${slug}`,
-    }
+    },
   };
 }
 
@@ -52,195 +55,137 @@ export default async function InstituteSEOPage({ params }: PageProps) {
 
   if (!inst) {
     return (
-      <Box sx={{ p: 4, textAlign: 'center', color: 'white' }}>
-        <Typography variant="h5" gutterBottom>Institute Not Found</Typography>
-        <Typography variant="body1" sx={{ mb: 3, color: 'grey.400' }}>
-          The coaching center you are looking for does not exist or has been removed.
+      <Box sx={{ p: 4, textAlign: 'center' }}>
+        <Typography variant="h5" gutterBottom sx={{ color: 'text.primary', fontWeight: 800 }}>
+          Institute not found
         </Typography>
-        <Link href="/" style={{ textDecoration: 'none' }}>
-          <Button variant="contained" startIcon={<ArrowBackIcon />}>
-            Back to Home
+        <Typography variant="body1" sx={{ mb: 3, color: 'text.secondary' }}>
+          The coaching centre you are looking for does not exist or has been removed.
+        </Typography>
+        <Link href="/institutes" style={{ textDecoration: 'none' }}>
+          <Button variant="contained" startIcon={<ArrowBackIcon />} sx={{ textTransform: 'none', fontWeight: 800, background: `linear-gradient(135deg, ${GREEN}, ${GREEN_LIGHT})` }}>
+            Browse academies
           </Button>
         </Link>
       </Box>
     );
   }
 
-  // Fallback logo URL if empty
   const logoUrl = inst.logo || '';
-  const primaryColor = inst.primary_color || '#1976d2';
-  const accentColor = inst.accent_color || '#ff9800';
-
-  // JSON-LD EducationalOrganization Schema
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'EducationalOrganization',
-    'name': inst.name,
-    'logo': logoUrl,
-    'email': inst.contact_email,
-    'telephone': inst.phone,
-    'address': {
+    name: inst.name,
+    logo: logoUrl,
+    email: inst.contact_email,
+    telephone: inst.phone,
+    address: {
       '@type': 'PostalAddress',
-      'streetAddress': inst.address
-    }
+      streetAddress: inst.address,
+    },
   };
 
   return (
-    <Box sx={{ maxWidth: 900, mx: 'auto', p: 3, mt: 4 }}>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+    <Box sx={{ maxWidth: 900, mx: 'auto', pb: 6 }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
-      {/* Main Profile Card with Custom Branding styling */}
-      <Paper 
-        elevation={3}
-        sx={{ 
-          p: 4, 
-          borderRadius: 6, 
-          color: 'white',
-          position: 'relative',
-          overflow: 'hidden',
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%)',
-          border: '1px solid', borderColor: 'divider',
-          backdropFilter: 'blur(10px)'
+      <Paper
+        elevation={0}
+        sx={{
+          mb: 3,
+          p: { xs: 3, md: 4.5 },
+          borderRadius: '24px',
+          background: `linear-gradient(165deg, ${GREEN} 0%, #166534 50%, #134E2A 100%)`,
+          color: '#fff',
         }}
       >
-        {/* Subtle background color accent blobs based on branding color */}
-        <Box 
-          sx={{ 
-            position: 'absolute', 
-            top: '-50px', 
-            right: '-50px', 
-            width: 200, 
-            height: 200, 
-            borderRadius: '50%', 
-            background: primaryColor,
-            opacity: 0.1,
-            filter: 'blur(40px)',
-            zIndex: 0
-          }} 
-        />
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2.5} alignItems="center">
+          <Avatar
+            src={logoUrl}
+            alt={inst.name}
+            sx={{ width: 88, height: 88, bgcolor: 'rgba(255,255,255,0.16)', border: '2px solid rgba(255,255,255,0.35)' }}
+          >
+            <SchoolIcon sx={{ fontSize: 42 }} />
+          </Avatar>
+          <Box>
+            <Typography sx={{ fontSize: '0.75rem', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#FCD34D', mb: 0.75 }}>
+              Coaching centre
+            </Typography>
+            <Typography sx={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 900, fontSize: { xs: '1.7rem', md: '2.2rem' }, letterSpacing: '-0.03em' }}>
+              {inst.name}
+            </Typography>
+            {inst.tagline && (
+              <Typography sx={{ mt: 0.75, color: 'rgba(255,255,255,0.86)' }}>{inst.tagline}</Typography>
+            )}
+          </Box>
+        </Stack>
+      </Paper>
 
-        <Stack spacing={4} sx={{ position: 'relative', zIndex: 1 }}>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} alignItems="center" textAlign={{ xs: 'center', sm: 'left' }}>
-            <Avatar 
-              src={logoUrl} 
-              alt={inst.name}
-              sx={{ 
-                width: 100, 
-                height: 100, 
-                border: `3px solid ${primaryColor}`,
-                bgcolor: 'rgba(255,255,255,0.1)',
-                boxShadow: '0 4px 14px rgba(0,0,0,0.3)'
-              }}
-            >
-              <SchoolIcon sx={{ fontSize: 50, color: 'grey.300' }} />
-            </Avatar>
-
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="h3" sx={{ fontWeight: 'bold', mb: 1, letterSpacing: '-0.02em' }}>
-                {inst.name}
-              </Typography>
-              {inst.tagline && (
-                <Typography variant="h6" sx={{ color: 'grey.300', fontWeight: 'normal', fontStyle: 'italic', mb: 1.5 }}>
-                  "{inst.tagline}"
-                </Typography>
-              )}
-              {inst.established_year && (
-                <Typography variant="caption" sx={{ color: 'grey.500', display: 'block' }}>
-                  Established: {inst.established_year}
-                </Typography>
-              )}
-            </Box>
+      <Paper elevation={0} sx={{ p: { xs: 2.5, md: 4 }, borderRadius: '20px', border: '1.5px solid', borderColor: 'divider' }}>
+        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
+          <Stack spacing={1.5}>
+            <Typography sx={{ fontWeight: 800, color: 'text.primary' }}>Contact</Typography>
+            {inst.contact_email && (
+              <Stack direction="row" spacing={1.5} alignItems="center">
+                <ContactMailIcon sx={{ color: GREEN }} />
+                <Typography>{inst.contact_email}</Typography>
+              </Stack>
+            )}
+            {inst.phone && (
+              <Stack direction="row" spacing={1.5} alignItems="center">
+                <PhoneIcon sx={{ color: GREEN }} />
+                <Typography>{inst.phone}</Typography>
+              </Stack>
+            )}
+            {inst.website && (
+              <Stack direction="row" spacing={1.5} alignItems="center">
+                <LanguageIcon sx={{ color: GREEN }} />
+                <a href={inst.website} target="_blank" rel="noopener noreferrer" style={{ color: GREEN, fontWeight: 700 }}>
+                  {inst.website}
+                </a>
+              </Stack>
+            )}
+            {!inst.contact_email && !inst.phone && !inst.website && (
+              <Typography sx={{ color: 'text.secondary' }}>No contact listed yet.</Typography>
+            )}
           </Stack>
+          <Stack spacing={1.5}>
+            <Typography sx={{ fontWeight: 800, color: 'text.primary' }}>Location</Typography>
+            {inst.address ? (
+              <Stack direction="row" spacing={1.5} alignItems="flex-start">
+                <LocationOnIcon sx={{ color: GREEN, mt: 0.4 }} />
+                <Typography sx={{ whiteSpace: 'pre-line' }}>{inst.address}</Typography>
+              </Stack>
+            ) : (
+              <Typography sx={{ color: 'text.secondary' }}>No address listed.</Typography>
+            )}
+            {inst.established_year && (
+              <Typography sx={{ color: 'text.secondary' }}>Established {inst.established_year}</Typography>
+            )}
+          </Stack>
+        </Box>
 
-          <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
+        <Divider sx={{ my: 3 }} />
 
-          {/* Contact and Info details */}
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
-            <Stack spacing={2}>
-              <Typography variant="h6" sx={{ color: primaryColor, fontWeight: 'bold' }}>
-                Contact Information
-              </Typography>
-              
-              {inst.contact_email && (
-                <Stack direction="row" spacing={1.5} alignItems="center">
-                  <ContactMailIcon sx={{ color: 'grey.400' }} />
-                  <Typography variant="body1">{inst.contact_email}</Typography>
-                </Stack>
-              )}
-
-              {inst.phone && (
-                <Stack direction="row" spacing={1.5} alignItems="center">
-                  <PhoneIcon sx={{ color: 'grey.400' }} />
-                  <Typography variant="body1">{inst.phone}</Typography>
-                </Stack>
-              )}
-
-              {inst.website && (
-                <Stack direction="row" spacing={1.5} alignItems="center">
-                  <LanguageIcon sx={{ color: 'grey.400' }} />
-                  <a href={inst.website} target="_blank" rel="noopener noreferrer" style={{ color: '#42a5f5', textDecoration: 'none' }}>
-                    {inst.website}
-                  </a>
-                </Stack>
-              )}
-            </Stack>
-
-            <Stack spacing={2}>
-              <Typography variant="h6" sx={{ color: primaryColor, fontWeight: 'bold' }}>
-                Location
-              </Typography>
-              {inst.address ? (
-                <Stack direction="row" spacing={1.5} alignItems="flex-start">
-                  <LocationOnIcon sx={{ color: 'grey.400', mt: 0.5 }} />
-                  <Typography variant="body1" sx={{ whiteSpace: 'pre-line', lineHeight: 1.6 }}>
-                    {inst.address}
-                  </Typography>
-                </Stack>
-              ) : (
-                <Typography variant="body2" sx={{ color: 'grey.500' }}>No address listed.</Typography>
-              )}
-            </Stack>
-          </Box>
-
-          <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
-
-          {/* Connect / Actions */}
-          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, justifyContent: 'center', pt: 2 }}>
-            <Button 
-              component="a" 
-              href={`http://${inst.slug}.localhost:3000/login`} 
-              variant="contained" 
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} justifyContent="center">
+          <Link href="/institutes" style={{ textDecoration: 'none' }}>
+            <Button
+              variant="contained"
               size="large"
-              sx={{ 
-                bgcolor: primaryColor,
-                '&:hover': {
-                  bgcolor: primaryColor,
-                  filter: 'brightness(1.1)'
-                }
-              }}
+              sx={{ textTransform: 'none', fontWeight: 800, borderRadius: '12px', color: '#fff', background: `linear-gradient(135deg, ${GREEN}, ${GREEN_LIGHT})` }}
             >
-              Student Portal Login
+              Request to join
             </Button>
-            <Link href={`/register?institute=${inst.id}`} style={{ textDecoration: 'none' }}>
-              <Button 
-                variant="outlined" 
-                size="large"
-                sx={{ 
-                  color: 'white', 
-                  borderColor: primaryColor,
-                  '&:hover': {
-                    borderColor: primaryColor,
-                    bgcolor: 'rgba(255,255,255,0.05)'
-                  }
-                }}
-              >
-                Request to Join Institute
-              </Button>
-            </Link>
-          </Box>
+          </Link>
+          <Link href="/login" style={{ textDecoration: 'none' }}>
+            <Button
+              variant="outlined"
+              size="large"
+              sx={{ textTransform: 'none', fontWeight: 800, borderRadius: '12px', color: GREEN, borderColor: GREEN }}
+            >
+              Student login
+            </Button>
+          </Link>
         </Stack>
       </Paper>
     </Box>
