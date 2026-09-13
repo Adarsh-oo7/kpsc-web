@@ -16,7 +16,7 @@ export default function ExamModeSelectionClient({ examId }: Props) {
   const { fetcher } = useAppContext();
 
   // We fetch the specific exam details to display its name
-  const { data: exam, error, isLoading } = useSWR(`/exams/${examId}/`, fetcher);
+  const { data: exam, error, isLoading } = useSWR(`/public/exams/${examId}/`, fetcher);
 
   if (isLoading) {
     return (
@@ -43,7 +43,7 @@ export default function ExamModeSelectionClient({ examId }: Props) {
             <Typography color="text.secondary" sx={{ mb: 3 }}>
               Go through all questions like flashcards. See answers and explanations instantly. Perfect for learning.
             </Typography>
-            <Button variant="outlined" size="large" onClick={() => router.push(`/exam/${examId}/study`)}>Start Studying</Button>
+            <Button variant="outlined" size="large" onClick={() => router.push(`/exams/${examId}/study`)}>Start Studying</Button>
           </Paper>
         </Grid>
         <Grid size={{ xs: 12, md: 6 }}>

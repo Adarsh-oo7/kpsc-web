@@ -20,10 +20,13 @@ export default function StudyModePage() {
     const [showAnswer, setShowAnswer] = useState(false);
 
     const lang = profile?.preferred_language || 'en';
-    const { data: questions, error, isLoading } = useSWR(`/questions/?exam=${examId}&language=${lang}`, fetcher);
+    const { data: rawQuestions, error, isLoading } = useSWR(`/questions/?exam=${examId}&language=${lang}&limit=40`, fetcher);
 
     if (isLoading) return <CircularProgress />;
-    if (error || !questions || questions.length === 0) return <Alert severity="error">No questions found for this exam target yet.</Alert>;
+    const questions = Array.isArray(rawQuestions)
+        ? rawQuestions
+        : (rawQuestions?.results || rawQuestions?.questions || []);
+    if (error || !questions.length) return <Alert severity="error">No questions found for this exam target yet.</Alert>;
 
     const rawQuestion = questions[currentIndex];
     const currentQuestion = sanitizeQuestion(rawQuestion);
