@@ -74,14 +74,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     mutate(() => true, undefined, { revalidate: false });
   }, [mutate]);
 
-  const fetchAndSetUser = useCallback(async () => {
+  const fetchAndSetUser = useCallback(async (silent = false) => {
     // This is the single source of truth for fetching profile data.
-    setIsLoading(true);
+    if (!silent) setIsLoading(true);
     try {
       const response = await apiClient.get('/auth/profile/');
       const profileData = response.data;
       setUser(profileData.user || profileData);
       setProfile(profileData);
+      const primaryId = profileData.primary_exam_detail?.id || profileData.preferred_exams?.[0]?.id;
+      if (primaryId) setExamId(String(primaryId));
       setIsInstituteOwner(profileData.is_owner === true);
       return profileData;
     } catch (error) {
@@ -91,7 +93,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       // Re-throw the error so the calling function (like the login page) knows it failed.
       throw error;
     } finally {
-      setIsLoading(false);
+      if (!silent) setIsLoading(false);
     }
   }, [logout]);
 
@@ -150,7 +152,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     themeMode,
     toggleThemeMode,
     setThemeMode: applyThemeMode,
-    refreshProfile: fetchAndSetUser,
+    refreshProfile: () => fetchAndSetUser(true),
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

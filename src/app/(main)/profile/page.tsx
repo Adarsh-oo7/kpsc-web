@@ -73,7 +73,7 @@ const DISTRICTS = [
 ];
 
 export default function ProfilePage() {
-  const { user, fetcher, isLoading: isContextLoading } = useAppContext();
+  const { user, fetcher, isLoading: isContextLoading, refreshProfile } = useAppContext();
   const router = useRouter();
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
@@ -170,11 +170,15 @@ export default function ProfilePage() {
 
     formData.preferred_topics_ids.forEach(id => data.append('preferred_topics_ids', id.toString()));
     formData.preferred_exams_ids.forEach(id => data.append('preferred_exams_ids', id.toString()));
+    if (formData.preferred_exams_ids[0]) {
+      data.append('primary_exam_id', formData.preferred_exams_ids[0].toString());
+    }
     
     try {
       const response = await apiClient.patch('/auth/profile/', data);
       setSuccess('Profile updated successfully!');
       mutate(response.data, false);
+      await refreshProfile();
     } catch (err: any) {
       const errorMsg = err.response?.data?.detail || 'Failed to update profile.';
       setError(errorMsg);
@@ -539,7 +543,7 @@ export default function ProfilePage() {
                         bgcolor: isDark ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.01)',
                         borderRadius: '12px'
                       }}>
-                        <InputLabel>Focus Exams (Select up to 3)</InputLabel>
+                        <InputLabel>Target exams (up to 3 — first is Home exam)</InputLabel>
                         <Select
                           multiple
                           value={formData.preferred_exams_ids}

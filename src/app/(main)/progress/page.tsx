@@ -77,9 +77,9 @@ export default function ProgressPage() {
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 4, flexWrap: 'wrap', gap: 2 }}>
                 <Box>
                     <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'text.primary' }}>Your Performance Report</Typography>
-                    <Typography variant="h6" sx={{ color: 'text.secondary' }}>Analysis for: {target_exam_name}</Typography>
+                    <Typography variant="h6" sx={{ color: 'text.secondary' }}>Analysis for: {target_exam_name || data?.report_title || 'your target exam'}</Typography>
                 </Box>
-                <Button variant="outlined" onClick={() => router.push('/profile')}>Change Focus Exam</Button>
+                <Button variant="outlined" onClick={() => router.push('/home')}>Change exam</Button>
             </Box>
             
             <Grid container spacing={3} sx={{ mb: 4 }}>
