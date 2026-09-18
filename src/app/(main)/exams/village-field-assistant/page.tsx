@@ -3,19 +3,19 @@
 import React from 'react';
 import Link from 'next/link';
 import { Metadata } from 'next';
-import { Container, Box, Typography, Button, Paper, Stack, Grid, Chip, Divider, TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
+import { Container, Box, Typography, Button, Paper, Stack, Grid, Chip } from '@mui/material';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import DateRangeIcon from '@mui/icons-material/DateRange';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 
 import VfaCountdown from './VfaCountdown';
 import VfaDistrictStats from './VfaDistrictStats';
+import { VFA_PHASES, vfaFaqAnswer } from '@/lib/vfaSchedule';
 
 export const metadata: Metadata = {
-  title: "VFA Mock Test 2026 Free | Village Field Assistant Kerala PSC Sept 19 | Bilingual Malayalam | KPSC Master",
-  description: "Free Village Field Assistant (VFA) mock test 2026 — Kerala PSC exam September 19. VFA mock test Malayalam medium, bilingual questions, downloadable syllabus summary. Cat 571/2025. No signup.",
+  title: "VFA Mock Test 2026 Free | Village Field Assistant Kerala PSC Sept 19, Oct 17 & Oct 31 | Bilingual Malayalam | KPSC Master",
+  description: "Free Village Field Assistant (VFA) mock test 2026 — Kerala PSC district-wise exam on 19 September, 17 October and 31 October 2026. VFA mock test Malayalam medium, bilingual questions, downloadable syllabus summary. Cat 571/2025. No signup.",
   keywords: [
     'village field assistant mock test',
     'vfa mock test',
@@ -27,6 +27,8 @@ export const metadata: Metadata = {
     'VFA mock test Malayalam medium',
     'VFA syllabus 2026 PDF',
     'VFA Kerala PSC Sept 19',
+    'VFA Kerala PSC Oct 17',
+    'VFA Kerala PSC Oct 31',
     'village field assistant syllabus 2026',
     'VFA previous year questions Kerala PSC',
     'cat 571/2025 mock test',
@@ -35,23 +37,20 @@ export const metadata: Metadata = {
     canonical: 'https://www.kpscmaster.in/exams/village-field-assistant',
   },
   openGraph: {
-    title: 'VFA Mock Test 2026 Free | Village Field Assistant Kerala PSC Sept 19 | KPSC Master',
-    description: "Free VFA mock test Malayalam 2026 — Kerala PSC September 19, Cat 571/2025. Bilingual questions, syllabus summary, AI explanations. No signup.",
+    title: 'VFA Mock Test 2026 Free | Village Field Assistant Kerala PSC District-wise Dates | KPSC Master',
+    description: "Free VFA mock test Malayalam 2026 — Kerala PSC on 19 Sep, 17 Oct and 31 Oct 2026 (district-wise), Cat 571/2025. Bilingual questions, syllabus summary, AI explanations. No signup.",
     url: 'https://www.kpscmaster.in/exams/village-field-assistant',
     images: [{ url: '/KPSC MASTER.png', width: 1200, height: 630, alt: 'Village Field Assistant Mock Test 2026 Free' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'VFA Mock Test 2026 Free | Village Field Assistant Sept 19 | KPSC Master',
-    description: "Free VFA mock test Malayalam 2026 — Kerala PSC exam Sept 19. Bilingual, AI explanations. No signup.",
+    title: 'VFA Mock Test 2026 Free | Village Field Assistant District-wise Dates | KPSC Master',
+    description: "Free VFA mock test Malayalam 2026 — Kerala PSC exam 19 Sep, 17 Oct and 31 Oct. Bilingual, AI explanations. No signup.",
     images: ['/KPSC MASTER.png'],
   },
 };
 
 export default function VillageFieldAssistantPage() {
-  const examDate = "2026-09-19T00:00:00";
-
-  // FAQ Schema JSON-LD
   const faqSchema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -61,7 +60,7 @@ export default function VillageFieldAssistantPage() {
         'name': "When is the Kerala PSC Village Field Assistant (VFA) exam 2026?",
         'acceptedAnswer': {
           '@type': 'Answer',
-          'text': "The VFA (Village Field Assistant) exam is scheduled to be held on September 19, 2026 (Saturday), under Category 571/2025."
+          'text': vfaFaqAnswer()
         }
       },
       {
@@ -152,19 +151,22 @@ export default function VillageFieldAssistantPage() {
         }}
       >
         <Grid container spacing={4} alignItems="center">
-          <Grid item xs={12} md={8}>
+          <Grid size={{ xs: 12, md: 8 }}>
             <Stack spacing={2}>
               <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap">
-                <Chip
-                  label="September 19, 2026"
-                  icon={<DateRangeIcon sx={{ fontSize: '0.9rem !important', color: '#3B82F6 !important' }} />}
-                  sx={{
-                    background: 'rgba(59, 130, 246, 0.12)',
-                    color: '#3B82F6',
-                    fontWeight: 800,
-                    fontSize: '0.75rem',
-                  }}
-                />
+                {VFA_PHASES.map((phase) => (
+                  <Chip
+                    key={phase.date}
+                    label={phase.label}
+                    icon={<DateRangeIcon sx={{ fontSize: '0.9rem !important', color: '#3B82F6 !important' }} />}
+                    sx={{
+                      background: 'rgba(59, 130, 246, 0.12)',
+                      color: '#3B82F6',
+                      fontWeight: 800,
+                      fontSize: '0.75rem',
+                    }}
+                  />
+                ))}
                 <Chip
                   label="Category 571/2025"
                   icon={<AssignmentIcon sx={{ fontSize: '0.9rem !important', color: '#8B5CF6 !important' }} />}
@@ -186,18 +188,17 @@ export default function VillageFieldAssistantPage() {
                   lineHeight: 1.1,
                 }}
               >
-                Village Field Assistant Mock Test 2026 — Exam on September 19
+                Village Field Assistant Mock Test 2026 — District-wise exam
               </Typography>
               <Typography variant="body1" sx={{ color: 'text.secondary', maxWidth: 620, fontSize: '1.05rem', lineHeight: 1.6 }}>
-                Prepare for the VFA (Revenue Department) exam with top-tier bilingual mock tests, district statistics trackers, and SCERT-based math & science questions.
+                Kerala PSC is conducting VFA on three Saturdays: 19 September, 17 October and 31 October 2026. Pick your district below for the live countdown, then practise with bilingual mock tests and SCERT-based math & science questions.
               </Typography>
 
-              {/* Countdown Timer */}
-              <VfaCountdown targetDate={examDate} />
+              <VfaCountdown />
             </Stack>
           </Grid>
           
-          <Grid item xs={12} md={4} sx={{ display: 'flex', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
+          <Grid size={{ xs: 12, md: 4 }} sx={{ display: 'flex', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
             <Link href="/quiz?exam_id=village-field-assistant" style={{ textDecoration: 'none', width: '100%' }}>
               <Button
                 variant="contained"
@@ -226,10 +227,33 @@ export default function VillageFieldAssistantPage() {
         </Grid>
       </Paper>
 
+      <Box sx={{ mb: 5 }}>
+        <Typography variant="h4" component="h2" sx={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, color: 'text.primary', mb: 2 }}>
+          Official VFA exam dates by district
+        </Typography>
+        <Grid container spacing={2}>
+          {VFA_PHASES.map((phase) => (
+            <Grid size={{ xs: 12, md: 4 }} key={phase.date}>
+              <Paper sx={{ p: 2.5, height: '100%', border: '1px solid', borderColor: 'divider', borderRadius: 4 }}>
+                <Chip
+                  label={phase.weekday}
+                  size="small"
+                  sx={{ fontWeight: 800, mb: 1.25, bgcolor: 'rgba(59, 130, 246, 0.12)', color: '#3B82F6' }}
+                />
+                <Typography sx={{ fontWeight: 900, fontSize: '1.15rem', mb: 1 }}>{phase.label}</Typography>
+                <Typography sx={{ color: 'text.secondary', fontSize: '0.9rem', lineHeight: 1.6 }}>
+                  {phase.districts.join(', ')}
+                </Typography>
+              </Paper>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+
       {/* Main Content Layout */}
       <Grid container spacing={4}>
         {/* Left Column: Syllabus & District Stats */}
-        <Grid item xs={12} md={7}>
+        <Grid size={{ xs: 12, md: 7 }}>
           <Stack spacing={4}>
             {/* Syllabus breakdown */}
             <Box>
@@ -272,7 +296,7 @@ export default function VillageFieldAssistantPage() {
                 📊 VFA District-wise Stats
               </Typography>
               <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2, lineHeight: 1.6 }}>
-                Compare applicant load and vacancy projections across key districts in Kerala to strategically plan your target cutoff threshold.
+                Exam Saturday, applicant load and vacancy projections across all 14 districts. Use this to plan your cutoff and revision window.
               </Typography>
               <VfaDistrictStats />
             </Box>
@@ -280,7 +304,7 @@ export default function VillageFieldAssistantPage() {
         </Grid>
 
         {/* Right Column: PYQ & FAQs */}
-        <Grid item xs={12} md={5}>
+        <Grid size={{ xs: 12, md: 5 }}>
           <Stack spacing={4}>
             {/* VFA Previous Year Papers */}
             <Box>

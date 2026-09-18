@@ -37,7 +37,7 @@ export default async function sitemap({ id }: { id: number }): Promise<MetadataR
       const examHubPages = [
         { path: '/exams/kseb-electricity-worker', priority: 1.0, freq: 'daily' as const },   // ⭐⭐⭐⭐⭐ 18K-25K vol
         { path: '/exams/company-board-lgs', priority: 1.0, freq: 'daily' as const },          // ⭐⭐⭐⭐ peak NOW
-        { path: '/exams/village-field-assistant', priority: 0.95, freq: 'daily' as const },   // ⭐⭐⭐⭐ Sept 19
+        { path: '/exams/village-field-assistant', priority: 0.95, freq: 'daily' as const },   // ⭐⭐⭐⭐ district-wise Sept 19 / Oct 17 / Oct 31
         { path: '/exams/fire-and-rescue', priority: 0.95, freq: 'daily' as const },           // ⭐⭐⭐⭐⭐ post-exam spike
         { path: '/exams/ksrtc-conductor', priority: 0.9, freq: 'weekly' as const },           // ⭐⭐⭐⭐⭐ zero competition
         { path: '/exams/ldc-lgs-august-2026', priority: 0.9, freq: 'daily' as const },       // ⭐⭐⭐⭐ Aug 1

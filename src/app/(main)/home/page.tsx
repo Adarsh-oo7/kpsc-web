@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import {
   Box, Typography, Button, CircularProgress, Grid,
-  LinearProgress, Stack, useTheme
+  LinearProgress, Stack
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
@@ -17,6 +17,8 @@ import NewspaperIcon from '@mui/icons-material/Newspaper';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
+import { flattenExamCatalog } from '@/lib/exams';
+import { apiErrorMessage } from '@/lib/auth';
 import MasterPlanRoadmap from '@/components/MasterPlanRoadmap';
 import ExamCountdownBanner from '@/components/ExamCountdownBanner';
 import WeakAreaInterventionCard from '@/components/WeakAreaInterventionCard';
@@ -53,10 +55,11 @@ const quickActions = [
 ];
 
 export default function HomePage() {
-  const theme = useTheme();
   const { profile, fetcher, user, isLoading: ctxLoading, refreshProfile } = useAppContext();
   const router = useRouter();
   const [savingMode, setSavingMode] = useState(false);
+  const [changingExam, setChangingExam] = useState(false);
+  const [examChangeError, setExamChangeError] = useState('');
 
   useEffect(() => {
     if (!ctxLoading) {
@@ -68,13 +71,27 @@ export default function HomePage() {
     }
   }, [user, profile, ctxLoading, router]);
 
-  // Fetch progress dashboard
-  const { data: dashData, isLoading: dashLoading } = useSWR(
+  const activeExam = profile?.primary_exam_detail || profile?.preferred_exams?.[0];
+  const examId = activeExam?.id;
+
+  const { data: dashData, mutate: mutateDash } = useSWR(
     user ? '/my-progress-dashboard/' : null, fetcher
   );
-  const { data: syllabusData } = useSWR(
-    user ? '/syllabus-sections/' : null, fetcher
+  const { data: syllabusData, mutate: mutateSyllabus } = useSWR(
+    user ? (examId ? `/syllabus-sections/?exam_id=${examId}` : '/syllabus-sections/') : null,
+    fetcher
   );
+  const { data: examsCatalog } = useSWR(user ? '/exams/' : null, fetcher);
+  const availableExams = useMemo(() => {
+    const catalog = flattenExamCatalog(examsCatalog);
+    const extra = [...(profile?.preferred_exams || []), activeExam].filter(Boolean);
+    const byId = new Map<number, (typeof catalog)[number]>();
+    [...catalog, ...extra].forEach((exam: { id?: number }) => {
+      if (!exam?.id) return;
+      byId.set(exam.id, { ...byId.get(exam.id), ...exam });
+    });
+    return Array.from(byId.values());
+  }, [examsCatalog, profile, activeExam]);
 
   const streak = profile?.current_streak || 0;
   const xp = profile?.total_xp || 0;
@@ -91,7 +108,32 @@ export default function HomePage() {
   const focusQuizPath = focusSection?.key
     ? `/quiz?section=${encodeURIComponent(focusSection.key)}&limit=15`
     : '/quiz';
-  const todayQuizPath = practiceMode === 'focus' ? focusQuizPath : '/quiz';
+  const withExam = (path: string) => {
+    if (!examId) return path;
+    return path.includes('?') ? `${path}&exam_id=${examId}` : `${path}?exam_id=${examId}`;
+  };
+  const todayQuizPath = withExam(practiceMode === 'focus' ? focusQuizPath : '/quiz');
+
+  const changeExam = async (nextExamId: number) => {
+    if (!nextExamId || nextExamId === examId || changingExam) return;
+    setChangingExam(true);
+    setExamChangeError('');
+    try {
+      const currentPreferred = (profile?.preferred_exams || []).map((exam: { id: number }) => exam.id);
+      const preferred = [nextExamId, ...currentPreferred.filter((id: number) => id !== nextExamId)].slice(0, 3);
+      await apiClient.patch('/auth/profile/', {
+        primary_exam_id: nextExamId,
+        preferred_exams_ids: preferred,
+      });
+      await refreshProfile();
+      await Promise.all([mutateSyllabus(), mutateDash()]);
+    } catch (err: unknown) {
+      setExamChangeError(apiErrorMessage(err, 'Could not change exam. Try again.'));
+      throw err;
+    } finally {
+      setChangingExam(false);
+    }
+  };
 
   const setPracticeMode = async (mode: 'full' | 'focus') => {
     if (mode === practiceMode || savingMode) return;
@@ -132,7 +174,7 @@ export default function HomePage() {
         body: 'You already showed up today. One weak-section drill is how rank moves this week.',
         cta: `Drill ${focusName}`,
         path: focusSection.key
-          ? `/quiz?section=${encodeURIComponent(focusSection.key)}&limit=15`
+          ? withExam(`/quiz?section=${encodeURIComponent(focusSection.key)}&limit=15`)
           : `/topics/${focusSection.slug}`,
       };
     }
@@ -145,7 +187,7 @@ export default function HomePage() {
     };
   })();
 
-  if (ctxLoading) {
+  if (ctxLoading || !user) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
         <CircularProgress size={32} />
@@ -159,7 +201,12 @@ export default function HomePage() {
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.5 }}>
         <Box sx={{ mb: 3 }}>
           <ExamCountdownBanner
-            primaryExam={profile?.primary_exam_detail || profile?.preferred_exams?.[0]}
+            primaryExam={activeExam}
+            availableExams={availableExams}
+            onExamChange={changeExam}
+            changingExam={changingExam}
+            changeError={examChangeError}
+            district={profile?.district}
           />
         </Box>
       </motion.div>
@@ -243,7 +290,7 @@ export default function HomePage() {
       <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }}>
         <Box sx={{ mb: 3 }}>
           <OfficialSyllabusCard
-            examName={profile?.primary_exam_detail?.name || profile?.preferred_exams?.[0]?.name || syllabusData?.exam_name || 'LGS / VFA 2026'}
+            examName={activeExam?.name || syllabusData?.exam_name || 'Kerala PSC'}
             officialSyllabus={
               syllabusData?.sections?.length
                 ? {
@@ -255,9 +302,9 @@ export default function HomePage() {
                       topics: (section.topics || []).slice(0, 8).map((topic: any) => topic.name),
                     })),
                   }
-                : profile?.primary_exam_detail?.official_syllabus
+                : activeExam?.official_syllabus
             }
-            questionPattern={profile?.primary_exam_detail?.question_pattern}
+            questionPattern={activeExam?.question_pattern}
           />
           <Button
             fullWidth
@@ -273,7 +320,7 @@ export default function HomePage() {
       {/* Shared Master Study Plan Roadmap */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.5 }}>
         <Box sx={{ mb: 3 }}>
-          <MasterPlanRoadmap examId={profile?.primary_exam_detail?.id || profile?.preferred_exams?.[0]?.id} />
+          <MasterPlanRoadmap examId={examId} />
         </Box>
       </motion.div>
 
@@ -282,7 +329,7 @@ export default function HomePage() {
         <Box sx={{ mb: 3 }}>
           <WeakAreaInterventionCard
             weakTopics={syllabusData?.weak_sections || dashData?.weakest_topics}
-            examName={profile?.primary_exam_detail?.name || profile?.preferred_exams?.[0]?.name || syllabusData?.exam_name || 'LGS 2026'}
+            examName={activeExam?.name || syllabusData?.exam_name || 'Kerala PSC'}
           />
         </Box>
       </motion.div>
@@ -297,7 +344,7 @@ export default function HomePage() {
             <Grid size={{ xs: 6, sm: 3 }} key={action.label}>
               <motion.div whileHover={{ y: -4, scale: 1.02 }} whileTap={{ scale: 0.97 }}>
                 <Box
-                  onClick={() => router.push(action.path)}
+                  onClick={() => router.push(action.label === 'Daily Quiz' ? withExam('/quiz') : action.path)}
                   sx={{
                     p: 2, textAlign: 'center',
                     background: action.bg,

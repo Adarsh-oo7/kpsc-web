@@ -35,6 +35,7 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import TranslateOutlined from '@mui/icons-material/TranslateOutlined';
 import GavelOutlined from '@mui/icons-material/GavelOutlined';
+import { formatVfaCatalogDate, formatVfaChipDate, isVfaExam } from '@/lib/vfaSchedule';
 
 const GREEN = '#1B6B3A';
 const GREEN_LIGHT = '#2E8B57';
@@ -430,7 +431,9 @@ export default function ExamsClient() {
                 </Stack>
                 <Stack direction="row" spacing={0.75} alignItems="center">
                   <CalendarTodayIcon sx={{ color: AMBER, fontSize: 18 }} />
-                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>YEAR {featuredExam.year}</Typography>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>
+                    {isVfaExam(featuredExam) ? formatVfaCatalogDate(profile?.district) : `YEAR ${featuredExam.year}`}
+                  </Typography>
                 </Stack>
               </Stack>
             </Grid>
@@ -545,7 +548,7 @@ export default function ExamsClient() {
                         <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${GREEN}, ${GREEN_LIGHT})` }} />
                         <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1.25, pt: 0.5 }}>
                           <Chip
-                            label={`YEAR ${exam.year ?? '—'}`}
+                            label={isVfaExam(exam) ? formatVfaChipDate(profile?.district) : `YEAR ${exam.year ?? '—'}`}
                             size="small"
                             sx={{ bgcolor: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', fontSize: '0.65rem', fontWeight: 800, height: 22 }}
                           />
