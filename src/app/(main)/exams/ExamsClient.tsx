@@ -36,6 +36,7 @@ import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import TranslateOutlined from '@mui/icons-material/TranslateOutlined';
 import GavelOutlined from '@mui/icons-material/GavelOutlined';
 import { formatVfaCatalogDate, formatVfaChipDate, isVfaExam } from '@/lib/vfaSchedule';
+import VfaPaywallDialog, { gateVfaStart, VfaAccess } from '@/components/VfaPaywallDialog';
 
 const GREEN = '#1B6B3A';
 const GREEN_LIGHT = '#2E8B57';
@@ -164,6 +165,8 @@ export default function ExamsClient() {
   const [selectedSyllabus, setSelectedSyllabus] = useState<any>(null);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [pendingPath, setPendingPath] = useState('/exams');
+  const [vfaPaywallOpen, setVfaPaywallOpen] = useState(false);
+  const [vfaAccess, setVfaAccess] = useState<VfaAccess | null>(null);
 
   const { data: categories, error, isLoading } = useSWR('/exams/', fetcher);
   const { data: syllabusList } = useSWR('/syllabuses/', fetcher);
@@ -250,13 +253,21 @@ export default function ExamsClient() {
     router.push(`/login?next=${encodeURIComponent(path)}`);
   };
 
-  const startMock = (exam: ExamItem) => {
+  const startMock = async (exam: ExamItem) => {
     const path = mockPath(exam);
     setExamId(String(exam.id));
     if (!user) {
       setPendingPath(path);
       setAuthDialogOpen(true);
       return;
+    }
+    if (isVfaExam(exam)) {
+      const gate = await gateVfaStart(exam);
+      if (!gate.allowed) {
+        setVfaAccess(gate.access);
+        setVfaPaywallOpen(true);
+        return;
+      }
     }
     router.push(path);
   };
@@ -789,6 +800,15 @@ export default function ExamsClient() {
           </Button>
         </DialogActions>
       </Dialog>
+      <VfaPaywallDialog
+        open={vfaPaywallOpen}
+        onClose={() => setVfaPaywallOpen(false)}
+        access={vfaAccess}
+        onUnlocked={() => {
+          setVfaPaywallOpen(false);
+          router.push('/quiz?mode=mock&exam_id=village-field-assistant');
+        }}
+      />
     </Box>
   );
 }

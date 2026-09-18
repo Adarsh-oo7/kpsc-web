@@ -1,10 +1,12 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import { Box, Typography, Button, Paper, CircularProgress, Alert, Grid } from '@mui/material';
 import { useAppContext } from '@/context/AppContext';
+import VfaPaywallDialog, { gateVfaStart, VfaAccess } from '@/components/VfaPaywallDialog';
+import { isVfaExam } from '@/lib/vfaSchedule';
 import TimerIcon from '@mui/icons-material/Timer';
 import LibraryBooksIcon from '@mui/icons-material/LibraryBooks';
 
@@ -19,6 +21,8 @@ export default function ExamModeSelectionClient({ examId }: Props) {
   const router = useRouter();
   const { fetcher, user } = useAppContext();
   const { data: categories, error, isLoading } = useSWR('/exams/', fetcher);
+  const [vfaOpen, setVfaOpen] = useState(false);
+  const [vfaAccess, setVfaAccess] = useState<VfaAccess | null>(null);
 
   const exam = useMemo(() => {
     if (!Array.isArray(categories)) return null;
@@ -51,10 +55,18 @@ export default function ExamModeSelectionClient({ examId }: Props) {
   const mockHref = `/quiz?mode=mock&exam_id=${exam.id}`;
   const studyHref = `/exams/${exam.slug || examId}/study`;
 
-  const startMock = () => {
+  const startMock = async () => {
     if (!user) {
       router.push(`/login?next=${encodeURIComponent(mockHref)}`);
       return;
+    }
+    if (isVfaExam(exam)) {
+      const gate = await gateVfaStart(exam);
+      if (!gate.allowed) {
+        setVfaAccess(gate.access);
+        setVfaOpen(true);
+        return;
+      }
     }
     router.push(mockHref);
   };
@@ -112,6 +124,15 @@ export default function ExamModeSelectionClient({ examId }: Props) {
           </Paper>
         </Grid>
       </Grid>
+      <VfaPaywallDialog
+        open={vfaOpen}
+        onClose={() => setVfaOpen(false)}
+        access={vfaAccess}
+        onUnlocked={() => {
+          setVfaOpen(false);
+          router.push(mockHref);
+        }}
+      />
     </Box>
   );
 }

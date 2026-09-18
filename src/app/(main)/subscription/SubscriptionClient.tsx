@@ -221,7 +221,7 @@ export default function SubscriptionClient() {
       {/* Grid of Plans */}
       <Grid container spacing={3} alignItems="stretch">
         {plansData ? (
-          plansData.map((plan: any) => {
+          plansData.filter((plan: any) => plan.slug !== 'vfa-unlock').map((plan: any) => {
             const isCurrent = subData && subData.plan === plan.id && subData.status === 'active';
             const features = getFeaturesList(plan.slug);
             return (

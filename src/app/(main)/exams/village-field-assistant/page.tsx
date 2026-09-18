@@ -11,6 +11,7 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 
 import VfaCountdown from './VfaCountdown';
 import VfaDistrictStats from './VfaDistrictStats';
+import VfaStartButton from './VfaStartButton';
 import { VFA_PHASES, vfaFaqAnswer } from '@/lib/vfaSchedule';
 
 export const metadata: Metadata = {
@@ -198,31 +199,8 @@ export default function VillageFieldAssistantPage() {
             </Stack>
           </Grid>
           
-          <Grid size={{ xs: 12, md: 4 }} sx={{ display: 'flex', justifyContent: { xs: 'flex-start', md: 'flex-end' } }}>
-            <Link href="/quiz?exam_id=village-field-assistant" style={{ textDecoration: 'none', width: '100%' }}>
-              <Button
-                variant="contained"
-                fullWidth
-                sx={{
-                  py: 2.2,
-                  px: 4,
-                  borderRadius: '16px',
-                  background: 'linear-gradient(135deg, #3B82F6, #2563EB)',
-                  fontWeight: 900,
-                  fontSize: '1.05rem',
-                  textTransform: 'none',
-                  boxShadow: '0 8px 32px rgba(59,130,246,0.3)',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #3B82F6, #2563EB)',
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 12px 40px rgba(59,130,246,0.4)',
-                  }
-                }}
-              >
-                Start Free Mock Test — No Signup
-              </Button>
-            </Link>
+          <Grid size={{ xs: 12, md: 4 }} sx={{ display: 'flex', flexDirection: 'column', justifyContent: { xs: 'flex-start', md: 'flex-end' }, width: '100%' }}>
+            <VfaStartButton />
           </Grid>
         </Grid>
       </Paper>

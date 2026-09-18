@@ -18,6 +18,8 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import ReportQuestionButton from '@/components/ReportQuestionButton';
 import { sanitizeQuestion } from '@/lib/questionSanitizer';
 import KpscOptionList from '@/components/KpscOptionList';
+import VfaPaywallDialog from '@/components/VfaPaywallDialog';
+import { isVfaExam } from '@/lib/vfaSchedule';
 
 // ───────────────────────────────────────────────
 // Types
@@ -337,7 +339,7 @@ function QuizContent() {
     return url;
   }, [examParam, topicParam, sectionParam, modeParam, limitParam, language, isWeeklyCurrentAffairs, isMockExam]);
 
-  const { data: rawQuizData, error, isLoading } = useSWR(apiUrl, fetcher, { revalidateOnFocus: false });
+  const { data: rawQuizData, error, isLoading, mutate: mutateQuiz } = useSWR(apiUrl, fetcher, { revalidateOnFocus: false });
 
   const questions = useMemo(() => {
     if (!rawQuizData) return [];
@@ -423,6 +425,7 @@ function QuizContent() {
         answers,
         question_ids: questions?.map((q: Question) => q.id) || [],
         shuffle: !isMockExam,
+        exam_id: examParam || undefined,
       });
       setResultData({ ...res.data, timeTaken });
       setIsFinished(true);
@@ -493,6 +496,28 @@ function QuizContent() {
   if (isLoading) return <Box sx={{ display: 'flex', justifyContent: 'center', pt: 8 }}><CircularProgress size={32} /></Box>;
   if (error) {
     const status = error?.response?.status;
+    const paywall = error?.response?.status === 402 || error?.response?.data?.code === 'vfa_unlock_required';
+    if (paywall || (isVfaExam({ slug: examParam || '', name: examParam || '' }) && status === 402)) {
+      return (
+        <Box sx={{ maxWidth: 480, mx: 'auto', py: 6, px: 2, textAlign: 'center' }}>
+          <Typography sx={{ fontWeight: 800, mb: 1.5 }}>VFA sets are locked after 2 free attempts</Typography>
+          <Typography sx={{ color: 'text.secondary', mb: 2 }}>Pay ₹29 to unlock every Village Field Assistant mock set.</Typography>
+          <Button
+            variant="contained"
+            onClick={() => setVfaPaywallOpen(true)}
+            sx={{ textTransform: 'none', fontWeight: 800, borderRadius: '12px', background: 'linear-gradient(135deg, #F59E0B, #D97706)' }}
+          >
+            Unlock for ₹29
+          </Button>
+          <VfaPaywallDialog
+            open
+            onClose={() => router.push('/exams/village-field-assistant')}
+            access={error?.response?.data}
+            onUnlocked={() => mutateQuiz()}
+          />
+        </Box>
+      );
+    }
     if (isMockExam && (status === 401 || status === 403)) {
       const next = `/quiz?mode=mock&exam_id=${encodeURIComponent(examParam || '')}`;
       return (
