@@ -197,7 +197,9 @@ export default async function ExamDetailPage({ params }: PageProps) {
 
   const syllabuses = await getSyllabusList();
   const syllabus = syllabuses.find((s: any) => s.exam === exam.id);
-  const weightages = getSyllabusWeightage(exam.name);
+  const weightages = hot
+    ? hot.syllabus.map((row) => ({ subject: row.topic, weight: row.marks }))
+    : getSyllabusWeightage(exam.name);
   const isLDC = exam.name.toLowerCase().includes('ldc') || exam.slug.toLowerCase().includes('ldc') || exam.name.toLowerCase().includes('lower division clerk');
 
   // FAQ Schema JSON-LD

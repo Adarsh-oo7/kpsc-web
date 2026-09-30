@@ -363,7 +363,7 @@ export default function ExamsClient() {
                 <TextField
                   fullWidth
                   variant="outlined"
-                  placeholder="Search LDC, LGS, Police, KAS..."
+                  placeholder="Search Special Branch, Excise, Lineman, Nurse..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   sx={{
