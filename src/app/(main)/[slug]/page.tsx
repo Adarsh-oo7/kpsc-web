@@ -181,8 +181,13 @@ function parseSlug(slug: string) {
   return null;
 }
 
+const RESERVED_SLUGS = new Set(['sitemap.xml', 'robots.txt', 'favicon.ico', 'manifest.json']);
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
+  if (RESERVED_SLUGS.has(slug)) {
+    return { robots: { index: false, follow: false } };
+  }
   if (slug === 'settings') {
     return {
       title: 'Settings — Account, theme, and language | KPSC Master',
@@ -289,6 +294,9 @@ export async function generateStaticParams() {
 
 export default async function ProgrammaticSeoPage({ params }: PageProps) {
   const { slug } = await params;
+  if (RESERVED_SLUGS.has(slug)) {
+    notFound();
+  }
   if (slug === 'settings') {
     return <SettingsClient />;
   }

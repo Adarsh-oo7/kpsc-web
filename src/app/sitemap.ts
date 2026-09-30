@@ -17,8 +17,8 @@ export function generateSitemaps() {
   ];
 }
 
-export default async function sitemap({ id }: { id: number }): Promise<MetadataRoute.Sitemap> {
-  switch (id) {
+export default async function sitemap({ id }: { id: number | string }): Promise<MetadataRoute.Sitemap> {
+  switch (Number(id)) {
     // ─── 0: Core + Exam Hub Pages (High Priority) ──────────────────
     case 0: {
       const corePages = [
