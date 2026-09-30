@@ -308,6 +308,7 @@ function QuizContent() {
   const topicParam = searchParams.get('topic') || searchParams.get('topic_id') || searchParams.get('topic_name');
   const sectionParam = searchParams.get('section');
   const modeParam = searchParams.get('mode');
+  const setParam = searchParams.get('set');
   const limitParam = searchParams.get('limit') || '15';
   const currentAffairsParam = searchParams.get('current_affairs');
 
@@ -329,7 +330,9 @@ function QuizContent() {
       return `/questions/weekly-current-affairs/?language=${language}`;
     }
     if (isMockExam && examParam) {
-      return `/generate-mock-exam/${encodeURIComponent(examParam)}/?language=${language}`;
+      let url = `/generate-mock-exam/${encodeURIComponent(examParam)}/?language=${language}`;
+      if (setParam) url += `&set=${encodeURIComponent(setParam)}`;
+      return url;
     }
     let url = `/questions/?limit=${limitParam}&language=${language}`;
     if (examParam) url += `&exam=${encodeURIComponent(examParam)}`;
@@ -337,7 +340,7 @@ function QuizContent() {
     if (sectionParam) url += `&section=${encodeURIComponent(sectionParam)}`;
     if (modeParam) url += `&mode=${encodeURIComponent(modeParam)}`;
     return url;
-  }, [examParam, topicParam, sectionParam, modeParam, limitParam, language, isWeeklyCurrentAffairs, isMockExam]);
+  }, [examParam, topicParam, sectionParam, modeParam, setParam, limitParam, language, isWeeklyCurrentAffairs, isMockExam]);
 
   const { data: rawQuizData, error, isLoading, mutate: mutateQuiz } = useSWR(apiUrl, fetcher, { revalidateOnFocus: false });
 

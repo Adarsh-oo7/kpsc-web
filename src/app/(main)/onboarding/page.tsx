@@ -27,6 +27,7 @@ import TranslateIcon from '@mui/icons-material/Translate';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
 import { apiErrorMessage, isValidIndianMobile, safeNextPath } from '@/lib/auth';
+import { getPriorityExam, sortExamsByPriority } from '@/lib/priorityExams';
 
 interface Exam {
   id: number;
@@ -43,6 +44,17 @@ interface ExamCategory {
 }
 
 const POPULAR_KEYS = [
+  'special branch',
+  'civil excise',
+  'lineman',
+  'nurse grade',
+  'fire',
+  'electrician',
+  'beat forest',
+  'laboratory attender',
+  'assistant project engineer',
+  'band',
+  'bugler',
   'ldc',
   'ld clerk',
   'lgs',
@@ -120,14 +132,18 @@ function OnboardingClient() {
   }, [user]);
 
   const allExams = useMemo(
-    () => categories.flatMap((category) => category.exams.map((exam) => ({ ...exam, category: category.name }))),
+    () => sortExamsByPriority(
+      categories.flatMap((category) => category.exams.map((exam) => ({ ...exam, category: category.name })))
+    ),
     [categories]
   );
 
-  const popularExams = useMemo(
-    () => allExams.filter((exam) => isPopularExam(exam.name)).slice(0, 8),
-    [allExams]
-  );
+  const popularExams = useMemo(() => {
+    const ranked = sortExamsByPriority(allExams);
+    const hot = ranked.filter((exam) => getPriorityExam(exam.slug));
+    const rest = ranked.filter((exam) => !getPriorityExam(exam.slug) && isPopularExam(exam.name));
+    return [...hot, ...rest].slice(0, 10);
+  }, [allExams]);
 
   const query = search.trim().toLowerCase();
   const popularIds = useMemo(() => new Set(popularExams.map((exam) => exam.id)), [popularExams]);
@@ -135,10 +151,14 @@ function OnboardingClient() {
     return categories
       .map((category) => ({
         ...category,
-        exams: category.exams.filter((exam) => {
-          if (query) return exam.name.toLowerCase().includes(query);
-          return !popularIds.has(exam.id);
-        }),
+        exams: sortExamsByPriority(
+          category.exams.filter((exam) => {
+            if (!query) return !popularIds.has(exam.id);
+            const hot = getPriorityExam(exam.slug);
+            const hay = `${exam.name} ${exam.slug ?? ''} ${hot?.opportunity ?? ''} ${hot?.keywords.join(' ') ?? ''}`.toLowerCase();
+            return hay.includes(query);
+          })
+        ),
       }))
       .filter((category) => category.exams.length > 0);
   }, [categories, query, popularIds]);

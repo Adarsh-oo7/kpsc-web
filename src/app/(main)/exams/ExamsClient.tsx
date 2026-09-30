@@ -190,7 +190,12 @@ export default function ExamsClient() {
     if (!Array.isArray(categories)) return [];
     return categories
       .filter((cat: any) => Array.isArray(cat.exams) && cat.exams.length > 0)
-      .map((cat: any) => ({ ...cat, exams: sortExamsByPriority(cat.exams) }));
+      .map((cat: any) => ({ ...cat, exams: sortExamsByPriority(cat.exams) }))
+      .sort((a: any, b: any) => {
+        const ra = Math.min(...a.exams.map((exam: ExamItem) => (getPriorityExam(exam.slug)?.rank ?? 999)));
+        const rb = Math.min(...b.exams.map((exam: ExamItem) => (getPriorityExam(exam.slug)?.rank ?? 999)));
+        return ra - rb;
+      });
   }, [categories]);
 
   const paperCount = useMemo(

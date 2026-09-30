@@ -161,7 +161,7 @@ export default function ExamModeSelectionClient({ examId }: Props) {
                 <Chip
                   key={paper.id || idx}
                   label={paper.name || `Set ${idx + 1}`}
-                  onClick={() => router.push(paper.id && String(paper.id).length < 6 ? `/quiz?mode=mock&exam_id=${exam.id}` : `/quiz?mode=mock&exam_id=${exam.id}`)}
+                  onClick={() => router.push(`/quiz?mode=mock&exam_id=${exam.id}&set=${idx + 1}`)}
                   sx={{ fontWeight: 700 }}
                 />
               ))}
