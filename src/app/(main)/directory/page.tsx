@@ -42,6 +42,16 @@ const LOCATIONS: Record<string, string> = {
 };
 
 const EXAMS: Record<string, string> = {
+  'special-branch-assistant': 'Special Branch Assistant',
+  'civil-excise-officer': 'Civil Excise Officer',
+  'lineman': 'Lineman',
+  'nurse-grade-ii': 'Nurse Grade II',
+  'fire-and-rescue': 'Fire & Rescue Officer',
+  'electrician': 'Electrician',
+  'beat-forest-officer': 'Beat Forest Officer',
+  'laboratory-attender': 'Laboratory Attender',
+  'assistant-project-engineer': 'Assistant Project Engineer',
+  'police-constable-band': 'Police Constable Band',
   'ldc': 'LDC',
   'lgs': 'LGS',
   'degree-level': 'Degree Level',
@@ -49,7 +59,6 @@ const EXAMS: Record<string, string> = {
   'ld-typist': 'LD Typist',
   'secretariat-assistant': 'Secretariat Assistant',
   'police-constable': 'Police Constable',
-  'fire-and-rescue': 'Fire & Rescue Officer',
   'lp-teacher': 'LP Teacher',
   'up-teacher': 'UP Teacher',
   'clerk': 'Clerk',
@@ -58,7 +67,6 @@ const EXAMS: Record<string, string> = {
   'university-assistant': 'University Assistant',
   'assistant-prison-officer': 'Assistant Prison Officer',
   'excise-officer': 'Excise Officer',
-  'civil-excise-officer': 'Civil Excise Officer',
   'assistant-junior-assistant': 'Assistant / Junior Assistant',
   'village-field-assistant': 'Village Field Assistant',
   'panchayat-secretary': 'Panchayat Secretary',

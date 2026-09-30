@@ -6,6 +6,7 @@ import { Metadata } from 'next';
 import { Container, Box, Typography, Button, Paper, Stack, Grid, Divider, Chip, LinearProgress } from '@mui/material';
 import ExamModeSelectionClient from './ExamModeSelectionClient';
 import DetailedSyllabusSearch from './DetailedSyllabusSearch';
+import { getPriorityExam } from '@/lib/priorityExams';
 
 interface PageProps {
   params: Promise<{ examId: string }>;
@@ -117,10 +118,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const exam = await getPublicExam(examId);
-  if (!exam) {
+  const hot = getPriorityExam(examId);
+  if (!exam && !hot) {
     return {
       title: 'Exam Mock Test Not Found | KPSC Master',
       description: 'The requested Kerala PSC exam details and syllabus page could not be found.',
+    };
+  }
+
+  if (hot) {
+    return {
+      title: hot.title,
+      description: hot.description,
+      keywords: hot.keywords,
+      alternates: { canonical: `/exams/${hot.slug}` },
     };
   }
 
@@ -144,6 +155,32 @@ export default async function ExamDetailPage({ params }: PageProps) {
 
   // Otherwise, render the public SEO landing page
   const exam = await getPublicExam(examId);
+  const hot = getPriorityExam(examId);
+
+  if (!exam && hot) {
+    return (
+      <Container maxWidth="lg" sx={{ pt: { xs: 3, md: 6 }, pb: 8 }}>
+        <Typography variant="h1" sx={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 900, fontSize: { xs: '2rem', md: '2.6rem' }, mb: 2 }}>
+          {hot.name} Mock Tests 2026
+        </Typography>
+        <Typography sx={{ color: 'text.secondary', mb: 2, maxWidth: 640 }}>{hot.description}</Typography>
+        <Chip label={hot.opportunity} sx={{ mb: 3, fontWeight: 800 }} />
+        <Link href={`/login?next=${encodeURIComponent(`/quiz?mode=mock&exam_id=${hot.slug}`)}`} style={{ textDecoration: 'none' }}>
+          <Button variant="contained" sx={{ textTransform: 'none', fontWeight: 800, borderRadius: '12px', background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)' }}>
+            Start {hot.shortName} mock
+          </Button>
+        </Link>
+        <Box sx={{ mt: 4 }}>
+          <Typography variant="h5" sx={{ fontWeight: 800, mb: 2 }}>Syllabus weightage</Typography>
+          {hot.syllabus.map((row) => (
+            <Typography key={row.topic} sx={{ color: 'text.secondary', mb: 0.75 }}>
+              {row.topic} — {row.marks} marks
+            </Typography>
+          ))}
+        </Box>
+      </Container>
+    );
+  }
 
   if (!exam) {
     return (
@@ -240,6 +277,18 @@ export default async function ExamDetailPage({ params }: PageProps) {
           <Grid size={{ xs: 12, md: 8 }}>
             <Stack spacing={2}>
               <Box>
+                {getPriorityExam(exam.slug) ? (
+                  <Chip
+                    label={getPriorityExam(exam.slug)?.badge || 'Hot now'}
+                    sx={{
+                      background: 'rgba(27, 107, 58, 0.14)',
+                      color: '#1B6B3A',
+                      fontWeight: 800,
+                      fontSize: '0.75rem',
+                      mr: 1,
+                    }}
+                  />
+                ) : null}
                 <Chip
                   label={`YEAR ${exam.year}`}
                   sx={{

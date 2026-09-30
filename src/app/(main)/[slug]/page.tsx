@@ -31,6 +31,15 @@ interface ExamInfo {
 }
 
 const EXAMS: Record<string, ExamInfo> = {
+  'special-branch-assistant': { name: 'Special Branch Assistant', formalName: 'Kerala PSC Special Branch Assistant', duration: 75, qCount: 100 },
+  'civil-excise-officer': { name: 'Civil Excise Officer', formalName: 'Civil Excise Officer', duration: 75, qCount: 100 },
+  'lineman': { name: 'Lineman', formalName: 'Kerala PSC Lineman', duration: 90, qCount: 100 },
+  'nurse-grade-ii': { name: 'Nurse Grade II', formalName: 'Kerala PSC Nurse Grade II', duration: 75, qCount: 100 },
+  'electrician': { name: 'Electrician', formalName: 'Kerala PSC Electrician', duration: 90, qCount: 100 },
+  'beat-forest-officer': { name: 'Beat Forest Officer', formalName: 'Kerala PSC Beat Forest Officer', duration: 75, qCount: 100 },
+  'laboratory-attender': { name: 'Laboratory Attender', formalName: 'Kerala PSC Laboratory Attender', duration: 75, qCount: 100 },
+  'assistant-project-engineer': { name: 'Assistant Project Engineer', formalName: 'Kerala PSC Assistant Project Engineer', duration: 75, qCount: 100 },
+  'police-constable-band': { name: 'Police Constable Band', formalName: 'Police Constable Band / Bugler / Drummer', duration: 75, qCount: 100 },
   'ldc': { name: 'LDC', formalName: 'Kerala PSC LDC', duration: 75, qCount: 100 },
   'lgs': { name: 'LGS', formalName: 'Kerala PSC LGS', duration: 75, qCount: 100 },
   'degree-level': { name: 'Degree Level', formalName: 'Kerala PSC Degree Level', duration: 75, qCount: 100 },
@@ -47,7 +56,6 @@ const EXAMS: Record<string, ExamInfo> = {
   'university-assistant': { name: 'University Assistant', formalName: 'University Assistant', duration: 75, qCount: 100 },
   'assistant-prison-officer': { name: 'Assistant Prison Officer', formalName: 'Assistant Prison Officer', duration: 75, qCount: 100 },
   'excise-officer': { name: 'Excise Officer', formalName: 'Excise Officer', duration: 75, qCount: 100 },
-  'civil-excise-officer': { name: 'Civil Excise Officer', formalName: 'Civil Excise Officer', duration: 75, qCount: 100 },
   'assistant-junior-assistant': { name: 'Assistant / Junior Assistant', formalName: 'Assistant / Junior Assistant (Various Depts.)', duration: 75, qCount: 100 },
   'village-field-assistant': { name: 'Village Field Assistant', formalName: 'Village Field Assistant (VFA)', duration: 75, qCount: 100 },
   'panchayat-secretary': { name: 'Panchayat Secretary', formalName: 'Panchayat Secretary', duration: 75, qCount: 100 },
@@ -56,6 +64,36 @@ const EXAMS: Record<string, ExamInfo> = {
 
 function parseSlug(slug: string) {
   // Check exact high-intent pages
+  if (slug === 'kerala-psc-special-branch-assistant-online-test' || slug === 'special-branch-assistant-mock-test') {
+    return { type: 'exam-generic', examKey: 'special-branch-assistant', exam: EXAMS['special-branch-assistant'], location: 'Kerala', locationKey: 'kerala' };
+  }
+  if (slug === 'kerala-psc-civil-excise-officer-online-test' || slug === 'civil-excise-officer-mock-test') {
+    return { type: 'exam-generic', examKey: 'civil-excise-officer', exam: EXAMS['civil-excise-officer'], location: 'Kerala', locationKey: 'kerala' };
+  }
+  if (slug === 'kerala-psc-lineman-online-test' || slug === 'lineman-mock-test') {
+    return { type: 'exam-generic', examKey: 'lineman', exam: EXAMS['lineman'], location: 'Kerala', locationKey: 'kerala' };
+  }
+  if (slug === 'kerala-psc-nurse-grade-ii-online-test' || slug === 'nurse-grade-ii-mock-test') {
+    return { type: 'exam-generic', examKey: 'nurse-grade-ii', exam: EXAMS['nurse-grade-ii'], location: 'Kerala', locationKey: 'kerala' };
+  }
+  if (slug === 'kerala-psc-fire-and-rescue-online-test') {
+    return { type: 'exam-generic', examKey: 'fire-and-rescue', exam: EXAMS['fire-and-rescue'], location: 'Kerala', locationKey: 'kerala' };
+  }
+  if (slug === 'kerala-psc-electrician-online-test') {
+    return { type: 'exam-generic', examKey: 'electrician', exam: EXAMS['electrician'], location: 'Kerala', locationKey: 'kerala' };
+  }
+  if (slug === 'kerala-psc-beat-forest-officer-online-test') {
+    return { type: 'exam-generic', examKey: 'beat-forest-officer', exam: EXAMS['beat-forest-officer'], location: 'Kerala', locationKey: 'kerala' };
+  }
+  if (slug === 'kerala-psc-laboratory-attender-online-test' || slug === 'laboratory-attender-mock-test') {
+    return { type: 'exam-generic', examKey: 'laboratory-attender', exam: EXAMS['laboratory-attender'], location: 'Kerala', locationKey: 'kerala' };
+  }
+  if (slug === 'kerala-psc-assistant-project-engineer-online-test') {
+    return { type: 'exam-generic', examKey: 'assistant-project-engineer', exam: EXAMS['assistant-project-engineer'], location: 'Kerala', locationKey: 'kerala' };
+  }
+  if (slug === 'kerala-psc-police-constable-band-online-test') {
+    return { type: 'exam-generic', examKey: 'police-constable-band', exam: EXAMS['police-constable-band'], location: 'Kerala', locationKey: 'kerala' };
+  }
   if (slug === 'kerala-psc-ldc-online-test') {
     return { type: 'exam-generic', examKey: 'ldc', exam: EXAMS['ldc'], location: 'Kerala', locationKey: 'kerala' };
   }

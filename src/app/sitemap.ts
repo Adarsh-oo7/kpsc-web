@@ -33,14 +33,23 @@ export default async function sitemap({ id }: { id: number }): Promise<MetadataR
         { path: '/previous-papers', priority: 0.8, freq: 'weekly' as const },
       ];
 
-      // High-priority dedicated exam hub pages (keyword research Tier 1 & 2)
+      // High-priority exam hubs — current PSC prep / exam / result-search cycle
       const examHubPages = [
-        { path: '/exams/kseb-electricity-worker', priority: 1.0, freq: 'daily' as const },   // ⭐⭐⭐⭐⭐ 18K-25K vol
-        { path: '/exams/company-board-lgs', priority: 1.0, freq: 'daily' as const },          // ⭐⭐⭐⭐ peak NOW
-        { path: '/exams/village-field-assistant', priority: 0.95, freq: 'daily' as const },   // ⭐⭐⭐⭐ district-wise Sept 19 / Oct 17 / Oct 31
-        { path: '/exams/fire-and-rescue', priority: 0.95, freq: 'daily' as const },           // ⭐⭐⭐⭐⭐ post-exam spike
-        { path: '/exams/ksrtc-conductor', priority: 0.9, freq: 'weekly' as const },           // ⭐⭐⭐⭐⭐ zero competition
-        { path: '/exams/ldc-lgs-august-2026', priority: 0.9, freq: 'daily' as const },       // ⭐⭐⭐⭐ Aug 1
+        { path: '/exams/special-branch-assistant', priority: 1.0, freq: 'daily' as const },
+        { path: '/exams/civil-excise-officer', priority: 1.0, freq: 'daily' as const },
+        { path: '/exams/lineman', priority: 1.0, freq: 'daily' as const },
+        { path: '/exams/nurse-grade-ii', priority: 1.0, freq: 'daily' as const },
+        { path: '/exams/fire-and-rescue', priority: 1.0, freq: 'daily' as const },
+        { path: '/exams/electrician', priority: 0.98, freq: 'daily' as const },
+        { path: '/exams/beat-forest-officer', priority: 0.98, freq: 'daily' as const },
+        { path: '/exams/laboratory-attender', priority: 0.98, freq: 'daily' as const },
+        { path: '/exams/assistant-project-engineer', priority: 0.98, freq: 'daily' as const },
+        { path: '/exams/police-constable-band', priority: 0.98, freq: 'daily' as const },
+        { path: '/exams/village-field-assistant', priority: 0.9, freq: 'daily' as const },
+        { path: '/exams/kseb-electricity-worker', priority: 0.85, freq: 'weekly' as const },
+        { path: '/exams/company-board-lgs', priority: 0.85, freq: 'weekly' as const },
+        { path: '/exams/ldc-lgs-august-2026', priority: 0.8, freq: 'weekly' as const },
+        { path: '/exams/ksrtc-conductor', priority: 0.75, freq: 'weekly' as const },
       ];
 
       // High-intent generic online test pages matching Google Search Console top queries
@@ -56,7 +65,21 @@ export default async function sitemap({ id }: { id: number }): Promise<MetadataR
         '/psc-coaching-centre-nedumangad',
         '/psc-coaching-centre-pathanamthitta',
         '/kerala-psc-degree-level-online-test',
-        '/kerala-psc-village-field-assistant-online-test',
+        '/kerala-psc-special-branch-assistant-online-test',
+        '/kerala-psc-civil-excise-officer-online-test',
+        '/kerala-psc-lineman-online-test',
+        '/kerala-psc-nurse-grade-ii-online-test',
+        '/kerala-psc-fire-and-rescue-online-test',
+        '/kerala-psc-electrician-online-test',
+        '/kerala-psc-beat-forest-officer-online-test',
+        '/kerala-psc-laboratory-attender-online-test',
+        '/kerala-psc-assistant-project-engineer-online-test',
+        '/kerala-psc-police-constable-band-online-test',
+        '/special-branch-assistant-mock-test',
+        '/civil-excise-officer-mock-test',
+        '/lineman-mock-test',
+        '/nurse-grade-ii-mock-test',
+        '/laboratory-attender-mock-test',
         '/kerala-psc-panchayat-secretary-online-test',
         '/kerala-psc-daily-quiz',
         '/kerala-psc-assistant-junior-assistant-online-test',
@@ -93,10 +116,13 @@ export default async function sitemap({ id }: { id: number }): Promise<MetadataR
         'ernakulam', 'thrissur', 'kozhikode', 'malappuram', 'palakkad', 'kerala'
       ];
       const examsList = [
+        'special-branch-assistant', 'civil-excise-officer', 'lineman', 'nurse-grade-ii',
+        'fire-and-rescue', 'electrician', 'beat-forest-officer', 'laboratory-attender',
+        'assistant-project-engineer', 'police-constable-band',
         'ldc', 'lgs', 'degree-level', 'veo', 'ld-typist', 'secretariat-assistant',
-        'police-constable', 'fire-and-rescue', 'lp-teacher', 'up-teacher', 'clerk',
+        'police-constable', 'lp-teacher', 'up-teacher', 'clerk',
         'company-board', 'water-authority', 'university-assistant', 'assistant-prison-officer',
-        'excise-officer', 'civil-excise-officer', 'assistant-junior-assistant', 'village-field-assistant',
+        'excise-officer', 'assistant-junior-assistant', 'village-field-assistant',
         'panchayat-secretary', 'general-psc', 'kseb-electricity-worker', 'ksrtc-conductor'
       ];
 

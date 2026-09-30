@@ -22,6 +22,16 @@ export const metadata: Metadata = {
   description:
     "Kerala's #1 PSC prep platform with 47,000+ students. Daily mock tests for LDC, LGS, Degree Level & more. AI-powered Malayalam explanations. Free daily quiz — no signup needed.",
   keywords: [
+    'special branch assistant',
+    'civil excise officer',
+    'kerala psc lineman',
+    'nurse grade ii',
+    'fire and rescue officer',
+    'kerala psc electrician',
+    'beat forest officer',
+    'laboratory attender',
+    'assistant project engineer',
+    'police constable band',
     'kerala psc',
     'kpsc mock test',
     'kerala psc online mock test',

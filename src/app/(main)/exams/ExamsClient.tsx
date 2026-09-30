@@ -36,6 +36,7 @@ import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import TranslateOutlined from '@mui/icons-material/TranslateOutlined';
 import GavelOutlined from '@mui/icons-material/GavelOutlined';
 import { formatVfaCatalogDate, formatVfaChipDate, isVfaExam } from '@/lib/vfaSchedule';
+import { PRIORITY_EXAMS, getPriorityExam, sortExamsByPriority } from '@/lib/priorityExams';
 import VfaPaywallDialog, { gateVfaStart, VfaAccess } from '@/components/VfaPaywallDialog';
 
 const GREEN = '#1B6B3A';
@@ -187,7 +188,9 @@ export default function ExamsClient() {
 
   const populatedCategories = useMemo(() => {
     if (!Array.isArray(categories)) return [];
-    return categories.filter((cat: any) => Array.isArray(cat.exams) && cat.exams.length > 0);
+    return categories
+      .filter((cat: any) => Array.isArray(cat.exams) && cat.exams.length > 0)
+      .map((cat: any) => ({ ...cat, exams: sortExamsByPriority(cat.exams) }));
   }, [categories]);
 
   const paperCount = useMemo(
@@ -205,7 +208,8 @@ export default function ExamsClient() {
     return result
       .map((category: any) => {
         const exams = category.exams.filter((exam: ExamItem) => {
-          const hay = `${exam.name} ${exam.year ?? ''} ${exam.slug ?? ''} ${exam.category_number ?? ''}`.toLowerCase();
+          const hot = getPriorityExam(exam.slug);
+          const hay = `${exam.name} ${exam.year ?? ''} ${exam.slug ?? ''} ${exam.category_number ?? ''} ${hot?.opportunity ?? ''} ${hot?.keywords.join(' ') ?? ''}`.toLowerCase();
           return hay.includes(q);
         });
         return { ...category, exams };
@@ -241,9 +245,10 @@ export default function ExamsClient() {
       }
     }
 
-    const ldc = populatedCategories
-      .flatMap((cat: any) => cat.exams.map((exam: ExamItem) => ({ ...exam, categoryName: cat.name })))
-      .find((exam: ExamItem) => /ldc|lower division clerk/i.test(exam.name));
+    const allExams = populatedCategories.flatMap((cat: any) => cat.exams.map((exam: ExamItem) => ({ ...exam, categoryName: cat.name })));
+    const hot = allExams.find((exam: ExamItem) => getPriorityExam(exam.slug));
+    if (hot) return hot;
+    const ldc = allExams.find((exam: ExamItem) => /ldc|lower division clerk/i.test(exam.name));
     if (ldc) return ldc;
     const first = populatedCategories[0].exams[0];
     return first ? { ...first, categoryName: populatedCategories[0].name } : null;
@@ -516,6 +521,39 @@ export default function ExamsClient() {
               <Skeleton variant="rectangular" height={40} sx={{ borderRadius: 2 }} />
             </Paper>
           ))}
+        </Box>
+      )}
+
+      {!searchQuery && (
+        <Box sx={{ mb: 4 }}>
+          <Typography sx={{ fontWeight: 800, mb: 1.5, letterSpacing: '0.04em', textTransform: 'uppercase', fontSize: '0.78rem', color: GREEN_LIGHT }}>
+            Top searches now
+          </Typography>
+          <Grid container spacing={1.5}>
+            {PRIORITY_EXAMS.map((hot) => (
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={hot.slug}>
+                <Paper
+                  elevation={0}
+                  onClick={() => router.push(`/exams/${hot.slug}`)}
+                  sx={{
+                    p: 2,
+                    borderRadius: '16px',
+                    cursor: 'pointer',
+                    border: '1.5px solid',
+                    borderColor: isDark ? 'rgba(46,139,87,0.28)' : 'rgba(27,107,58,0.18)',
+                    '&:hover': { borderColor: GREEN_LIGHT },
+                  }}
+                >
+                  <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.75 }}>
+                    <Chip label={`#${hot.rank}`} size="small" sx={{ height: 22, fontWeight: 800, bgcolor: 'rgba(27,107,58,0.12)', color: GREEN }} />
+                    <Chip label={hot.badge} size="small" sx={{ height: 22, fontWeight: 700 }} />
+                  </Stack>
+                  <Typography sx={{ fontWeight: 800 }}>{hot.name}</Typography>
+                  <Typography sx={{ color: 'text.secondary', fontSize: '0.8rem', mt: 0.5 }}>{hot.opportunity}</Typography>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
         </Box>
       )}
 
