@@ -198,28 +198,49 @@ export default function ExamsClient() {
     [populatedCategories],
   );
 
-  const filteredCategories = useMemo(() => {
-    let result = populatedCategories;
-    if (selectedCategory !== 'All') {
-      result = result.filter((cat: any) => cat.name === selectedCategory);
-    }
-    const q = searchQuery.toLowerCase().trim();
-    if (!q) return result;
-    return result
-      .map((category: any) => {
-        const exams = category.exams.filter((exam: ExamItem) => {
-          const hot = getPriorityExam(exam.slug);
-          const hay = `${exam.name} ${exam.year ?? ''} ${exam.slug ?? ''} ${exam.category_number ?? ''} ${hot?.opportunity ?? ''} ${hot?.keywords.join(' ') ?? ''}`.toLowerCase();
-          return hay.includes(q);
-        });
-        return { ...category, exams };
-      })
-      .filter((category: any) => category.exams.length > 0);
-  }, [populatedCategories, searchQuery, selectedCategory]);
-
   const categoryNames = useMemo(() => {
-    return ['All', ...populatedCategories.map((c: any) => c.name)];
+    return ['All', 'Current PSC posts', ...populatedCategories.map((c: any) => c.name)];
   }, [populatedCategories]);
+
+  const pinnedExams = useMemo(() => {
+    const all = populatedCategories.flatMap((cat: any) =>
+      (cat.exams || []).map((exam: ExamItem) => ({ ...exam, categoryName: cat.name })),
+    );
+    const bySlug = new Map(all.map((exam: ExamItem) => [exam.slug, exam]));
+    return PRIORITY_EXAMS.map((hot) => bySlug.get(hot.slug)).filter(Boolean) as ExamItem[];
+  }, [populatedCategories]);
+
+  const displayCategories = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    const matches = (exam: ExamItem) => {
+      if (!q) return true;
+      const hot = getPriorityExam(exam.slug);
+      const hay = `${exam.name} ${exam.year ?? ''} ${exam.slug ?? ''} ${exam.category_number ?? ''} ${hot?.opportunity ?? ''} ${hot?.keywords.join(' ') ?? ''}`.toLowerCase();
+      return hay.includes(q);
+    };
+    const restOf = (exams: ExamItem[]) => sortExamsByPriority(exams.filter((exam) => !getPriorityExam(exam.slug) && matches(exam)));
+    const pinnedMatched = pinnedExams.filter(matches);
+    const currentSection = { id: 'current-psc', name: 'Current PSC posts', exams: pinnedMatched };
+
+    if (selectedCategory === 'Current PSC posts') {
+      return pinnedMatched.length ? [currentSection] : [];
+    }
+
+    if (selectedCategory !== 'All') {
+      return populatedCategories
+        .filter((cat: any) => cat.name === selectedCategory)
+        .map((cat: any) => ({
+          ...cat,
+          exams: [...pinnedMatched, ...restOf(cat.exams || [])],
+        }))
+        .filter((cat: any) => cat.exams.length > 0);
+    }
+
+    const others = populatedCategories
+      .map((cat: any) => ({ ...cat, exams: restOf(cat.exams || []) }))
+      .filter((cat: any) => cat.exams.length > 0);
+    return pinnedMatched.length ? [currentSection, ...others] : others;
+  }, [populatedCategories, pinnedExams, searchQuery, selectedCategory]);
 
   const featuredExam = useMemo(() => {
     if (!populatedCategories.length) return null;
@@ -556,8 +577,8 @@ export default function ExamsClient() {
       )}
 
       <Stack spacing={5}>
-        {filteredCategories.length > 0 ? (
-          filteredCategories.map((category: any) => (
+        {displayCategories.length > 0 ? (
+          displayCategories.map((category: any) => (
             <Box key={category.id}>
               <Box sx={{ mb: 2.25, display: 'flex', alignItems: 'center', gap: 1.25 }}>
                 <Box sx={{ width: 4, height: 26, borderRadius: 2, background: `linear-gradient(135deg, ${GREEN}, ${GREEN_LIGHT})` }} />
@@ -574,6 +595,7 @@ export default function ExamsClient() {
                 {category.exams.map((exam: ExamItem) => {
                   const bestScore = bestScores[String(exam.id)];
                   const attempted = bestScore !== undefined;
+                  const hot = getPriorityExam(exam.slug);
                   return (
                     <Grid size={{ xs: 12, sm: 6, md: 4 }} key={exam.id}>
                       <Paper
@@ -594,11 +616,20 @@ export default function ExamsClient() {
                       >
                         <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${GREEN}, ${GREEN_LIGHT})` }} />
                         <Stack direction="row" justifyContent="space-between" alignItems="flex-start" sx={{ mb: 1.25, pt: 0.5 }}>
-                          <Chip
-                            label={isVfaExam(exam) ? formatVfaChipDate(profile?.district) : `YEAR ${exam.year ?? '—'}`}
-                            size="small"
-                            sx={{ bgcolor: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', fontSize: '0.65rem', fontWeight: 800, height: 22 }}
-                          />
+                          <Stack direction="row" spacing={0.75} alignItems="center">
+                            {hot && (
+                              <Chip
+                                label={`#${hot.rank}`}
+                                size="small"
+                                sx={{ bgcolor: 'rgba(27,107,58,0.12)', color: GREEN, fontSize: '0.65rem', fontWeight: 800, height: 22 }}
+                              />
+                            )}
+                            <Chip
+                              label={isVfaExam(exam) ? formatVfaChipDate(profile?.district) : `YEAR ${exam.year ?? '—'}`}
+                              size="small"
+                              sx={{ bgcolor: isDark ? 'rgba(255,255,255,0.06)' : '#F1F5F9', fontSize: '0.65rem', fontWeight: 800, height: 22 }}
+                            />
+                          </Stack>
                           <Chip
                             label={attempted ? `Best: ${bestScore}%` : 'Not attempted'}
                             size="small"

@@ -136,7 +136,9 @@ export async function getSitemapEntries(): Promise<SitemapEntry[]> {
   }
 
   const seen = new Set<string>();
-  return [...core, ...examHubs, ...onlineTests, ...blogs, ...locationPages, ...dynamicPages].filter((entry) => {
+  const priorityHubs = examHubs.slice(0, 10);
+  const otherHubs = examHubs.slice(10);
+  return [...core.slice(0, 2), ...priorityHubs, ...core.slice(2), ...otherHubs, ...onlineTests, ...blogs, ...locationPages, ...dynamicPages].filter((entry) => {
     if (seen.has(entry.url)) return false;
     seen.add(entry.url);
     return true;
