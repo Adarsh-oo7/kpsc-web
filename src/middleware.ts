@@ -10,7 +10,9 @@ export function middleware(request: NextRequest) {
     url.pathname.startsWith('/_next') ||
     url.pathname.startsWith('/api') ||
     url.pathname.startsWith('/static') ||
-    url.pathname.includes('.') // matches favicon.ico, images, etc.
+    url.pathname.includes('.') ||
+    url.pathname === '/sitemap.xml' ||
+    url.pathname === '/robots.txt'
   ) {
     return NextResponse.next();
   }

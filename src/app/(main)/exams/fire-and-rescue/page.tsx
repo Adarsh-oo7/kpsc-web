@@ -10,8 +10,8 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
 export const metadata: Metadata = {
-  title: "Fire & Rescue Officer Mock Test 2026 | New Notifications + Kerala PSC Practice",
-  description: "Kerala PSC Fire & Rescue Officer mock tests for 2026 notification categories. 100 MCQs, official timer, fire-service special topics, GK, English and Malayalam.",
+  title: "Fire & Rescue Officer Answer Key July 4 2026 | Expected Cutoff | Kerala PSC Previous Questions | KPSC Master",
+  description: "Kerala PSC Fire & Rescue Officer answer key July 4, 2026 — expected cutoff prediction, previous year question papers, and post-exam analysis. Also start a 2026 mock test with 100 MCQs and official timer.",
   keywords: [
     'fire rescue officer answer key 2026',
     'fire rescue officer answer key July 2026',
@@ -19,6 +19,7 @@ export const metadata: Metadata = {
     'fire rescue officer expected cutoff 2026',
     'kerala psc fire and rescue officer mock test',
     'fire rescue officer exam analysis July 4 2026',
+    'fire and rescue officer mock test 2026',
   ],
   alternates: {
     canonical: 'https://www.kpscmaster.in/exams/fire-and-rescue',

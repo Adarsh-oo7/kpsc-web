@@ -22,6 +22,11 @@ export const metadata: Metadata = {
     'kerala psc preparation app 2026',
     'kerala psc daily quiz with answers',
     'psc mock test streak leaderboard',
+    'special branch assistant mock test',
+    'civil excise officer mock test',
+    'kerala psc lineman mock test',
+    'nurse grade ii kerala psc',
+    'laboratory attender kerala psc',
   ],
   alternates: { canonical: 'https://www.kpscmaster.in' },
   openGraph: {

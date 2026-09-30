@@ -2,9 +2,14 @@ import ExamsClient from './ExamsClient';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Kerala PSC Mock Tests 2026 — Special Branch, Excise, Lineman, Nurse, Fire & Rescue',
-  description: "Free Kerala PSC mock tests for Special Branch Assistant, Civil Excise Officer, Lineman, Nurse Grade II, Fire & Rescue, Electrician, Beat Forest Officer, Laboratory Attender, Assistant Project Engineer and Police Constable Band. 100 MCQs, official timer.",
+  title: 'Kerala PSC Mock Tests — Free Online Practice for LDC, LGS, Degree Level',
+  description: "Sit a full Kerala PSC mock paper for LDC, LGS, Degree and more. Official timer, 100 MCQs, and +1 / −0.33 marking. Also practice Special Branch Assistant, Civil Excise Officer, Lineman, Nurse Grade II, Fire & Rescue, Electrician, Beat Forest Officer, Laboratory Attender, Assistant Project Engineer and Police Constable Band.",
   keywords: [
+    'kerala psc mock test',
+    'psc mock test malayalam',
+    'kerala psc online exam practice',
+    'ldc mock test',
+    'lgs mock test',
     'special branch assistant mock test',
     'civil excise officer mock test',
     'kerala psc lineman',

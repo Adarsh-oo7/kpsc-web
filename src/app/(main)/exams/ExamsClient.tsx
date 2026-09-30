@@ -190,12 +190,7 @@ export default function ExamsClient() {
     if (!Array.isArray(categories)) return [];
     return categories
       .filter((cat: any) => Array.isArray(cat.exams) && cat.exams.length > 0)
-      .map((cat: any) => ({ ...cat, exams: sortExamsByPriority(cat.exams) }))
-      .sort((a: any, b: any) => {
-        const ra = Math.min(...a.exams.map((exam: ExamItem) => (getPriorityExam(exam.slug)?.rank ?? 999)));
-        const rb = Math.min(...b.exams.map((exam: ExamItem) => (getPriorityExam(exam.slug)?.rank ?? 999)));
-        return ra - rb;
-      });
+      .map((cat: any) => ({ ...cat, exams: sortExamsByPriority(cat.exams) }));
   }, [categories]);
 
   const paperCount = useMemo(
@@ -251,8 +246,6 @@ export default function ExamsClient() {
     }
 
     const allExams = populatedCategories.flatMap((cat: any) => cat.exams.map((exam: ExamItem) => ({ ...exam, categoryName: cat.name })));
-    const hot = allExams.find((exam: ExamItem) => getPriorityExam(exam.slug));
-    if (hot) return hot;
     const ldc = allExams.find((exam: ExamItem) => /ldc|lower division clerk/i.test(exam.name));
     if (ldc) return ldc;
     const first = populatedCategories[0].exams[0];
@@ -363,7 +356,7 @@ export default function ExamsClient() {
                 <TextField
                   fullWidth
                   variant="outlined"
-                  placeholder="Search Special Branch, Excise, Lineman, Nurse..."
+                  placeholder="Search LDC, LGS, Special Branch, Nurse..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   sx={{
