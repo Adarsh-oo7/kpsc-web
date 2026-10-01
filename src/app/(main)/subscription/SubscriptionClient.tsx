@@ -59,6 +59,12 @@ export default function SubscriptionClient() {
       // Create checkout session in backend
       const res = await apiClient.post('/subscriptions/checkout/create-session/', { plan_id: plan.id });
       const orderData = res.data;
+      if (orderData.already_active) {
+        setMessage({ type: 'success', text: `${plan.name} is already active on this account. You were not charged again.` });
+        mutateSub();
+        setCheckoutLoading(null);
+        return;
+      }
 
       // Handle local mock mode
       if (orderData.order_id.startsWith('order_mock_')) {
@@ -99,11 +105,10 @@ export default function SubscriptionClient() {
         order_id: orderData.order_id,
         handler: async function (response: any) {
           try {
-            await apiClient.post('/subscriptions/checkout/webhook/', {
+            await apiClient.post('/subscriptions/checkout/verify/', {
               order_id: orderData.order_id,
               payment_id: response.razorpay_payment_id,
               signature: response.razorpay_signature,
-              status: 'success'
             });
             setMessage({ type: 'success', text: `Payment successful! Your ${plan.name} plan is now active.` });
             mutateSub();

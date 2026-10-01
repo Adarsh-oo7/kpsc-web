@@ -91,6 +91,12 @@ export default function VfaPaywallDialog({
         plan_id: access?.plan_id,
       });
       const order = res.data;
+      if (order.already_active) {
+        onUnlocked?.();
+        onClose();
+        setLoading(false);
+        return;
+      }
       if (String(order.order_id || '').startsWith('order_mock_')) {
         await apiClient.post('/subscriptions/checkout/verify/', {
           order_id: order.order_id,
@@ -175,12 +181,15 @@ export default function VfaPaywallDialog({
           sx={{ bgcolor: 'rgba(245,158,11,0.18)', color: AMBER, fontWeight: 800, mb: 2 }}
         />
         <Typography sx={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 900, fontSize: '1.55rem', lineHeight: 1.2, mb: 1 }}>
-          Unlock all VFA mock sets
+          {access?.unlocked ? 'VFA is already unlocked' : 'Unlock all VFA mock sets'}
         </Typography>
         <Typography sx={{ color: 'rgba(255,255,255,0.72)', fontSize: '0.92rem', mb: 3 }}>
-          Village Field Assistant papers after the 2 free sets need a one-time unlock.
+          {access?.unlocked
+            ? 'This account already has the one-time VFA unlock. You will not be charged again.'
+            : 'Village Field Assistant papers after the 2 free sets need a one-time unlock.'}
         </Typography>
 
+        {!access?.unlocked && (
         <Box sx={{ mb: 3 }}>
           <Typography
             component="span"
@@ -198,6 +207,7 @@ export default function VfaPaywallDialog({
             one-time · full VFA unlock
           </Typography>
         </Box>
+        )}
 
         <Stack spacing={1} sx={{ textAlign: 'left', mb: 3, px: 0.5 }}>
           {['Unlimited VFA mock tests', 'Bilingual papers + AI explanations', 'Valid through this VFA exam season'].map((item) => (
@@ -213,7 +223,7 @@ export default function VfaPaywallDialog({
           fullWidth
           variant="contained"
           startIcon={loading ? <CircularProgress size={16} color="inherit" /> : <LockOpenIcon />}
-          onClick={handlePay}
+          onClick={access?.unlocked ? () => { onUnlocked?.(); onClose(); } : handlePay}
           disabled={loading}
           sx={{
             py: 1.4,
@@ -226,7 +236,7 @@ export default function VfaPaywallDialog({
             '&:hover': { background: '#D97706' },
           }}
         >
-          {loading ? 'Opening payment…' : `Pay ₹${price} · Unlock VFA`}
+          {access?.unlocked ? 'Continue to the paper' : loading ? 'Opening payment…' : `Pay ₹${price} · Unlock VFA`}
         </Button>
         <Typography sx={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.72rem', mt: 1.5 }}>
           Secure checkout with Razorpay
