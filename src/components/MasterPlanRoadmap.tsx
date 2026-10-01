@@ -296,7 +296,7 @@ export default function MasterPlanRoadmap({ examId }: MasterPlanRoadmapProps) {
               overflow: 'hidden'
             }}
           >
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <AccordionSummary component="div" expandIcon={<ExpandMoreIcon />}>
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ width: '100%', pr: 2 }}>
                 <Typography sx={{ fontWeight: 800, fontSize: '0.95rem' }}>
                   {subj.subject}

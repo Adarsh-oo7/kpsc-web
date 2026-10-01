@@ -204,7 +204,7 @@ export default function OfficialSyllabusCard({
               bgcolor: 'background.paper'
             }}
           >
-            <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: subject.color }} />}>
+            <AccordionSummary component="div" expandIcon={<ExpandMoreIcon sx={{ color: subject.color }} />}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', pr: 1 }}>
                 <Stack direction="row" spacing={1.5} alignItems="center">
                   <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: subject.color }} />

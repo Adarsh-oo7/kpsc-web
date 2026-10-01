@@ -335,7 +335,7 @@ export default function StartLearningModal({ open, onClose, examName = 'LGS 2026
           <Stack spacing={1.5}>
             {syllabusSubjects.map((subj, idx) => (
               <Accordion key={idx} elevation={0} defaultExpanded={idx === 0} sx={{ borderRadius: '16px !important', border: '1px solid', borderColor: 'divider' }}>
-                <AccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: subj.color }} />}>
+                <AccordionSummary component="div" expandIcon={<ExpandMoreIcon sx={{ color: subj.color }} />}>
                   <Stack direction="row" spacing={1.5} alignItems="center">
                     <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: subj.color }} />
                     <Typography sx={{ fontWeight: 800, fontSize: '0.9rem' }}>

@@ -301,7 +301,7 @@ export default function TopicsClient() {
                   bgcolor: 'background.paper',
                 }}
               >
-                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <AccordionSummary component="div" expandIcon={<ExpandMoreIcon />}>
                   <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: '100%', pr: 1 }}>
                     <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: section.color, flexShrink: 0 }} />
                     <Box sx={{ flex: 1, minWidth: 0 }}>

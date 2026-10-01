@@ -240,7 +240,10 @@ export default function ExamCountdownBanner({
                   <Button
                     size="small"
                     startIcon={changingExam ? <CircularProgress size={14} color="inherit" /> : <SwapHorizIcon />}
-                    onClick={() => setPickerOpen(true)}
+                    onClick={(event) => {
+                      event.currentTarget.blur();
+                      setPickerOpen(true);
+                    }}
                     disabled={changingExam}
                     sx={{
                       textTransform: 'none',
