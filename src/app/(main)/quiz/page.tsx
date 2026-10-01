@@ -307,6 +307,7 @@ function QuizContent() {
   const examParam = searchParams.get('exam') || searchParams.get('exam_id');
   const topicParam = searchParams.get('topic') || searchParams.get('topic_id') || searchParams.get('topic_name');
   const sectionParam = searchParams.get('section');
+  const subdivisionParam = searchParams.get('subdivision');
   const modeParam = searchParams.get('mode');
   const setParam = searchParams.get('set');
   const limitParam = searchParams.get('limit') || '15';
@@ -338,9 +339,10 @@ function QuizContent() {
     if (examParam) url += `&exam=${encodeURIComponent(examParam)}`;
     if (topicParam) url += `&topic=${encodeURIComponent(topicParam)}`;
     if (sectionParam) url += `&section=${encodeURIComponent(sectionParam)}`;
+    if (subdivisionParam) url += `&subdivision=${encodeURIComponent(subdivisionParam)}`;
     if (modeParam) url += `&mode=${encodeURIComponent(modeParam)}`;
     return url;
-  }, [examParam, topicParam, sectionParam, modeParam, setParam, limitParam, language, isWeeklyCurrentAffairs, isMockExam]);
+  }, [examParam, topicParam, sectionParam, subdivisionParam, modeParam, setParam, limitParam, language, isWeeklyCurrentAffairs, isMockExam]);
 
   const { data: rawQuizData, error, isLoading, mutate: mutateQuiz } = useSWR(apiUrl, fetcher, { revalidateOnFocus: false });
 

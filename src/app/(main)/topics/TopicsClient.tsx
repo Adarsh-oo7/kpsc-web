@@ -342,20 +342,23 @@ export default function TopicsClient() {
                       Practise {section.title}
                     </Button>
                     <Typography variant="body2" sx={{ color: 'text.secondary', alignSelf: 'center' }}>
-                      {section.attempted} answers · {section.topics?.length || 0} chapters
+                      {section.question_count || 0} questions
+                      {(section.subdivisions || []).length > 0
+                        ? ` · ${section.subdivisions.length} parts`
+                        : ''}
                     </Typography>
                   </Stack>
                   <Grid container spacing={1.5}>
-                    {(section.topics || []).slice(0, 12).map((topic: any) => (
-                      <Grid item xs={12} sm={6} md={4} key={topic.id}>
+                    {(section.subdivisions || []).map((part: any) => (
+                      <Grid item xs={12} sm={6} md={4} key={part.key}>
                         <Paper
                           variant="outlined"
-                          onClick={() => handleTopicSelect(topic.slug)}
+                          onClick={() => router.push(`/quiz?section=${encodeURIComponent(section.key)}&subdivision=${encodeURIComponent(part.key)}&limit=15`)}
                           sx={{ p: 1.5, borderRadius: 2, cursor: 'pointer', '&:hover': { borderColor: section.color } }}
                         >
-                          <Typography sx={{ fontWeight: 700, fontSize: '0.85rem' }}>{topic.name}</Typography>
-                          <Typography variant="caption" sx={{ color: topic.is_weak ? '#EF4444' : 'text.secondary' }}>
-                            {topic.attempted ? `${topic.accuracy}% · ${topic.question_count} Qs` : `${topic.question_count} Qs`}
+                          <Typography sx={{ fontWeight: 700, fontSize: '0.85rem' }}>{part.name}</Typography>
+                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                            {part.question_count} questions inside {section.title}
                           </Typography>
                         </Paper>
                       </Grid>
