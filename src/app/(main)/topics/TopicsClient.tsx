@@ -1,119 +1,16 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import {
   Box, Typography, Alert, CircularProgress, Paper,
-  TextField, InputAdornment, Container, Skeleton, Stack,
-  Button, Chip, LinearProgress
+  TextField, InputAdornment, Container, Stack,
+  Button, Chip, LinearProgress, MenuItem, Divider,
 } from '@mui/material';
 import { useAppContext } from '@/context/AppContext';
-import { motion } from 'framer-motion';
 import SearchIcon from '@mui/icons-material/Search';
-
-// --- Icon imports ---
-import HistoryEduIcon from '@mui/icons-material/HistoryEdu';
-import PublicIcon from '@mui/icons-material/Public';
-import ScienceIcon from '@mui/icons-material/Science';
-import GavelIcon from '@mui/icons-material/Gavel';
-import CalculateIcon from '@mui/icons-material/Calculate';
-import TranslateIcon from '@mui/icons-material/Translate';
-import CategoryIcon from '@mui/icons-material/Category';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-
-// A predefined list of attractive gradients
-const gradients = [
-    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-    'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-    'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-    'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-];
-
-const getTopicVisuals = (topicName: string) => {
-    const lowerCaseName = topicName.toLowerCase();
-    const iconSize = { fontSize: { xs: 32, sm: 40, md: 48 } };
-    let icon = <CategoryIcon sx={iconSize} />;
-
-    if (lowerCaseName.includes('history')) icon = <HistoryEduIcon sx={iconSize} />;
-    else if (lowerCaseName.includes('geography')) icon = <PublicIcon sx={iconSize} />;
-    else if (lowerCaseName.includes('science')) icon = <ScienceIcon sx={iconSize} />;
-    else if (lowerCaseName.includes('polity')) icon = <GavelIcon sx={iconSize} />;
-    else if (lowerCaseName.includes('math')) icon = <CalculateIcon sx={iconSize} />;
-    else if (lowerCaseName.includes('english')) icon = <TranslateIcon sx={iconSize} />;
-    
-    const hash = topicName.split('').reduce((a, b) => (a << 5) - a + b.charCodeAt(0), 0);
-    const gradient = gradients[Math.abs(hash) % gradients.length];
-    
-    return { icon, gradient };
-};
-
-const TopicCard = ({ topic, onClick }: { topic: any; onClick: () => void; }) => {
-    const { icon, gradient } = getTopicVisuals(topic.name);
-    return (
-        <motion.div 
-            whileHover={{ scale: 1.05 }} 
-            whileTap={{ scale: 0.95 }} 
-            style={{ 
-                height: '100%', 
-                cursor: 'pointer',
-                display: 'flex'
-            }}
-        >
-            <Paper
-                onClick={onClick}
-                sx={{
-                    position: 'relative',
-                    width: '100%',
-                    height: 0,
-                    paddingBottom: '100%', // Creates perfect square aspect ratio
-                    borderRadius: 3,
-                    overflow: 'hidden',
-                    background: gradient,
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    '&:hover': {
-                        boxShadow: '0 8px 30px rgba(0,0,0,0.25)',
-                        transform: 'translateY(-4px)'
-                    }
-                }}
-            >
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        textAlign: 'center',
-                        color: 'white',
-                        p: { xs: 1.5, sm: 2, md: 2.5 }
-                    }}
-                >
-                    <Box sx={{ mb: { xs: 1, sm: 1.5 } }}>
-                        {icon}
-                    </Box>
-                    <Typography 
-                        sx={{ 
-                            fontWeight: 'bold', 
-                            fontSize: { xs: '0.75rem', sm: '0.9rem', md: '1rem' },
-                            textShadow: '0 2px 4px rgba(0,0,0,0.3)',
-                            lineHeight: 1.2,
-                            wordBreak: 'break-word'
-                        }}
-                    >
-                        {topic.name}
-                    </Typography>
-                </Box>
-            </Paper>
-        </motion.div>
-    );
-};
 
 function statusLine(section: { attempted?: number; accuracy?: number; is_weak?: boolean }) {
   if (!section.attempted) return 'Not started';
@@ -124,11 +21,13 @@ function statusLine(section: { attempted?: number; accuracy?: number; is_weak?: 
 function SectionCard({
   section,
   startHere,
+  showProgress,
   onSection,
   onPart,
 }: {
   section: any;
   startHere: boolean;
+  showProgress: boolean;
   onSection: () => void;
   onPart: (key: string) => void;
 }) {
@@ -162,10 +61,10 @@ function SectionCard({
             </Typography>
           ) : null}
           <Typography sx={{ color: 'text.secondary', fontSize: '0.82rem', mt: 0.75 }}>
-            {statusLine(section)} · {section.question_count || 0} questions
-            {parts.length > 0 ? ` · ${parts.length} chapters` : ''}
+            {showProgress ? `${statusLine(section)} · ` : ''}
+            {section.marks} marks · {section.question_count || 0} questions
           </Typography>
-          {section.attempted > 0 && (
+          {showProgress && section.attempted > 0 && (
             <LinearProgress
               variant="determinate"
               value={Math.min(100, section.accuracy || 0)}
@@ -180,92 +79,50 @@ function SectionCard({
             />
           )}
         </Box>
-        <Stack spacing={1} alignItems={{ xs: 'stretch', sm: 'flex-end' }} sx={{ flexShrink: 0 }}>
-          <Chip
-            size="small"
-            label={`${section.marks} marks`}
-            sx={{ alignSelf: { xs: 'flex-start', sm: 'flex-end' }, fontWeight: 800, bgcolor: 'surface.card', color: 'text.primary' }}
-          />
-          <Button
-            variant="contained"
-            startIcon={<PlayArrowIcon />}
-            onClick={onSection}
-            sx={{ textTransform: 'none', fontWeight: 800, borderRadius: '12px', px: 2 }}
-          >
-            Practise 15
-          </Button>
-        </Stack>
+        <Button
+          variant="contained"
+          startIcon={<PlayArrowIcon />}
+          onClick={onSection}
+          sx={{ textTransform: 'none', fontWeight: 800, borderRadius: '12px', alignSelf: { xs: 'stretch', sm: 'center' }, flexShrink: 0 }}
+        >
+          Practise 15
+        </Button>
       </Stack>
-      {startHere && (
-        <Typography sx={{ color: 'text.secondary', fontSize: '0.82rem', mt: 1.5, lineHeight: 1.5 }}>
-          Answer the set, then read the correct option and the reason. A wrong answer is saved and asked again.
-        </Typography>
-      )}
       {parts.length > 0 && (
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mt: 1.5 }}>
-          {parts.map((part: any) => (
-            <Chip
-              key={part.key}
-              label={`${part.name} · ${part.question_count}`}
-              onClick={() => onPart(part.key)}
-              variant="outlined"
-              sx={{ fontWeight: 700, borderRadius: '10px' }}
-            />
-          ))}
+        <Box sx={{ mt: 1.75 }}>
+          <Typography sx={{ fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.06em', color: 'text.secondary', mb: 0.75 }}>
+            CHAPTERS IN {section.title.toUpperCase()}
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
+            {parts.map((part: any) => (
+              <Chip
+                key={part.key}
+                label={`${part.name} · ${part.question_count}`}
+                onClick={() => onPart(part.key)}
+                variant="outlined"
+                sx={{ fontWeight: 700, borderRadius: '10px' }}
+              />
+            ))}
+          </Box>
         </Box>
       )}
     </Paper>
   );
 }
 
-const TopicCardSkeleton = () => (
-    <Paper 
-        sx={{ 
-            width: '100%', 
-            height: 0,
-            paddingBottom: '100%', // Perfect square
-            borderRadius: 3,
-            position: 'relative'
-        }}
-    >
-        <Box 
-            sx={{ 
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                display: 'flex', 
-                flexDirection: 'column', 
-                justifyContent: 'center', 
-                alignItems: 'center',
-                p: 2
-            }}
-        >
-            <Skeleton variant="circular" width={40} height={40} sx={{ mb: 1.5 }} />
-            <Skeleton variant="text" width="70%" height={20} />
-        </Box>
-    </Paper>
-);
-
 export default function TopicsClient() {
   const { fetcher, user } = useAppContext();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const [pickedSlug, setPickedSlug] = useState('');
 
-  const { data: syllabus, isLoading: syllabusLoading } = useSWR(
-    user ? '/syllabus-sections/' : null,
-    fetcher
-  );
-  const { data: topics, error, isLoading } = useSWR('/topics/', fetcher);
+  const syllabusKey = pickedSlug
+    ? `/syllabus-sections/?exam_slug=${encodeURIComponent(pickedSlug)}`
+    : '/syllabus-sections/';
+  const { data: syllabus, error, isLoading } = useSWR(syllabusKey, fetcher);
 
-  const filteredTopics = useMemo(() => {
-    if (!topics) return [];
-    if (!searchQuery.trim()) return topics;
-    return topics.filter((topic: any) =>
-      topic.name.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [topics, searchQuery]);
+  const exams = syllabus?.available_exams || [];
+  const selectedSlug = pickedSlug || syllabus?.exam_slug || '';
 
   const visibleSections = useMemo(() => {
     const sections = syllabus?.sections || [];
@@ -288,95 +145,90 @@ export default function TopicsClient() {
     return [focus, ...matched.filter((section: any) => section.key !== focusKey)];
   }, [syllabus, searchQuery]);
 
-  const handleTopicSelect = (slug: string) => {
-    router.push(`/topics/${slug}`);
+  const openPractice = (sectionKey: string, partKey?: string) => {
+    const params = new URLSearchParams({ section: sectionKey, limit: '15' });
+    if (partKey) params.set('subdivision', partKey);
+    if (syllabus?.exam_id) params.set('exam_id', String(syllabus.exam_id));
+    else if (selectedSlug) params.set('exam', selectedSlug);
+    const next = `/quiz?${params.toString()}`;
+    if (!user) {
+      router.push(`/login?next=${encodeURIComponent(next)}`);
+      return;
+    }
+    router.push(next);
   };
 
-  const focus = syllabus?.focus_section;
+  const upcoming = exams.filter((exam: any) => exam.upcoming);
+  const others = exams.filter((exam: any) => !exam.upcoming);
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <Box sx={{ mb: 2.5, maxWidth: 720 }}>
-          <Typography
-            variant="h4"
-            component="h1"
-            sx={{
-              fontWeight: 800,
-              color: 'text.primary',
-              fontSize: { xs: '1.7rem', sm: '2rem' },
-              lineHeight: 1.2,
-            }}
-          >
-            {syllabus?.exam_name || 'PSC Syllabus'}
-          </Typography>
-          <Typography sx={{ color: 'text.secondary', mt: 0.75, fontSize: '0.95rem', lineHeight: 1.5 }}>
-            Open one section, answer 15 questions, then read the correct option and the reason. Chapters stay inside their subject.
-          </Typography>
-        </Box>
+    <Container maxWidth="md" sx={{ py: { xs: 3, md: 4 } }}>
+      <Box sx={{ mb: 2.5 }}>
+        <Typography
+          variant="h4"
+          component="h1"
+          sx={{ fontWeight: 800, fontSize: { xs: '1.7rem', sm: '2rem' }, lineHeight: 1.2 }}
+        >
+          {syllabus?.exam_name || 'Syllabus'}
+        </Typography>
+        <Typography sx={{ color: 'text.secondary', mt: 0.75, fontSize: '0.95rem', lineHeight: 1.5 }}>
+          Subjects of this paper, with each chapter kept inside its subject.
+          {syllabus?.total_marks ? ` ${syllabus.total_marks} marks` : ''}
+          {syllabus?.duration_minutes ? ` · ${syllabus.duration_minutes} minutes` : ''}.
+        </Typography>
+      </Box>
 
-        <Box sx={{ maxWidth: 720, mb: 2.5 }}>
-          <TextField
-            fullWidth
-            variant="outlined"
-            placeholder="Search a subject or chapter..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                borderRadius: '50px',
-                bgcolor: 'background.paper',
-              }
-            }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Box>
-      </motion.div>
+      <Stack spacing={1.5} sx={{ mb: 2.5 }}>
+        <TextField
+          select
+          fullWidth
+          label="Exam"
+          value={selectedSlug}
+          onChange={(event) => setPickedSlug(event.target.value)}
+          disabled={!exams.length}
+        >
+          {upcoming.map((exam: any) => (
+            <MenuItem key={exam.slug} value={exam.slug}>{exam.name}</MenuItem>
+          ))}
+          {upcoming.length > 0 && others.length > 0 && <Divider />}
+          {others.map((exam: any) => (
+            <MenuItem key={exam.slug} value={exam.slug}>{exam.name}</MenuItem>
+          ))}
+        </TextField>
+        <TextField
+          fullWidth
+          placeholder="Search a subject or chapter..."
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon />
+              </InputAdornment>
+            ),
+          }}
+        />
+      </Stack>
 
-      {user && (syllabusLoading || syllabus) ? (
-        syllabusLoading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress size={32} /></Box>
-        ) : visibleSections.length > 0 ? (
-          <Stack spacing={1.25} sx={{ maxWidth: 720 }}>
-            {visibleSections.map((section: any) => (
-              <SectionCard
-                key={section.key}
-                section={section}
-                startHere={!searchQuery.trim() && section.key === focus?.key}
-                onSection={() => router.push(`/quiz?section=${encodeURIComponent(section.key)}&limit=15`)}
-                onPart={(partKey) => router.push(`/quiz?section=${encodeURIComponent(section.key)}&subdivision=${encodeURIComponent(partKey)}&limit=15`)}
-              />
-            ))}
-          </Stack>
-        ) : (
-          <Alert severity="info">No subject or chapter matches that search.</Alert>
-        )
-      ) : isLoading ? (
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 2 }}>
-          {Array.from({ length: 8 }).map((_, index) => (
-            <TopicCardSkeleton key={index} />
+      {isLoading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress size={32} /></Box>
+      ) : error ? (
+        <Alert severity="error">Could not load the syllabus. Refresh the page and try again.</Alert>
+      ) : visibleSections.length > 0 ? (
+        <Stack spacing={1.25}>
+          {visibleSections.map((section: any) => (
+            <SectionCard
+              key={section.key}
+              section={section}
+              startHere={!searchQuery.trim() && section.key === syllabus?.focus_section?.key}
+              showProgress={Boolean(user)}
+              onSection={() => openPractice(section.key)}
+              onPart={(partKey) => openPractice(section.key, partKey)}
+            />
           ))}
-        </Box>
-      ) : filteredTopics && filteredTopics.length > 0 ? (
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(3, 1fr)', md: 'repeat(4, 1fr)' }, gap: 2 }}>
-          {filteredTopics.map((topic: any) => (
-            <TopicCard key={topic.id} topic={topic} onClick={() => handleTopicSelect(topic.slug)} />
-          ))}
-        </Box>
+        </Stack>
       ) : (
-        <Alert severity="info">
-          {searchQuery ? 'No topics match your search.' : error ? 'Could not load topics.' : 'No topics available at the moment.'}
-        </Alert>
+        <Alert severity="info">No subject or chapter matches that search.</Alert>
       )}
     </Container>
   );
