@@ -42,6 +42,9 @@ const LOCATIONS: Record<string, string> = {
 };
 
 const EXAMS: Record<string, string> = {
+  'village-field-assistant': 'Village Field Assistant',
+  'junior-lab-assistant': 'Junior Lab Assistant',
+  'motor-mechanic': 'Motor Mechanic',
   'special-branch-assistant': 'Special Branch Assistant',
   'civil-excise-officer': 'Civil Excise Officer',
   'lineman': 'Lineman',
@@ -68,7 +71,6 @@ const EXAMS: Record<string, string> = {
   'assistant-prison-officer': 'Assistant Prison Officer',
   'excise-officer': 'Excise Officer',
   'assistant-junior-assistant': 'Assistant / Junior Assistant',
-  'village-field-assistant': 'Village Field Assistant',
   'panchayat-secretary': 'Panchayat Secretary',
   'general-psc': 'General PSC',
 };

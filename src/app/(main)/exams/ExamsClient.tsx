@@ -546,7 +546,7 @@ export default function ExamsClient() {
       {!searchQuery && (
         <Box sx={{ mb: 4 }}>
           <Typography sx={{ fontWeight: 800, mb: 1.5, letterSpacing: '0.04em', textTransform: 'uppercase', fontSize: '0.78rem', color: GREEN_LIGHT }}>
-            Top searches now
+            October exams and open posts
           </Typography>
           <Grid container spacing={1.5}>
             {PRIORITY_EXAMS.map((hot) => (

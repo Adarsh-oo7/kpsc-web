@@ -44,6 +44,10 @@ interface ExamCategory {
 }
 
 const POPULAR_KEYS = [
+  'village field',
+  'vfa',
+  'junior lab',
+  'motor mechanic',
   'special branch',
   'civil excise',
   'lineman',

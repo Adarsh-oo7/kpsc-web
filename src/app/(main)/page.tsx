@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'KPSC Master — Free Kerala PSC Mock Tests 2026 | LDC, LGS, KSEB, VFA | AI Malayalam Explanations',
-  description: "Kerala's #1 free PSC prep platform — 47,000+ students. Free mock tests for KSEB Electricity Worker (Mazdoor), LGS, VFA, LDC, KSRTC Conductor 2026. AI Malayalam explanations, daily quiz & leaderboard.",
+  description: "Kerala's #1 free PSC prep platform — 47,000+ students. Free mock tests for KSEB Electricity Worker (Mazdoor), LGS, VFA, LDC, KSRTC Conductor 2026. AI Malayalam explanations, daily quiz & leaderboard. October 2026: VFA on 17 and 31 Oct, Junior Lab Assistant on 3 Oct, Motor Mechanic on 13 Oct.",
   keywords: [
     'kerala psc mock test free 2026',
     'KSEB electricity worker mock test 2026 free',
@@ -27,6 +27,9 @@ export const metadata: Metadata = {
     'kerala psc lineman mock test',
     'nurse grade ii kerala psc',
     'laboratory attender kerala psc',
+    'junior lab assistant exam 3 october 2026',
+    'motor mechanic kerala psc 13 october',
+    'vfa exam 17 october 2026',
   ],
   alternates: { canonical: 'https://www.kpscmaster.in' },
   openGraph: {

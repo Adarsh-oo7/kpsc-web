@@ -57,7 +57,9 @@ const EXAMS: Record<string, ExamInfo> = {
   'assistant-prison-officer': { name: 'Assistant Prison Officer', formalName: 'Assistant Prison Officer', duration: 75, qCount: 100 },
   'excise-officer': { name: 'Excise Officer', formalName: 'Excise Officer', duration: 75, qCount: 100 },
   'assistant-junior-assistant': { name: 'Assistant / Junior Assistant', formalName: 'Assistant / Junior Assistant (Various Depts.)', duration: 75, qCount: 100 },
-  'village-field-assistant': { name: 'Village Field Assistant', formalName: 'Village Field Assistant (VFA)', duration: 75, qCount: 100 },
+  'village-field-assistant': { name: 'Village Field Assistant', formalName: 'Village Field Assistant (VFA)', duration: 90, qCount: 100 },
+  'junior-lab-assistant': { name: 'Junior Lab Assistant', formalName: 'Junior Lab Assistant (Cat 733/2025)', duration: 90, qCount: 100 },
+  'motor-mechanic': { name: 'Motor Mechanic', formalName: 'Motor Mechanic (Cat 630/2025)', duration: 90, qCount: 100 },
   'panchayat-secretary': { name: 'Panchayat Secretary', formalName: 'Panchayat Secretary', duration: 75, qCount: 100 },
   'general-psc': { name: 'General PSC', formalName: 'General PSC (2025)', duration: 75, qCount: 100 },
 };
