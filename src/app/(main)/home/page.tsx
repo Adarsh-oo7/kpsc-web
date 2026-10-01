@@ -47,6 +47,51 @@ function StatBadge({ icon, value, label, color }: any) {
   );
 }
 
+function StudyPath({
+  examName,
+  sections,
+  onPractise,
+}: {
+  examName?: string;
+  sections: { key?: string; title?: string; marks?: number }[];
+  onPractise: (key: string) => void;
+}) {
+  const biggest = [...sections].sort((a, b) => (b.marks || 0) - (a.marks || 0))[0];
+  const steps = [
+    `Stay on ${examName || 'your exam'}. Practise that paper, not a random mix.`,
+    biggest?.title
+      ? `Start with ${biggest.title}. It carries ${biggest.marks} marks, so it moves the score the most.`
+      : 'Open the syllabus and start with the part that carries the most marks.',
+    'Answer one question, then read the correct option and the reason before you go on.',
+    'A wrong answer is kept and asked again later. Then sit one full set from Mock tests.',
+  ];
+  return (
+    <Box sx={{ mb: 3, p: 2.25, borderRadius: '16px', border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
+      <Typography sx={{ fontWeight: 800, fontSize: '1rem', mb: 0.4 }}>How to study on this page</Typography>
+      <Typography sx={{ color: 'text.secondary', fontSize: '0.82rem', mb: 1.25, lineHeight: 1.5 }}>
+        Most students here are preparing for Village Field Assistant. The same steps work for every exam you select.
+      </Typography>
+      <Stack spacing={0.8}>
+        {steps.map((step, index) => (
+          <Typography key={step} sx={{ fontSize: '0.86rem', lineHeight: 1.45 }}>
+            <Box component="span" sx={{ fontWeight: 800, mr: 0.75 }}>{index + 1}.</Box>
+            {step}
+          </Typography>
+        ))}
+      </Stack>
+      {biggest?.key && (
+        <Button
+          variant="contained"
+          onClick={() => onPractise(biggest.key as string)}
+          sx={{ mt: 1.5, textTransform: 'none', fontWeight: 800, borderRadius: 2 }}
+        >
+          Practise {biggest.title}
+        </Button>
+      )}
+    </Box>
+  );
+}
+
 const quickActions = [
   { label: 'Daily Quiz', icon: <QuizIcon />, path: '/quiz', color: '#1B6B3A', bg: 'rgba(27,107,58,0.15)', border: 'rgba(46,139,87,0.2)' },
   { label: 'Mock Tests', icon: <AssignmentIcon />, path: '/exams', color: '#7C3AED', bg: 'rgba(124,58,237,0.15)', border: 'rgba(124,58,237,0.2)' },
@@ -209,6 +254,14 @@ export default function HomePage() {
             district={profile?.district}
           />
         </Box>
+      </motion.div>
+
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.07, duration: 0.45 }}>
+        <StudyPath
+          examName={activeExam?.name || syllabusData?.exam_name}
+          sections={syllabusData?.sections || []}
+          onPractise={(key) => router.push(withExam(`/quiz?section=${encodeURIComponent(key)}&limit=15`))}
+        />
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08, duration: 0.45 }}>

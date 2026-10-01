@@ -49,6 +49,69 @@ const difficultyColor: Record<string, string> = {
   easy: '#22c55e', medium: '#F59E0B', hard: '#EF4444'
 };
 
+function optionText(options: any, letter?: string) {
+  if (!options || !letter) return '';
+  if (Array.isArray(options)) {
+    return options.find((opt) => opt?.key === letter)?.text || '';
+  }
+  return options[letter] || options[letter.toLowerCase()] || '';
+}
+
+function LearnNote({
+  explanation,
+  options,
+  correctAnswer,
+  selected,
+  isDark,
+}: {
+  explanation?: string;
+  options: any;
+  correctAnswer?: string;
+  selected?: string;
+  isDark: boolean;
+}) {
+  if (!explanation && !correctAnswer) return null;
+  const rememberSplit = (explanation || '').split(/\s*Remember:\s*/i);
+  const why = rememberSplit[0]?.trim();
+  const remember = rememberSplit[1]?.trim();
+  const correct = optionText(options, correctAnswer);
+  const chosen = selected && selected !== correctAnswer ? optionText(options, selected) : '';
+  return (
+    <Box sx={{
+      mt: 2.5, p: 2, borderRadius: '10px',
+      background: isDark ? 'rgba(59,130,246,0.08)' : 'rgba(59,130,246,0.04)',
+      border: '1px solid', borderColor: isDark ? 'rgba(59,130,246,0.15)' : 'rgba(59,130,246,0.1)',
+    }}>
+      <Typography sx={{ fontSize: '0.75rem', fontWeight: 800, color: isDark ? '#60a5fa' : '#1e40af', letterSpacing: '0.04em' }}>
+        CORRECT ANSWER
+      </Typography>
+      <Typography sx={{ fontSize: '0.95rem', fontWeight: 700, color: 'text.primary', mt: 0.4, lineHeight: 1.45 }}>
+        {correctAnswer}{correct ? `. ${correct}` : ''}
+      </Typography>
+      {why && (
+        <>
+          <Typography sx={{ fontSize: '0.75rem', fontWeight: 800, color: isDark ? '#60a5fa' : '#1e40af', letterSpacing: '0.04em', mt: 1.25 }}>
+            WHY
+          </Typography>
+          <Typography sx={{ fontSize: '0.875rem', color: isDark ? '#93c5fd' : '#1e3a8a', lineHeight: 1.7, mt: 0.3 }}>
+            {why}
+          </Typography>
+        </>
+      )}
+      {remember && (
+        <Typography sx={{ fontSize: '0.84rem', fontWeight: 700, color: 'text.primary', mt: 1.1, lineHeight: 1.5 }}>
+          Remember: {remember}
+        </Typography>
+      )}
+      {chosen && (
+        <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary', mt: 1 }}>
+          You marked {selected}. {chosen}
+        </Typography>
+      )}
+    </Box>
+  );
+}
+
 // ───────────────────────────────────────────────
 // Score Gauge SVG
 // ───────────────────────────────────────────────
@@ -242,13 +305,13 @@ function ResultsScreen({ resultData, answers, onRetry, originalQuestions }: { re
                   disabled
                 />
                 {!userAns && <Alert severity="warning" sx={{ mt: 1.5, py: 0 }}>Not answered</Alert>}
-                {q.explanation && (
-                  <Box sx={{ mt: 1.5, p: 1.5, borderRadius: '8px', background: isDark ? 'rgba(59,130,246,0.08)' : 'rgba(59,130,246,0.04)', border: '1px solid', borderColor: 'divider' }}>
-                    <Typography sx={{ fontSize: '0.8rem', color: isDark ? '#93c5fd' : '#1E40AF', lineHeight: 1.6 }}>
-                      <strong>💡</strong> {q.explanation}
-                    </Typography>
-                  </Box>
-                )}
+                <LearnNote
+                  explanation={q.explanation}
+                  options={q.options}
+                  correctAnswer={q.correct_answer}
+                  selected={userAns}
+                  isDark={isDark}
+                />
               </Box>
             </motion.div>
           );
@@ -709,20 +772,15 @@ function QuizContent() {
                 Missed this one — it will come back in your next practice with shuffled options.
               </Typography>
             )}
-            {isAnswered && q.explanation && (
+            {isAnswered && (
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-                <Box sx={{
-                  mt: 2.5, p: 2, borderRadius: '10px',
-                  background: isDark ? 'rgba(59,130,246,0.08)' : 'rgba(59,130,246,0.04)',
-                  border: '1px solid', borderColor: isDark ? 'rgba(59,130,246,0.15)' : 'rgba(59,130,246,0.1)'
-                }}>
-                  <Typography sx={{ fontSize: '0.75rem', fontWeight: 700, color: isDark ? '#60a5fa' : '#1e40af', mb: 0.5, letterSpacing: '0.04em' }}>
-                    EXPLANATION
-                  </Typography>
-                  <Typography sx={{ fontSize: '0.875rem', color: isDark ? '#93c5fd' : '#1e3a8a', lineHeight: 1.7 }}>
-                    {q.explanation}
-                  </Typography>
-                </Box>
+                <LearnNote
+                  explanation={q.explanation}
+                  options={q.options}
+                  correctAnswer={q.correct_answer}
+                  selected={selectedOption}
+                  isDark={isDark}
+                />
               </motion.div>
             )}
           </Box>
