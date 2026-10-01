@@ -21,8 +21,8 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 interface SyllabusSubject {
   title: string;
   marks: number;
-  color: string;
-  topics: string[];
+  color?: string;
+  topics?: Array<string | { name?: string }>;
 }
 
 interface OfficialSyllabusCardProps {
@@ -102,10 +102,22 @@ export default function OfficialSyllabusCard({
     }
   ];
 
-  const syllabusData = officialSyllabus?.subjects?.length ? officialSyllabus.subjects : fallbackSyllabusData;
-  const totalMarks = officialSyllabus?.total_marks || 100;
+  const palette = ['#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#0EA5E9', '#1B6B3A'];
+  const rawSubjects = officialSyllabus?.subjects?.length ? officialSyllabus.subjects : fallbackSyllabusData;
+  const syllabusData = rawSubjects.map((subject, idx) => {
+    const topicLabels = (Array.isArray(subject.topics) ? subject.topics : [])
+      .map((topic) => (typeof topic === 'string' ? topic : topic?.name || ''))
+      .filter(Boolean);
+    return {
+      title: subject.title || 'Syllabus section',
+      marks: Number(subject.marks) || 0,
+      color: subject.color || palette[idx % palette.length],
+      topics: topicLabels.length ? topicLabels : [subject.title || 'Syllabus section'],
+    };
+  });
+  const totalMarks = officialSyllabus?.total_marks || syllabusData.reduce((sum, subject) => sum + subject.marks, 0) || 100;
   const durationMins = questionPattern?.duration_minutes || 75;
-  const modeText = questionPattern?.mode || 'OMR Objective Type';
+  const modeText = questionPattern?.mode || questionPattern?.marking_scheme || 'OMR Objective Type';
 
   return (
     <Paper
@@ -143,13 +155,13 @@ export default function OfficialSyllabusCard({
               Official Kerala PSC Syllabus
             </Typography>
             <Chip
-              label="100 Marks / 75 Mins"
+              label={`${totalMarks} Marks / ${durationMins} Mins`}
               size="small"
               sx={{ bgcolor: 'rgba(46, 139, 87, 0.12)', color: '#2E8B57', fontWeight: 800, fontSize: '0.7rem' }}
             />
           </Stack>
           <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-            Official examination pattern for {examName} (OMR Objective Mode)
+            {modeText} · {examName}
           </Typography>
         </Box>
       </Stack>
@@ -161,20 +173,20 @@ export default function OfficialSyllabusCard({
         <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1, color: 'text.secondary', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
           Mark Weightage Distribution
         </Typography>
-        <Grid container spacing={1}>
+        <Box sx={{ display: 'flex', gap: 0.5, width: '100%' }}>
           {syllabusData.map((item, idx) => (
-            <Grid item xs={idx === 0 ? 6 : idx === 1 ? 3 : idx === 2 ? 2.4 : 0.6} key={idx}>
-              <Box
-                sx={{
-                  bgcolor: item.color,
-                  height: 10,
-                  borderRadius: 2,
-                  opacity: 0.95
-                }}
-              />
-            </Grid>
+            <Box
+              key={idx}
+              sx={{
+                flex: Math.max(item.marks, 1),
+                bgcolor: item.color,
+                height: 10,
+                borderRadius: 2,
+                opacity: 0.95,
+              }}
+            />
           ))}
-        </Grid>
+        </Box>
       </Box>
 
       {/* Subject Accordions */}

@@ -270,7 +270,7 @@ export default function ExamCountdownBanner({
                 {examName}
               </Typography>
 
-              <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.9rem' }}>
+              <Typography component="div" variant="body2" sx={{ color: 'text.secondary', fontSize: '0.9rem' }}>
                 <DateRangeIcon sx={{ fontSize: 16, mr: 0.75, mb: '-3px', color: GREEN_LIGHT }} />
                 {dateCaption}:{' '}
                 <strong>

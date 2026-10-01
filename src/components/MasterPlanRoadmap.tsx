@@ -121,8 +121,23 @@ export default function MasterPlanRoadmap({ examId }: MasterPlanRoadmapProps) {
     try {
       const url = examId ? `/master-study-plan/${examId}/` : '/master-study-plan/';
       const res = await apiClient.get(url);
-      if (res.data && (res.data.syllabus_structure?.length || res.data.title)) {
-        setPlan(res.data);
+      const structure = Array.isArray(res.data?.syllabus_structure) ? res.data.syllabus_structure : [];
+      const usable = structure.some((subject: Subject) => Array.isArray(subject?.modules) && subject.modules.length > 0);
+      if (res.data && usable) {
+        setPlan({
+          ...res.data,
+          syllabus_structure: structure.map((subject: Subject) => ({
+            ...subject,
+            modules: subject.modules || [],
+          })),
+          weekly_milestones: res.data.weekly_milestones || [],
+        });
+      } else if (res.data?.title) {
+        setPlan({
+          ...res.data,
+          syllabus_structure: [],
+          weekly_milestones: res.data.weekly_milestones || [],
+        });
       } else {
         setPlan(fallbackPlan);
       }
@@ -295,7 +310,7 @@ export default function MasterPlanRoadmap({ examId }: MasterPlanRoadmapProps) {
             </AccordionSummary>
             <AccordionDetails sx={{ pt: 0, pb: 2 }}>
               <Stack spacing={1}>
-                {subj.modules.map((mod, mIdx) => {
+                {(subj.modules || []).map((mod, mIdx) => {
                   const isChecked = completedModuleNames.includes(mod.name);
                   return (
                     <Paper
