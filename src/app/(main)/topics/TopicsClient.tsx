@@ -4,9 +4,9 @@ import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import useSWR from 'swr';
 import {
-  Box, Typography, Grid, Alert, CircularProgress, Paper,
+  Box, Typography, Alert, CircularProgress, Paper,
   TextField, InputAdornment, Container, Skeleton, Stack,
-  Button, Chip, LinearProgress, Accordion, AccordionSummary, AccordionDetails
+  Button, Chip, LinearProgress
 } from '@mui/material';
 import { useAppContext } from '@/context/AppContext';
 import { motion } from 'framer-motion';
@@ -20,9 +20,7 @@ import GavelIcon from '@mui/icons-material/Gavel';
 import CalculateIcon from '@mui/icons-material/Calculate';
 import TranslateIcon from '@mui/icons-material/Translate';
 import CategoryIcon from '@mui/icons-material/Category';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 
 // A predefined list of attractive gradients
 const gradients = [
@@ -117,6 +115,109 @@ const TopicCard = ({ topic, onClick }: { topic: any; onClick: () => void; }) => 
     );
 };
 
+function statusLine(section: { attempted?: number; accuracy?: number; is_weak?: boolean }) {
+  if (!section.attempted) return 'Not started';
+  if (section.is_weak) return `${section.accuracy}% — this part is costing marks`;
+  return `${section.accuracy}% from ${section.attempted} answers`;
+}
+
+function SectionCard({
+  section,
+  startHere,
+  onSection,
+  onPart,
+}: {
+  section: any;
+  startHere: boolean;
+  onSection: () => void;
+  onPart: (key: string) => void;
+}) {
+  const parts = section.subdivisions || [];
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        p: { xs: 2, sm: 2.25 },
+        borderRadius: '16px',
+        border: '1px solid',
+        borderColor: startHere ? 'rgba(27,107,58,0.45)' : 'divider',
+        bgcolor: 'background.paper',
+        borderLeft: '4px solid',
+        borderLeftColor: section.color || '#1B6B3A',
+      }}
+    >
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="space-between">
+        <Box sx={{ minWidth: 0, flex: 1 }}>
+          {startHere && (
+            <Typography sx={{ fontSize: '0.68rem', fontWeight: 800, letterSpacing: '0.08em', color: '#1B6B3A', mb: 0.5 }}>
+              START HERE
+            </Typography>
+          )}
+          <Typography sx={{ fontWeight: 800, fontSize: '1.05rem', lineHeight: 1.3 }}>
+            {section.title}
+          </Typography>
+          {section.title_ml ? (
+            <Typography sx={{ color: 'text.secondary', fontSize: '0.82rem', mt: 0.25 }}>
+              {section.title_ml}
+            </Typography>
+          ) : null}
+          <Typography sx={{ color: 'text.secondary', fontSize: '0.82rem', mt: 0.75 }}>
+            {statusLine(section)} · {section.question_count || 0} questions
+            {parts.length > 0 ? ` · ${parts.length} chapters` : ''}
+          </Typography>
+          {section.attempted > 0 && (
+            <LinearProgress
+              variant="determinate"
+              value={Math.min(100, section.accuracy || 0)}
+              sx={{
+                mt: 1,
+                maxWidth: 280,
+                height: 6,
+                borderRadius: 4,
+                bgcolor: 'divider',
+                '& .MuiLinearProgress-bar': { bgcolor: section.is_weak ? '#EF4444' : (section.color || '#1B6B3A') },
+              }}
+            />
+          )}
+        </Box>
+        <Stack spacing={1} alignItems={{ xs: 'stretch', sm: 'flex-end' }} sx={{ flexShrink: 0 }}>
+          <Chip
+            size="small"
+            label={`${section.marks} marks`}
+            sx={{ alignSelf: { xs: 'flex-start', sm: 'flex-end' }, fontWeight: 800, bgcolor: 'surface.card', color: 'text.primary' }}
+          />
+          <Button
+            variant="contained"
+            startIcon={<PlayArrowIcon />}
+            onClick={onSection}
+            sx={{ textTransform: 'none', fontWeight: 800, borderRadius: '12px', px: 2 }}
+          >
+            Practise 15
+          </Button>
+        </Stack>
+      </Stack>
+      {startHere && (
+        <Typography sx={{ color: 'text.secondary', fontSize: '0.82rem', mt: 1.5, lineHeight: 1.5 }}>
+          Answer the set, then read the correct option and the reason. A wrong answer is saved and asked again.
+        </Typography>
+      )}
+      {parts.length > 0 && (
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mt: 1.5 }}>
+          {parts.map((part: any) => (
+            <Chip
+              key={part.key}
+              label={`${part.name} · ${part.question_count}`}
+              onClick={() => onPart(part.key)}
+              variant="outlined"
+              sx={{ fontWeight: 700, borderRadius: '10px' }}
+            />
+          ))}
+        </Box>
+      )}
+    </Paper>
+  );
+}
+
 const TopicCardSkeleton = () => (
     <Paper 
         sx={{ 
@@ -152,7 +253,7 @@ export default function TopicsClient() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: syllabus, error: syllabusError, isLoading: syllabusLoading } = useSWR(
+  const { data: syllabus, isLoading: syllabusLoading } = useSWR(
     user ? '/syllabus-sections/' : null,
     fetcher
   );
@@ -168,18 +269,23 @@ export default function TopicsClient() {
 
   const visibleSections = useMemo(() => {
     const sections = syllabus?.sections || [];
-    if (!searchQuery.trim()) return sections;
-    const q = searchQuery.toLowerCase();
-    return sections
-      .map((section: any) => ({
-        ...section,
-        topics: (section.topics || []).filter((topic: any) =>
-          `${section.title} ${topic.name}`.toLowerCase().includes(q)
-        ),
-      }))
-      .filter((section: any) =>
-        section.title.toLowerCase().includes(q) || (section.topics || []).length > 0
-      );
+    const q = searchQuery.trim().toLowerCase();
+    const matched = !q
+      ? sections
+      : sections
+          .map((section: any) => {
+            const titleHit = `${section.title} ${section.title_ml || ''}`.toLowerCase().includes(q);
+            const parts = (section.subdivisions || []).filter((part: any) =>
+              `${part.name} ${section.title}`.toLowerCase().includes(q)
+            );
+            return { ...section, subdivisions: titleHit ? section.subdivisions : parts, _hit: titleHit || parts.length > 0 };
+          })
+          .filter((section: any) => section._hit);
+    const focusKey = syllabus?.focus_section?.key;
+    if (!focusKey) return matched;
+    const focus = matched.find((section: any) => section.key === focusKey);
+    if (!focus) return matched;
+    return [focus, ...matched.filter((section: any) => section.key !== focusKey)];
   }, [syllabus, searchQuery]);
 
   const handleTopicSelect = (slug: string) => {
@@ -187,7 +293,6 @@ export default function TopicsClient() {
   };
 
   const focus = syllabus?.focus_section;
-  const weakSections = syllabus?.weak_sections || [];
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -196,31 +301,25 @@ export default function TopicsClient() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Box sx={{ textAlign: 'center', mb: 4 }}>
+        <Box sx={{ mb: 2.5, maxWidth: 720 }}>
           <Typography
-            variant="h3"
+            variant="h4"
             component="h1"
             sx={{
               fontWeight: 800,
               color: 'text.primary',
-              fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' }
+              fontSize: { xs: '1.7rem', sm: '2rem' },
+              lineHeight: 1.2,
             }}
           >
             {syllabus?.exam_name || 'PSC Syllabus'}
           </Typography>
-          <Typography
-            variant="h6"
-            sx={{
-              color: 'text.secondary',
-              fontWeight: 400,
-              fontSize: { xs: '1rem', sm: '1.25rem' }
-            }}
-          >
-            Official paper sections — practise the part you are weakest in.
+          <Typography sx={{ color: 'text.secondary', mt: 0.75, fontSize: '0.95rem', lineHeight: 1.5 }}>
+            Open one section, answer 15 questions, then read the correct option and the reason. Chapters stay inside their subject.
           </Typography>
         </Box>
 
-        <Box sx={{ maxWidth: 600, mx: 'auto', mb: 4 }}>
+        <Box sx={{ maxWidth: 720, mb: 2.5 }}>
           <TextField
             fullWidth
             variant="outlined"
@@ -244,131 +343,23 @@ export default function TopicsClient() {
         </Box>
       </motion.div>
 
-      {focus && (
-        <Paper
-          sx={{
-            mb: 3,
-            p: 2.5,
-            borderRadius: 4,
-            border: '1px solid',
-            borderColor: 'rgba(239,68,68,0.25)',
-            bgcolor: 'background.paper',
-          }}
-        >
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ sm: 'center' }} justifyContent="space-between">
-            <Box>
-              <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
-                <WarningAmberIcon sx={{ color: '#EF4444', fontSize: 20 }} />
-                <Typography sx={{ fontWeight: 800 }}>Focus for the exam</Typography>
-                <Chip size="small" label={`${focus.marks} marks`} sx={{ fontWeight: 800 }} />
-              </Stack>
-              <Typography sx={{ fontWeight: 700, color: 'text.primary' }}>
-                {focus.title}{focus.title_ml ? ` · ${focus.title_ml}` : ''}
-              </Typography>
-              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                {focus.attempted > 0
-                  ? `${focus.accuracy}% accuracy from ${focus.attempted} answers. This section can swing ${focus.marks} marks.`
-                  : `You have not practised this ${focus.marks}-mark section yet.`}
-              </Typography>
-            </Box>
-            <Button
-              variant="contained"
-              startIcon={<PlayArrowIcon />}
-              onClick={() => router.push(`/quiz?section=${encodeURIComponent(focus.key)}&limit=15`)}
-              sx={{ textTransform: 'none', fontWeight: 800, borderRadius: 3, bgcolor: '#EF4444', '&:hover': { bgcolor: '#DC2626' } }}
-            >
-              Practise this section
-            </Button>
-          </Stack>
-        </Paper>
-      )}
-
       {user && (syllabusLoading || syllabus) ? (
         syllabusLoading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress size={32} /></Box>
-        ) : (
-          <Stack spacing={1.5}>
+        ) : visibleSections.length > 0 ? (
+          <Stack spacing={1.25} sx={{ maxWidth: 720 }}>
             {visibleSections.map((section: any) => (
-              <Accordion
+              <SectionCard
                 key={section.key}
-                defaultExpanded={section.is_weak || section.key === focus?.key}
-                elevation={0}
-                sx={{
-                  border: '1px solid',
-                  borderColor: section.is_weak ? 'rgba(239,68,68,0.35)' : 'divider',
-                  borderRadius: '16px !important',
-                  '&:before': { display: 'none' },
-                  bgcolor: 'background.paper',
-                }}
-              >
-                <AccordionSummary component="div" expandIcon={<ExpandMoreIcon />}>
-                  <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: '100%', pr: 1 }}>
-                    <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: section.color, flexShrink: 0 }} />
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography sx={{ fontWeight: 800 }}>
-                        {section.title}
-                        {section.title_ml ? (
-                          <Box component="span" sx={{ color: 'text.secondary', fontWeight: 600, ml: 1, fontSize: '0.85rem' }}>
-                            {section.title_ml}
-                          </Box>
-                        ) : null}
-                      </Typography>
-                      <LinearProgress
-                        variant="determinate"
-                        value={section.attempted ? Math.min(100, section.accuracy) : 0}
-                        sx={{ mt: 0.75, height: 6, borderRadius: 4, bgcolor: 'divider', '& .MuiLinearProgress-bar': { bgcolor: section.color } }}
-                      />
-                    </Box>
-                    <Chip size="small" label={`${section.marks} marks`} sx={{ fontWeight: 800, bgcolor: `${section.color}18`, color: section.color }} />
-                    <Chip
-                      size="small"
-                      label={section.attempted ? `${section.accuracy}%` : 'New'}
-                      sx={{
-                        fontWeight: 800,
-                        bgcolor: section.is_weak ? 'rgba(239,68,68,0.12)' : 'rgba(34,197,94,0.12)',
-                        color: section.is_weak ? '#EF4444' : '#16A34A',
-                      }}
-                    />
-                  </Stack>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 2 }}>
-                    <Button
-                      variant="contained"
-                      startIcon={<PlayArrowIcon />}
-                      onClick={() => router.push(`/quiz?section=${encodeURIComponent(section.key)}&limit=15`)}
-                      sx={{ textTransform: 'none', fontWeight: 800, borderRadius: 2, bgcolor: section.color }}
-                    >
-                      Practise {section.title}
-                    </Button>
-                    <Typography variant="body2" sx={{ color: 'text.secondary', alignSelf: 'center' }}>
-                      {section.question_count || 0} questions
-                      {(section.subdivisions || []).length > 0
-                        ? ` · ${section.subdivisions.length} parts`
-                        : ''}
-                    </Typography>
-                  </Stack>
-                  <Grid container spacing={1.5}>
-                    {(section.subdivisions || []).map((part: any) => (
-                      <Grid item xs={12} sm={6} md={4} key={part.key}>
-                        <Paper
-                          variant="outlined"
-                          onClick={() => router.push(`/quiz?section=${encodeURIComponent(section.key)}&subdivision=${encodeURIComponent(part.key)}&limit=15`)}
-                          sx={{ p: 1.5, borderRadius: 2, cursor: 'pointer', '&:hover': { borderColor: section.color } }}
-                        >
-                          <Typography sx={{ fontWeight: 700, fontSize: '0.85rem' }}>{part.name}</Typography>
-                          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                            {part.question_count} questions inside {section.title}
-                          </Typography>
-                        </Paper>
-                      </Grid>
-                    ))}
-                  </Grid>
-                </AccordionDetails>
-              </Accordion>
+                section={section}
+                startHere={!searchQuery.trim() && section.key === focus?.key}
+                onSection={() => router.push(`/quiz?section=${encodeURIComponent(section.key)}&limit=15`)}
+                onPart={(partKey) => router.push(`/quiz?section=${encodeURIComponent(section.key)}&subdivision=${encodeURIComponent(partKey)}&limit=15`)}
+              />
             ))}
-            {weakSections.length === 0 && !syllabusError ? null : null}
           </Stack>
+        ) : (
+          <Alert severity="info">No subject or chapter matches that search.</Alert>
         )
       ) : isLoading ? (
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 2 }}>
