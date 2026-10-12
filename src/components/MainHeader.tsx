@@ -47,6 +47,7 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
     { label: 'Institutes', path: '/institutes' },
     { label: 'Testimonials', path: '/testimonials' },
     { label: 'Blog', path: '/blog' },
+    { label: 'About', path: '/about' },
     { label: 'Contact', path: '/contact' },
   ];
 

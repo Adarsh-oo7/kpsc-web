@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
+import NextLink from 'next/link';
 import {
   Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText,
   Box, Typography, Divider, useTheme, useMediaQuery, Avatar, LinearProgress
@@ -206,8 +207,23 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
  
       {/* Footer */}
       <Box sx={{ p: 2, borderTop: themeMode === 'dark' ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)', textAlign: 'center' }}>
-        <Typography sx={{ fontSize: '0.65rem', color: themeMode === 'dark' ? '#4A5568' : '#64748B' }}>
+        <Typography sx={{ fontSize: '0.65rem', color: themeMode === 'dark' ? '#4A5568' : '#64748B', lineHeight: 1.5 }}>
           © 2026 KPSC Master
+        </Typography>
+        <Typography
+          component={NextLink}
+          href="/about"
+          sx={{
+            display: 'block',
+            fontSize: '0.6rem',
+            color: themeMode === 'dark' ? '#4A5568' : '#64748B',
+            mt: 0.5,
+            lineHeight: 1.45,
+            textDecoration: 'none',
+            '&:hover': { color: '#2E8B57' },
+          }}
+        >
+          About the platform
         </Typography>
       </Box>
     </Box>

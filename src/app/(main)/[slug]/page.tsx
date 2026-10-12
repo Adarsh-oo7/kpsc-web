@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import ProgrammaticSeoClient from './ProgrammaticSeoClient';
 import SettingsClient from '../settings/SettingsClient';
+import AboutClient from '../about/AboutClient';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -190,6 +191,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (RESERVED_SLUGS.has(slug)) {
     return { robots: { index: false, follow: false } };
   }
+  if (slug === 'about') {
+    return {
+      title: 'About KPSC Master — Kerala PSC Preparation Platform',
+      description:
+        'KPSC Master is a Kerala PSC exam-prep platform developed and maintained by Digital Product Solutions, with development contributions from Adarsh B S.',
+      alternates: { canonical: '/about' },
+    };
+  }
   if (slug === 'settings') {
     return {
       title: 'Settings — Account, theme, and language | KPSC Master',
@@ -298,6 +307,9 @@ export default async function ProgrammaticSeoPage({ params }: PageProps) {
   const { slug } = await params;
   if (RESERVED_SLUGS.has(slug)) {
     notFound();
+  }
+  if (slug === 'about') {
+    return <AboutClient />;
   }
   if (slug === 'settings') {
     return <SettingsClient />;

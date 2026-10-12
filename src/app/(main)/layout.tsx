@@ -3,8 +3,9 @@
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { Box, Toolbar } from '@mui/material';
-import Sidebar, { drawerWidth } from '@/components/Sidebar';
+import Sidebar from '@/components/Sidebar';
 import MainHeader from '@/components/MainHeader';
+import SiteFooter from '@/components/SiteFooter';
 import { useAppContext } from '@/context/AppContext';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
@@ -53,6 +54,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         }}>
           {children}
         </Box>
+        {!user && !isAuthPage && <SiteFooter />}
       </Box>
     </Box>
   );

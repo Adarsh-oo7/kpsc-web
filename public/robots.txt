@@ -6,6 +6,7 @@ Allow: /blog
 Allow: /features
 Allow: /testimonials
 Allow: /contact
+Allow: /about
 Allow: /topics
 Allow: /previous-papers
 Allow: /psc-question

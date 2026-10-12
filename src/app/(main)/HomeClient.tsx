@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import NextLink from 'next/link';
-import { Box, Typography, Button, Container, Grid, Chip, Stack, Avatar, CircularProgress, TextField, Link, IconButton } from '@mui/material';
+import { Box, Typography, Button, Container, Grid, Chip, Stack, Avatar, CircularProgress, TextField, Link } from '@mui/material';
 import { motion } from 'framer-motion';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
@@ -21,8 +20,6 @@ import SchoolIcon from '@mui/icons-material/School';
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import PhoneOutlinedIcon from '@mui/icons-material/PhoneOutlined';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
-import LinkedInIcon from '@mui/icons-material/LinkedIn';
-import InstagramIcon from '@mui/icons-material/Instagram';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import AppBanner from '@/components/AppBanner';
 
@@ -1096,86 +1093,7 @@ export default function HomeClient() {
         </Grid>
       </Container>
 
-      {/* ===== FOOTER ===== */}
-      <Box sx={{ borderTop: '1px solid', borderColor: 'divider', py: 5 }}>
-        <Container maxWidth="lg">
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Image src="/KPSC MASTER.png" alt="KPSC Master Logo" width={30} height={30} style={{ objectFit: 'contain' }} />
-              <Typography sx={{ fontFamily: "'Cabinet Grotesk'", fontWeight: 900, color: 'text.primary', fontSize: '1.05rem' }}>
-                KPSC Master
-              </Typography>
-            </Box>
-            <Typography sx={{ color: 'text.disabled', fontSize: '0.775rem', fontWeight: 500 }}>
-              © 2026 KPSC Master. An In-House Product of{' '}
-              <Link
-                href="https://www.digitalproductsolutions.in/"
-                target="_blank"
-                rel="noopener noreferrer"
-                sx={{ color: '#2E8B57', textDecoration: 'none', fontWeight: 700, '&:hover': { textDecoration: 'underline' } }}
-              >
-                Digital Product Solutions
-              </Link>
-              . Head Office: Attingal, Thiruvananthapuram, Kerala.
-            </Typography>
-
-            <Stack direction="row" spacing={3.5} sx={{ alignItems: 'center' }}>
-              <Stack direction="row" spacing={1} sx={{ mr: 1 }}>
-                <IconButton
-                  href="https://www.linkedin.com/showcase/kpsc-master/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="LinkedIn Page"
-                  size="small"
-                  sx={{ color: 'text.disabled', '&:hover': { color: '#0A66C2' } }}
-                >
-                  <LinkedInIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                  href="https://www.instagram.com/kpsc_master_app?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram Profile"
-                  size="small"
-                  sx={{ color: 'text.disabled', '&:hover': { color: '#E1306C' } }}
-                >
-                  <InstagramIcon fontSize="small" />
-                </IconButton>
-                <IconButton
-                  href="https://wa.me/919400355155"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="WhatsApp Chat"
-                  size="small"
-                  sx={{ color: 'text.disabled', '&:hover': { color: '#25D366' } }}
-                >
-                  <WhatsAppIcon fontSize="small" />
-                </IconButton>
-              </Stack>
-              
-              <Typography
-                component={NextLink}
-                href="/directory"
-                sx={{
-                  fontSize: '0.775rem',
-                  color: 'text.disabled',
-                  textDecoration: 'none',
-                  cursor: 'pointer',
-                  '&:hover': { color: 'text.secondary' },
-                  fontWeight: 600
-                }}
-              >
-                Exams & Locations Directory
-              </Typography>
-              {['Privacy', 'Terms', 'Contact'].map(item => (
-                <Typography key={item} sx={{ fontSize: '0.775rem', color: 'text.disabled', cursor: 'pointer', '&:hover': { color: 'text.secondary' }, fontWeight: 600 }}>
-                  {item}
-                </Typography>
-              ))}
-            </Stack>
-          </Box>
-        </Container>
-      </Box>
+      {/* Footer is rendered by the main layout for public pages. */}
     </Box>
   );
 }

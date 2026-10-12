@@ -48,9 +48,12 @@ export const metadata: Metadata = {
     'motor mechanic kerala psc',
     'village field assistant october 2026',
   ],
-  authors: [{ name: 'KPSC Master', url: BASE_URL }],
-  creator: 'KPSC Master',
-  publisher: 'KPSC Master',
+  authors: [
+    { name: 'Digital Product Solutions', url: 'https://www.digitalproductsolutions.in/' },
+    { name: 'Adarsh B S', url: 'https://adarsh.digitalproductsolutions.in/' },
+  ],
+  creator: 'Digital Product Solutions',
+  publisher: 'Digital Product Solutions',
   category: 'Education',
 
   // Canonical & alternates
@@ -138,8 +141,14 @@ const organisationSchema = {
   logo: `${BASE_URL}/logo.png`,
   sameAs: [
     'https://www.linkedin.com/showcase/kpsc-master/',
-    'https://www.instagram.com/kpsc_master_app/'
+    'https://www.instagram.com/kpsc_master_app/',
+    'https://www.digitalproductsolutions.in/',
   ],
+  parentOrganization: {
+    '@type': 'Organization',
+    name: 'Digital Product Solutions',
+    url: 'https://www.digitalproductsolutions.in/',
+  },
   contactPoint: {
     '@type': 'ContactPoint',
     telephone: '+91-94003-55155',
