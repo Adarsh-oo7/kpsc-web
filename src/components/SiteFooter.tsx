@@ -2,7 +2,10 @@
 
 import Image from 'next/image';
 import NextLink from 'next/link';
-import { Box, Container, Link, Stack, Typography } from '@mui/material';
+import { Box, Container, IconButton, Link, Stack, Typography } from '@mui/material';
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import InstagramIcon from '@mui/icons-material/Instagram';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 
 const DPS_URL = 'https://www.digitalproductsolutions.in/';
 const ADARSH_URL = 'https://adarsh.digitalproductsolutions.in/';
@@ -79,10 +82,41 @@ export default function SiteFooter() {
             component="nav"
             aria-label="Footer"
           >
+            <IconButton
+              href="https://www.linkedin.com/showcase/kpsc-master/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="KPSC Master on LinkedIn"
+              size="small"
+              sx={{ color: 'text.secondary', '&:hover': { color: '#0A66C2' } }}
+            >
+              <LinkedInIcon fontSize="small" />
+            </IconButton>
+            <IconButton
+              href="https://www.instagram.com/kpsc_master_app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="KPSC Master on Instagram"
+              size="small"
+              sx={{ color: 'text.secondary', '&:hover': { color: '#E1306C' } }}
+            >
+              <InstagramIcon fontSize="small" />
+            </IconButton>
+            <IconButton
+              href="https://wa.me/919400355155"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="WhatsApp chat"
+              size="small"
+              sx={{ color: 'text.secondary', '&:hover': { color: '#25D366' } }}
+            >
+              <WhatsAppIcon fontSize="small" />
+            </IconButton>
             {[
               { label: 'About', href: '/about' },
               { label: 'Features', href: '/features' },
               { label: 'Exams', href: '/exams' },
+              { label: 'Directory', href: '/directory' },
               { label: 'Contact', href: '/contact' },
             ].map((item) => (
               <Typography
