@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import useSWR from 'swr';
 import {
   Box, Typography, Alert, CircularProgress, Paper,
@@ -113,8 +113,9 @@ function SectionCard({
 export default function TopicsClient() {
   const { fetcher, user } = useAppContext();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
-  const [pickedSlug, setPickedSlug] = useState('');
+  const [pickedSlug, setPickedSlug] = useState(searchParams.get('exam') || '');
 
   const syllabusKey = pickedSlug
     ? `/syllabus-sections/?exam_slug=${encodeURIComponent(pickedSlug)}`
@@ -160,6 +161,10 @@ export default function TopicsClient() {
 
   const upcoming = exams.filter((exam: any) => exam.upcoming);
   const others = exams.filter((exam: any) => !exam.upcoming);
+  const demandPapers = [
+    { slug: 'assistant-ld-clerk-main-2026', label: '5 December syllabus' },
+    { slug: 'university-assistant', label: 'University Assistant' },
+  ];
 
   return (
     <Container maxWidth="md" sx={{ py: { xs: 3, md: 4 } }}>
@@ -172,11 +177,31 @@ export default function TopicsClient() {
           {syllabus?.exam_name || 'Syllabus'}
         </Typography>
         <Typography sx={{ color: 'text.secondary', mt: 0.75, fontSize: '0.95rem', lineHeight: 1.5 }}>
-          Subjects of this paper, with each chapter kept inside its subject.
-          {syllabus?.total_marks ? ` ${syllabus.total_marks} marks` : ''}
+          Subjects of this paper, with each chapter kept inside its subject
+          {syllabus?.total_marks ? ` · ${syllabus.total_marks} marks` : ''}
           {syllabus?.duration_minutes ? ` · ${syllabus.duration_minutes} minutes` : ''}.
         </Typography>
       </Box>
+
+      <Paper elevation={0} sx={{ p: 2, mb: 2, borderRadius: '16px', border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
+        <Typography sx={{ fontWeight: 800, mb: 0.5 }}>Papers with demand, other than Village Field Assistant</Typography>
+        <Typography sx={{ color: 'text.secondary', fontSize: '0.88rem', lineHeight: 1.55 }}>
+          The large paper still ahead is on Saturday 5 December 2026. It is one common main exam for Assistant Grade II, LD Clerk, Junior Assistant and the related posts (Category 383/2025, 463/2025 and 573/2025). The biggest of those lists has 62,918 candidates. Current affairs is 15 marks and Kerala administration is 10.
+          On this site, the next exam students have selected is University Assistant. Lower Division Typist is held on 11 December, district by district.
+        </Typography>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mt: 1.5 }}>
+          {demandPapers.map((paper) => (
+            <Button
+              key={paper.slug}
+              variant={selectedSlug === paper.slug ? 'contained' : 'outlined'}
+              onClick={() => setPickedSlug(paper.slug)}
+              sx={{ textTransform: 'none', fontWeight: 800, borderRadius: '12px' }}
+            >
+              {paper.label}
+            </Button>
+          ))}
+        </Stack>
+      </Paper>
 
       <Stack spacing={1.5} sx={{ mb: 2.5 }}>
         <TextField

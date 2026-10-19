@@ -51,10 +51,12 @@ function StudyPath({
   examName,
   sections,
   onPractise,
+  onOpenDemand,
 }: {
   examName?: string;
   sections: { key?: string; title?: string; marks?: number }[];
   onPractise: (key: string) => void;
+  onOpenDemand: () => void;
 }) {
   const biggest = [...sections].sort((a, b) => (b.marks || 0) - (a.marks || 0))[0];
   const steps = [
@@ -69,7 +71,7 @@ function StudyPath({
     <Box sx={{ mb: 3, p: 2.25, borderRadius: '16px', border: '1px solid', borderColor: 'divider', bgcolor: 'background.paper' }}>
       <Typography sx={{ fontWeight: 800, fontSize: '1rem', mb: 0.4 }}>How to study on this page</Typography>
       <Typography sx={{ color: 'text.secondary', fontSize: '0.82rem', mb: 1.25, lineHeight: 1.5 }}>
-        Most students here are preparing for Village Field Assistant. The same steps work for every exam you select.
+        The large paper still ahead is the 5 December main exam for Assistant, LD Clerk and Junior Assistant, not Village Field Assistant. On this site, University Assistant is the next exam students have selected.
       </Typography>
       <Stack spacing={0.8}>
         {steps.map((step, index) => (
@@ -79,15 +81,24 @@ function StudyPath({
           </Typography>
         ))}
       </Stack>
-      {biggest?.key && (
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mt: 1.5 }}>
         <Button
           variant="contained"
-          onClick={() => onPractise(biggest.key as string)}
-          sx={{ mt: 1.5, textTransform: 'none', fontWeight: 800, borderRadius: 2 }}
+          onClick={onOpenDemand}
+          sx={{ textTransform: 'none', fontWeight: 800, borderRadius: 2 }}
         >
-          Practise {biggest.title}
+          Open the 5 December syllabus
         </Button>
-      )}
+        {biggest?.key && (
+          <Button
+            variant="outlined"
+            onClick={() => onPractise(biggest.key as string)}
+            sx={{ textTransform: 'none', fontWeight: 800, borderRadius: 2 }}
+          >
+            Practise {biggest.title}
+          </Button>
+        )}
+      </Stack>
     </Box>
   );
 }
@@ -261,6 +272,7 @@ export default function HomePage() {
           examName={activeExam?.name || syllabusData?.exam_name}
           sections={syllabusData?.sections || []}
           onPractise={(key) => router.push(withExam(`/quiz?section=${encodeURIComponent(key)}&limit=15`))}
+          onOpenDemand={() => router.push('/topics?exam=assistant-ld-clerk-main-2026')}
         />
       </motion.div>
 
