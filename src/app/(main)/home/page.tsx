@@ -272,7 +272,7 @@ export default function HomePage() {
           examName={activeExam?.name || syllabusData?.exam_name}
           sections={syllabusData?.sections || []}
           onPractise={(key) => router.push(withExam(`/quiz?section=${encodeURIComponent(key)}&limit=15`))}
-          onOpenDemand={() => router.push('/topics?exam=assistant-ld-clerk-main-2026')}
+          onOpenDemand={() => router.push('/exams/assistant-ld-clerk-main-2026')}
         />
       </motion.div>
 

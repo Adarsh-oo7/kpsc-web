@@ -74,9 +74,10 @@ const features = [
 ];
 
 const exams = [
+  { name: 'Assistant / LD Clerk · 5 Dec', href: '/exams/assistant-ld-clerk-main-2026' },
+  { name: 'University Assistant', href: '/exams/university-assistant' },
+  { name: 'LD Typist · 11 Dec', href: '/exams/ld-typist' },
   { name: 'VFA · 17 & 31 Oct', href: '/exams/village-field-assistant' },
-  { name: 'Junior Lab Assistant · 3 Oct', href: '/exams/junior-lab-assistant' },
-  { name: 'Motor Mechanic · 13 Oct', href: '/exams/motor-mechanic' },
   { name: 'LDC', href: '/exams/kerala-psc-ldc-online-test' },
   { name: 'LGS', href: '/exams/kerala-psc-lgs-online-test' },
   { name: 'Company Board LGS', href: '/exams/company-board-lgs' },

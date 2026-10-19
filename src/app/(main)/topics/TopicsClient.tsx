@@ -200,6 +200,13 @@ export default function TopicsClient() {
               {paper.label}
             </Button>
           ))}
+          <Button
+            variant="text"
+            onClick={() => router.push('/exams/assistant-ld-clerk-main-2026')}
+            sx={{ textTransform: 'none', fontWeight: 800 }}
+          >
+            Open the 5 December page
+          </Button>
         </Stack>
       </Paper>
 
