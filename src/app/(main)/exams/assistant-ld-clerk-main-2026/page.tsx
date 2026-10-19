@@ -57,7 +57,6 @@ export default function AssistantClerkMainPage() {
       </Stack>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 3 }}>
         <Button
-          component={Link}
           href="/topics?exam=assistant-ld-clerk-main-2026"
           variant="contained"
           sx={{ textTransform: 'none', fontWeight: 800, borderRadius: '12px' }}
@@ -65,7 +64,6 @@ export default function AssistantClerkMainPage() {
           Open the syllabus
         </Button>
         <Button
-          component={Link}
           href="/quiz?section=daily-current-affairs&exam=assistant-ld-clerk-main-2026&limit=15"
           variant="outlined"
           sx={{ textTransform: 'none', fontWeight: 800, borderRadius: '12px' }}

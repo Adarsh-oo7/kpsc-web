@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import TopicsClient from './TopicsClient';
 
@@ -15,5 +16,9 @@ export const metadata: Metadata = {
 };
 
 export default function TopicsPage() {
-  return <TopicsClient />;
+  return (
+    <Suspense fallback={null}>
+      <TopicsClient />
+    </Suspense>
+  );
 }

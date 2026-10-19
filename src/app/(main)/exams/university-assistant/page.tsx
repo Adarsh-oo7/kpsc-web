@@ -49,7 +49,6 @@ export default function UniversityAssistantPage() {
       </Stack>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mb: 3 }}>
         <Button
-          component={Link}
           href="/topics?exam=university-assistant"
           variant="contained"
           sx={{ textTransform: 'none', fontWeight: 800, borderRadius: '12px' }}
@@ -57,7 +56,6 @@ export default function UniversityAssistantPage() {
           Open the syllabus
         </Button>
         <Button
-          component={Link}
           href="/quiz?section=maths&exam=university-assistant&limit=15"
           variant="outlined"
           sx={{ textTransform: 'none', fontWeight: 800, borderRadius: '12px' }}
@@ -95,7 +93,6 @@ export default function UniversityAssistantPage() {
           Start with Maths, then English. Read the correct option and the reason after each answer. The 5 December clerk paper is a different exam. Use that page if your admission ticket is for Category 383/2025, 463/2025 or 573/2025.
         </Typography>
         <Button
-          component={Link}
           href="/exams/assistant-ld-clerk-main-2026"
           sx={{ mt: 1.5, textTransform: 'none', fontWeight: 800 }}
         >
