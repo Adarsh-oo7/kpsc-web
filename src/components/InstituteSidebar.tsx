@@ -14,6 +14,7 @@ import GroupsIcon from '@mui/icons-material/Groups';
 import DescriptionIcon from '@mui/icons-material/Description';
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import { usePathname } from 'next/navigation';
+import { useAppContext } from '@/context/AppContext';
 
 export const instituteDrawerWidth = 280;
 
@@ -37,6 +38,9 @@ const menuItems = [
 
 const DrawerContent = ({ onNavigate }: { onNavigate: (path: string) => void }) => {
   const pathname = usePathname();
+  const { profile } = useAppContext();
+  const brandName = profile?.institute?.name || 'KPSC Master';
+  const brandLogo = profile?.institute?.logo || '';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -73,13 +77,22 @@ const DrawerContent = ({ onNavigate }: { onNavigate: (path: string) => void }) =
           flexShrink: 0,
           boxShadow: '0 2px 12px rgba(0,0,0,0.4)',
         }}>
-          <Image
-            src="/logo.png"
-            alt="KPSC Master Logo"
-            width={40}
-            height={40}
-            style={{ objectFit: 'contain' }}
-          />
+          {brandLogo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={brandLogo}
+              alt={brandName}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          ) : (
+            <Image
+              src="/logo.png"
+              alt="KPSC Master Logo"
+              width={40}
+              height={40}
+              style={{ objectFit: 'contain' }}
+            />
+          )}
         </Box>
 
         {/* Brand Text */}
@@ -91,7 +104,7 @@ const DrawerContent = ({ onNavigate }: { onNavigate: (path: string) => void }) =
             lineHeight: 1.2,
             letterSpacing: '-0.01em',
           }}>
-            KPSC Master
+            {brandName}
           </Typography>
           <Typography sx={{
             fontSize: '0.65rem',

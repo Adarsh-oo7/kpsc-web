@@ -4,8 +4,11 @@ import { useState, useEffect, useCallback } from 'react';
 import useSWR from 'swr';
 import {
   Box, Typography, TextField, Button, Alert, CircularProgress,
-  Avatar, Input, Grid, InputAdornment, Stack, Divider, Paper
+  Avatar, Input, Grid, InputAdornment, Stack, Divider, Paper,
+  FormControlLabel, Switch
 } from '@mui/material';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import QuizIcon from '@mui/icons-material/Quiz';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import BusinessIcon from '@mui/icons-material/Business';
 import EmailIcon from '@mui/icons-material/Email';
@@ -31,6 +34,8 @@ export default function InstituteSettingsPage() {
     established_year: '',
     primary_color: '#1976d2',
     accent_color: '#ff9800',
+    show_leaderboard: true,
+    allow_student_tests: true,
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -57,6 +62,8 @@ export default function InstituteSettingsPage() {
         established_year: instituteData.established_year?.toString() || '',
         primary_color: instituteData.primary_color || '#1976d2',
         accent_color: instituteData.accent_color || '#ff9800',
+        show_leaderboard: instituteData.show_leaderboard !== false,
+        allow_student_tests: instituteData.allow_student_tests !== false,
       });
       if (instituteData.logo) {
         setPreview(`${instituteData.logo}?t=${new Date().getTime()}`);
@@ -306,6 +313,68 @@ export default function InstituteSettingsPage() {
                   value={formData.accent_color}
                   onChange={(e) => setFormData(prev => ({ ...prev, accent_color: e.target.value }))}
                   style={{ width: 40, height: 40, border: 'none', background: 'none', cursor: 'pointer', borderRadius: 4 }}
+                />
+              </Box>
+            </Grid>
+          </Grid>
+        </Paper>
+
+        {/* Feature & Privacy Controls */}
+        <Paper sx={{ p: 4, mb: 4, borderRadius: 4, bgcolor: 'background.paper' }}>
+          <Typography variant="h6" sx={{ fontWeight: 800, mb: 1 }}>
+            Student Controls & Privacy
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Control whether students can see the academy leaderboard and whether approved students are allowed to take mock tests.
+          </Typography>
+          <Grid container spacing={3}>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <Box sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider', bgcolor: 'action.hover' }}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={formData.show_leaderboard}
+                      onChange={(e) => setFormData(prev => ({ ...prev, show_leaderboard: e.target.checked }))}
+                      color="primary"
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <EmojiEventsIcon sx={{ color: '#F59E0B', fontSize: 20 }} />
+                        <Typography sx={{ fontWeight: 800 }}>Show Academy Leaderboard</Typography>
+                      </Stack>
+                      <Typography variant="caption" color="text.secondary">
+                        When enabled, students can see their rank, score, and peers on the batch leaderboard.
+                      </Typography>
+                    </Box>
+                  }
+                  sx={{ m: 0, width: '100%' }}
+                />
+              </Box>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <Box sx={{ p: 2, borderRadius: 2, border: '1px solid', borderColor: 'divider', bgcolor: 'action.hover' }}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={formData.allow_student_tests}
+                      onChange={(e) => setFormData(prev => ({ ...prev, allow_student_tests: e.target.checked }))}
+                      color="primary"
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <QuizIcon sx={{ color: '#2E8B57', fontSize: 20 }} />
+                        <Typography sx={{ fontWeight: 800 }}>Allow Mock Tests & Practice</Typography>
+                      </Stack>
+                      <Typography variant="caption" color="text.secondary">
+                        When enabled, enrolled students can take tests and attempt questions curated by this academy.
+                      </Typography>
+                    </Box>
+                  }
+                  sx={{ m: 0, width: '100%' }}
                 />
               </Box>
             </Grid>

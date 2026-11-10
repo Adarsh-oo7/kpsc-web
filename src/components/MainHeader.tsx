@@ -309,7 +309,7 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
             <MenuIcon />
           </IconButton>
           <Box
-            onClick={() => router.push('/home')}
+            onClick={() => router.push(profile?.institute ? `/institute/${profile.institute.slug}` : '/home')}
             sx={{
               display: { xs: 'flex', lg: 'none' },
               alignItems: 'center',
@@ -317,13 +317,32 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
               cursor: 'pointer',
             }}
           >
-            <Image
-              src="/KPSC MASTER.png"
-              alt="KPSC Master Logo"
-              width={28}
-              height={28}
-              style={{ objectFit: 'contain' }}
-            />
+            <Box sx={{
+              width: 28, height: 28,
+              borderRadius: '8px',
+              overflow: 'hidden',
+              bgcolor: 'white',
+              position: 'relative',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0,
+            }}>
+              {profile?.institute?.logo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={profile.institute.logo}
+                  alt={profile.institute.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              ) : (
+                <Image
+                  src="/KPSC MASTER.png"
+                  alt="KPSC Master Logo"
+                  width={28}
+                  height={28}
+                  style={{ objectFit: 'contain' }}
+                />
+              )}
+            </Box>
             <Typography
               sx={{
                 fontFamily: "'Cabinet Grotesk', sans-serif",
@@ -331,7 +350,7 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
                 color: themeMode === 'dark' ? '#F0F4F8' : '#0F172A', letterSpacing: '-0.02em',
               }}
             >
-              KPSC Master
+              {profile?.institute?.name || 'KPSC Master'}
             </Typography>
           </Box>
         </Box>

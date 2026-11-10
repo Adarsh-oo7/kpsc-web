@@ -27,6 +27,7 @@ import MenuBookIcon from '@mui/icons-material/MenuBook';
 import PersonIcon from '@mui/icons-material/Person';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import BoltIcon from '@mui/icons-material/Bolt';
+import SchoolIcon from '@mui/icons-material/School';
 
 export const drawerWidth = 272;
 
@@ -71,6 +72,10 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
   const streak = profile?.current_streak || 0;
   const xpInLevel = xp % 100;
   const levelName = LEVEL_NAMES[Math.min(level, 10)] || 'PSC Master';
+  const institute = profile?.institute;
+  const brandName = institute?.name || 'KPSC Master';
+  const brandLogo = institute?.logo || '';
+  const brandSub = institute ? 'Official Academy Portal' : 'Kerala PSC Prep Platform';
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -80,30 +85,47 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
         background: themeMode === 'dark' ? 'linear-gradient(135deg, #0F1117 0%, #161B22 100%)' : 'linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 100%)',
         borderBottom: themeMode === 'dark' ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
       }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+        <Box
+          onClick={() => onNavigate(institute ? `/institute/${institute.slug}` : '/home')}
+          sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2, cursor: 'pointer' }}
+        >
           <Box sx={{
             width: 36, height: 36,
+            borderRadius: '10px',
+            overflow: 'hidden',
+            bgcolor: 'white',
             position: 'relative',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
           }}>
-            <Image
-              src="/KPSC MASTER.png"
-              alt="KPSC Master Logo"
-              width={36}
-              height={36}
-              style={{ objectFit: 'contain' }}
-            />
+            {brandLogo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={brandLogo}
+                alt={brandName}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            ) : (
+              <Image
+                src="/KPSC MASTER.png"
+                alt="KPSC Master Logo"
+                width={36}
+                height={36}
+                style={{ objectFit: 'contain' }}
+              />
+            )}
           </Box>
-          <Box>
+          <Box sx={{ minWidth: 0 }}>
             <Typography sx={{
               fontFamily: "'Cabinet Grotesk', sans-serif",
-              fontWeight: 800, fontSize: '1.1rem',
-              color: themeMode === 'dark' ? '#F0F4F8' : '#0F172A', letterSpacing: '-0.02em', lineHeight: 1
-            }}>
-              KPSC Master
+              fontWeight: 800, fontSize: '1.05rem',
+              color: themeMode === 'dark' ? '#F0F4F8' : '#0F172A', letterSpacing: '-0.02em', lineHeight: 1.1,
+            }} noWrap>
+              {brandName}
             </Typography>
-            <Typography sx={{ fontSize: '0.7rem', color: themeMode === 'dark' ? '#8892A4' : '#64748B', fontWeight: 500 }}>
-              Kerala PSC Prep Platform
+            <Typography sx={{ fontSize: '0.68rem', color: institute ? '#F59E0B' : (themeMode === 'dark' ? '#8892A4' : '#64748B'), fontWeight: 600 }} noWrap>
+              {brandSub}
             </Typography>
           </Box>
         </Box>
@@ -151,8 +173,60 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
 
       {/* Navigation */}
       <Box sx={{ flex: 1, overflowY: 'auto', py: 1, px: 1 }}>
+        {profile?.institute && (
+          <Box sx={{ mb: 1, px: 0.5 }}>
+            <ListItemButton
+              onClick={() => onNavigate(`/institute/${profile.institute.slug}`)}
+              sx={{
+                borderRadius: '12px',
+                py: 1,
+                px: 1.5,
+                background: 'linear-gradient(135deg, rgba(13, 71, 161, 0.18), rgba(245, 158, 11, 0.12))',
+                border: '1.5px solid #F59E0B',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, rgba(13, 71, 161, 0.28), rgba(245, 158, 11, 0.2))',
+                },
+              }}
+            >
+              <ListItemIcon sx={{ minWidth: 36, color: '#F59E0B' }}>
+                <SchoolIcon />
+              </ListItemIcon>
+              <ListItemText
+                primary={profile.institute.name}
+                secondary="Academy Portal & Tests"
+                primaryTypographyProps={{
+                  fontSize: '0.88rem',
+                  fontWeight: 800,
+                  color: '#F59E0B',
+                }}
+                secondaryTypographyProps={{
+                  fontSize: '0.68rem',
+                  color: 'text.secondary',
+                }}
+              />
+            </ListItemButton>
+          </Box>
+        )}
         <List disablePadding>
-          {navItems.map((item, idx) => {
+          {(profile?.institute
+            ? [
+                { text: 'Academy Portal', icon: <SchoolIcon sx={{ color: '#F59E0B' }} />, path: `/institute/${profile.institute.slug}` },
+                { text: 'Mock Tests & MCQs', icon: <QuizIcon />, path: `/institute/${profile.institute.slug}` },
+                { text: 'Batch Leaderboard', icon: <LeaderboardIcon />, path: '/leaderboard' },
+                { text: 'Study Notes & Materials', icon: <MenuBookIcon />, path: `/institute/${profile.institute.slug}` },
+                { divider: true, label: 'Full Practice', section: 'study' },
+                { text: 'Kerala PSC Exams', icon: <AssignmentIcon />, path: '/exams' },
+                { text: 'Daily Quiz', icon: <QuizIcon />, path: '/quiz' },
+                { text: 'Current Affairs', icon: <NewspaperIcon />, path: '/current-affairs' },
+                { divider: true, label: 'My Progress', section: 'progress' },
+                { text: 'Analytics', icon: <BarChartIcon />, path: '/analytics' },
+                { text: 'Saved Questions', icon: <BookmarkIcon />, path: '/saved' },
+                { text: 'Wrong Answers', icon: <CancelIcon />, path: '/wrong-answers' },
+                { divider: true, label: 'Account', section: 'account' },
+                { text: 'Profile', icon: <PersonIcon />, path: '/profile' },
+              ]
+            : navItems
+          ).map((item, idx) => {
             if ('divider' in item && item.divider) {
               return (
                 <Box key={idx} sx={{ px: 1, pt: 2, pb: 0.5 }}>

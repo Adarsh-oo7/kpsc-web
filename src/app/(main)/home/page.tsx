@@ -20,6 +20,8 @@ import apiClient from '@/lib/apiClient';
 import { flattenExamCatalog } from '@/lib/exams';
 import { apiErrorMessage } from '@/lib/auth';
 import MasterPlanRoadmap from '@/components/MasterPlanRoadmap';
+import SchoolIcon from '@mui/icons-material/School';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ExamCountdownBanner from '@/components/ExamCountdownBanner';
 import WeakAreaInterventionCard from '@/components/WeakAreaInterventionCard';
 import OfficialSyllabusCard from '@/components/OfficialSyllabusCard';
@@ -121,6 +123,9 @@ export default function HomePage() {
     if (!ctxLoading) {
       if (!user) {
         router.push('/login?next=/home');
+      } else if (profile?.institute?.slug) {
+        // Enrolled institute students automatically land on their academy dashboard & mock test portal
+        router.replace(`/institute/${profile.institute.slug}`);
       } else if (profile?.is_owner !== true && (!profile?.preferred_exams || profile.preferred_exams.length === 0)) {
         router.push('/onboarding');
       }
@@ -253,6 +258,69 @@ export default function HomePage() {
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto' }}>
+      {/* Academy Enrolled Banner if student belongs to an institute */}
+      {profile?.institute && (
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.03, duration: 0.5 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              mb: 3,
+              p: 2.5,
+              borderRadius: '20px',
+              background: 'linear-gradient(135deg, rgba(13, 71, 161, 0.16) 0%, rgba(245, 158, 11, 0.1) 100%)',
+              border: '1.5px solid #F59E0B',
+            }}
+          >
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'flex-start', sm: 'center' }} justifyContent="space-between">
+              <Stack direction="row" spacing={1.5} alignItems="center">
+                <Box
+                  sx={{
+                    width: 46,
+                    height: 46,
+                    borderRadius: '12px',
+                    bgcolor: '#0D47A1',
+                    color: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <SchoolIcon />
+                </Box>
+                <Box>
+                  <Typography variant="caption" sx={{ fontWeight: 800, color: '#F59E0B', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    YOUR ENROLLED ACADEMY
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 900, lineHeight: 1.2 }}>
+                    {profile.institute.name} Study & Test Portal
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Practice exclusive questions, view mock tests, and check batch rankings.
+                  </Typography>
+                </Box>
+              </Stack>
+              <Button
+                variant="contained"
+                endIcon={<ArrowForwardIcon />}
+                onClick={() => router.push(`/institute/${profile.institute.slug}`)}
+                sx={{
+                  bgcolor: '#0D47A1',
+                  color: '#fff',
+                  fontWeight: 800,
+                  textTransform: 'none',
+                  borderRadius: '12px',
+                  whiteSpace: 'nowrap',
+                  '&:hover': { bgcolor: '#091E42' },
+                }}
+              >
+                Open Academy Tests
+              </Button>
+            </Stack>
+          </Paper>
+        </motion.div>
+      )}
+
       {/* Target Exam Goal & Live Countdown Banner */}
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.5 }}>
         <Box sx={{ mb: 3 }}>

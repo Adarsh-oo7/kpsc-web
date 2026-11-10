@@ -23,9 +23,9 @@ import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
 
 export default function LeaderboardClient() {
-  const { user, fetcher, isLoading: ctxLoading } = useAppContext();
+  const { user, profile, fetcher, isLoading: ctxLoading } = useAppContext();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(profile?.institute ? 2 : 0);
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
 
@@ -234,7 +234,7 @@ export default function LeaderboardClient() {
       >
         <Tab label="Statewide" />
         <Tab label="My District" />
-        <Tab label="My Batch" />
+        <Tab label={profile?.institute?.name ? `${profile.institute.name} Batch` : "My Batch"} />
         <Tab label="Friends Graph" />
       </Tabs>
 
