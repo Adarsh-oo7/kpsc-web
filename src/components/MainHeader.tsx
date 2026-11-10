@@ -299,7 +299,7 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
     >
       <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64, px: { xs: 2, sm: 3 } }}>
         {/* Left: Menu toggle (mobile) + Brand on mobile */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <IconButton
             onClick={onDrawerToggle}
             edge="start"
@@ -311,20 +311,21 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
           <Box
             onClick={() => router.push(profile?.institute ? `/institute/${profile.institute.slug}` : '/home')}
             sx={{
-              display: { xs: 'flex', lg: 'none' },
+              display: 'flex',
               alignItems: 'center',
-              gap: 1,
+              gap: 1.25,
               cursor: 'pointer',
             }}
           >
             <Box sx={{
-              width: 28, height: 28,
+              width: 32, height: 32,
               borderRadius: '8px',
               overflow: 'hidden',
               bgcolor: 'white',
               position: 'relative',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexShrink: 0,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
             }}>
               {profile?.institute?.logo ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -337,21 +338,29 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
                 <Image
                   src="/KPSC MASTER.png"
                   alt="KPSC Master Logo"
-                  width={28}
-                  height={28}
+                  width={30}
+                  height={30}
                   style={{ objectFit: 'contain' }}
                 />
               )}
             </Box>
-            <Typography
-              sx={{
-                fontFamily: "'Cabinet Grotesk', sans-serif",
-                fontWeight: 800, fontSize: '1rem',
-                color: themeMode === 'dark' ? '#F0F4F8' : '#0F172A', letterSpacing: '-0.02em',
-              }}
-            >
-              {profile?.institute?.name || 'KPSC Master'}
-            </Typography>
+            <Box>
+              <Typography
+                sx={{
+                  fontFamily: "'Cabinet Grotesk', sans-serif",
+                  fontWeight: 900, fontSize: { xs: '0.95rem', sm: '1.05rem' },
+                  color: themeMode === 'dark' ? '#F0F4F8' : '#0F172A', letterSpacing: '-0.02em',
+                  lineHeight: 1.1,
+                }}
+              >
+                {profile?.institute?.name || 'KPSC Master'}
+              </Typography>
+              {profile?.institute && (
+                <Typography sx={{ fontSize: '0.62rem', color: '#F59E0B', fontWeight: 700, letterSpacing: '0.04em' }}>
+                  Powered by KPSC Master
+                </Typography>
+              )}
+            </Box>
           </Box>
         </Box>
 

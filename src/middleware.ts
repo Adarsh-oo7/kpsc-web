@@ -43,9 +43,15 @@ export function middleware(request: NextRequest) {
   }
 
   // Rewrite root request of subdomain to its branded public landing page
-  if (subdomain && url.pathname === '/') {
-    // Rewrite internally: abc.localhost:3000/ -> /institute/abc
+  if (subdomain && (url.pathname === '/' || url.pathname === '/dashboard')) {
+    // Rewrite internally: abc.kpscmaster.in/ or abc.kpscmaster.in/dashboard -> /institute/abc
     return NextResponse.rewrite(new URL(`/institute/${subdomain}`, request.url));
+  }
+
+  // Handle direct custom paths like /rankup/dashboard or /<slug>/dashboard
+  const pathParts = url.pathname.split('/').filter(Boolean);
+  if (pathParts.length === 2 && pathParts[1] === 'dashboard' && pathParts[0] !== 'institute') {
+    return NextResponse.rewrite(new URL(`/institute/${pathParts[0]}`, request.url));
   }
 
   return NextResponse.next();

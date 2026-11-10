@@ -75,7 +75,7 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
   const institute = profile?.institute;
   const brandName = institute?.name || 'KPSC Master';
   const brandLogo = institute?.logo || '';
-  const brandSub = institute ? 'Official Academy Portal' : 'Kerala PSC Prep Platform';
+  const brandSub = institute ? 'Powered by KPSC Master' : 'Kerala PSC Prep Platform';
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
