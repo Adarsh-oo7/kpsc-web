@@ -78,14 +78,15 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
   const brandSub = institute ? 'Powered by KPSC Master' : 'Kerala PSC Prep Platform';
 
   return (
-    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <Box suppressHydrationWarning sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Brand Header */}
-      <Box sx={{
+      <Box suppressHydrationWarning sx={{
         p: 2.5,
         background: themeMode === 'dark' ? 'linear-gradient(135deg, #0F1117 0%, #161B22 100%)' : 'linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 100%)',
         borderBottom: themeMode === 'dark' ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
       }}>
         <Box
+          suppressHydrationWarning
           onClick={() => onNavigate(institute ? `/institute/${institute.slug}` : '/home')}
           sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2, cursor: 'pointer' }}
         >

@@ -59,10 +59,15 @@ interface PortalProps {
 
 export default function InstituteStudentPortalClient({ slug, initialInstitute }: PortalProps) {
   const { user, profile, login, refreshProfile, isLoading: authLoading } = useAppContext();
+  const [mounted, setMounted] = useState(false);
 
   const [portalData, setPortalData] = useState<any>(null);
   const [loadingPortal, setLoadingPortal] = useState(true);
   const [portalTab, setPortalTab] = useState(0);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Auth box state for unauthenticated students
   const [authTab, setAuthTab] = useState<'login' | 'register'>('login');
@@ -263,6 +268,14 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
       setTimeout(() => setCopiedLink(false), 2500);
     }
   };
+
+  if (!mounted) {
+    return (
+      <Box sx={{ maxWidth: 1040, mx: 'auto', py: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh' }}>
+        <CircularProgress sx={{ color: primaryColor }} />
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ maxWidth: 1040, mx: 'auto', pb: 8 }}>

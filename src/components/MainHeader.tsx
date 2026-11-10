@@ -309,6 +309,7 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
             <MenuIcon />
           </IconButton>
           <Box
+            suppressHydrationWarning
             onClick={() => router.push(profile?.institute ? `/institute/${profile.institute.slug}` : '/home')}
             sx={{
               display: 'flex',

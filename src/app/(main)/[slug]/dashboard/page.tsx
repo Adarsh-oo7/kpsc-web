@@ -1,4 +1,4 @@
-import InstituteSEOPage, { generateMetadata } from '../[slug]/page';
+import InstituteSEOPage, { generateMetadata } from '../../institute/[slug]/page';
 
 export { generateMetadata };
 export default InstituteSEOPage;

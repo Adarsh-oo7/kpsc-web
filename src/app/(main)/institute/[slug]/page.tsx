@@ -82,8 +82,12 @@ export default async function InstituteSEOPage({ params }: PageProps) {
   };
 
   return (
-    <Box>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+    <Box suppressHydrationWarning>
+      <script
+        type="application/ld+json"
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <InstituteStudentPortalClient slug={slug} initialInstitute={inst} />
     </Box>
   );
