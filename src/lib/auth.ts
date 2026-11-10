@@ -75,9 +75,11 @@ export function fieldErrorsFromApi(err: ApiErrorShape): Record<string, string> {
 
 export function afterAuthPath(profile: any, nextPath: string | null): string {
   if (profile?.is_owner === true) return '/institute/dashboard';
-  // If student belongs to an institute, land directly on their branded academy study portal
+  // If student belongs to an institute, redirect them directly to their academy dashboard
   if (profile?.institute?.slug) {
-    return nextPath || `/institute/${profile.institute.slug}`;
+    return nextPath && !nextPath.startsWith('/home')
+      ? nextPath
+      : `/${profile.institute.slug}/dashboard`;
   }
   if (!profile?.preferred_exams || profile.preferred_exams.length === 0) {
     return nextPath ? `/onboarding?next=${encodeURIComponent(nextPath)}` : '/onboarding';

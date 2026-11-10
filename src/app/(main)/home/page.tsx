@@ -124,8 +124,8 @@ export default function HomePage() {
       if (!user) {
         router.push('/login?next=/home');
       } else if (profile?.institute?.slug) {
-        // Enrolled institute students automatically land on their academy dashboard & mock test portal
-        router.replace(`/institute/${profile.institute.slug}`);
+        // Enrolled institute students have no access to normal home - immediately redirected to their academy dashboard
+        router.replace(`/${profile.institute.slug}/dashboard`);
       } else if (profile?.is_owner !== true && (!profile?.preferred_exams || profile.preferred_exams.length === 0)) {
         router.push('/onboarding');
       }
@@ -248,7 +248,7 @@ export default function HomePage() {
     };
   })();
 
-  if (ctxLoading || !user) {
+  if (ctxLoading || !user || profile?.institute?.slug) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
         <CircularProgress size={32} />
