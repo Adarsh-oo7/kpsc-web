@@ -271,36 +271,36 @@ export default function ManageStudentsPage() {
                           </Box>
                         </TableCell>
                         <TableCell align="right">
-                          <Typography variant="body2" sx={{ fontWeight: 800 }}>
-                            {st.academy_score ?? 0} pts
+                          <Typography variant="body2" sx={{ fontWeight: 800, color: (st.academy_score ?? 0) >= 0 ? '#1B6B3A' : '#DC2626' }}>
+                            {(st.academy_score ?? 0) > 0 ? `+${st.academy_score}` : (st.academy_score ?? 0)} pts
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            ({st.academy_attempted ?? 0} academy Qs)
+                            Academy tests
                           </Typography>
                         </TableCell>
                         <TableCell align="right">
                           <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                            {st.total_attempted ?? 0} total
+                            {st.academy_attempted ?? 0} solved
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            {st.total_correct ?? 0} correct • Net: {st.net_marks ?? 0}
+                            {st.academy_correct ?? 0} correct • {st.academy_wrong ?? 0} wrong
                           </Typography>
                         </TableCell>
                         <TableCell align="right">
                           <Chip
-                            label={`${st.accuracy ?? 0}%`}
+                            label={`${st.academy_accuracy ?? 0}%`}
                             size="small"
-                            color={(st.accuracy ?? 0) >= 70 ? 'success' : (st.accuracy ?? 0) >= 40 ? 'warning' : 'default'}
+                            color={(st.academy_accuracy ?? 0) >= 70 ? 'success' : (st.academy_accuracy ?? 0) >= 40 ? 'warning' : 'default'}
                             variant="outlined"
                             sx={{ fontWeight: 800 }}
                           />
                         </TableCell>
                         <TableCell align="right">
-                          <Typography variant="body2" sx={{ fontWeight: 800, color: '#2E8B57' }}>
-                            {profile.total_xp ?? 0} XP
+                          <Typography variant="body2" sx={{ fontWeight: 800, color: '#F59E0B' }}>
+                            {st.academy_xp ?? profile.total_xp ?? 0} XP
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            Lv {profile.level ?? 1} • 🔥 {profile.current_streak ?? 0}d
+                            Academy XP
                           </Typography>
                         </TableCell>
                         <TableCell>
@@ -384,46 +384,44 @@ export default function ManageStudentsPage() {
                   <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 800 }}>
                     ACADEMY TEST SCORE
                   </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 900 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 900, color: (selectedStudentResults.student.performance_stats?.academy_score ?? 0) >= 0 ? 'success.main' : 'error.main' }}>
                     {selectedStudentResults.student.performance_stats?.academy_score ?? 0} pts
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {selectedStudentResults.student.performance_stats?.academy_correct ?? 0} /{' '}
-                    {selectedStudentResults.student.performance_stats?.academy_attempted ?? 0} correct
+                    {selectedStudentResults.student.performance_stats?.academy_correct ?? 0} correct • {selectedStudentResults.student.performance_stats?.academy_wrong ?? 0} wrong
                   </Typography>
                 </Paper>
                 <Paper variant="outlined" sx={{ p: 2, borderRadius: '14px' }}>
                   <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 800 }}>
-                    OVERALL NET MARKS
+                    ACADEMY QUESTIONS
                   </Typography>
                   <Typography variant="h6" sx={{ fontWeight: 900 }}>
-                    {selectedStudentResults.student.performance_stats?.net_marks ?? 0}
+                    {selectedStudentResults.student.performance_stats?.academy_attempted ?? 0}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {selectedStudentResults.student.performance_stats?.total_attempted ?? 0} attempted
+                    Total academy attempts
                   </Typography>
                 </Paper>
                 <Paper variant="outlined" sx={{ p: 2, borderRadius: '14px' }}>
                   <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 800 }}>
-                    ACCURACY
+                    ACADEMY ACCURACY
                   </Typography>
                   <Typography variant="h6" sx={{ fontWeight: 900, color: 'success.main' }}>
-                    {selectedStudentResults.student.performance_stats?.accuracy ?? 0}%
+                    {selectedStudentResults.student.performance_stats?.academy_accuracy ?? 0}%
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {selectedStudentResults.student.performance_stats?.total_correct ?? 0} correct
+                    {selectedStudentResults.student.performance_stats?.academy_correct ?? 0} / {selectedStudentResults.student.performance_stats?.academy_attempted ?? 0} correct
                   </Typography>
                 </Paper>
                 <Paper variant="outlined" sx={{ p: 2, borderRadius: '14px' }}>
                   <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 800 }}>
-                    XP & STREAK
+                    ACADEMY XP
                   </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 900, color: 'primary.main' }}>
-                    {selectedStudentResults.student.total_xp ?? 0} XP
+                  <Typography variant="h6" sx={{ fontWeight: 900, color: '#F59E0B' }}>
+                    {selectedStudentResults.student.performance_stats?.academy_xp ?? selectedStudentResults.student.total_xp ?? 0} XP
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Level {selectedStudentResults.student.level ?? 1} • 🔥{' '}
-                    {selectedStudentResults.student.current_streak ?? 0} days
+                    Earned from academy tests
                   </Typography>
                 </Paper>
               </Box>
