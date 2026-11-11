@@ -183,7 +183,7 @@ export default function ManageStudentsPage() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <InstitutePageHeader
         title="Students, Leaderboard & Test Results"
-        subtitle={`${studentList.length} student${studentList.length !== 1 ? 's' : ''} enrolled — ranked by Academy Score, Net Marks & XP.`}
+        subtitle={`${studentList.length} student${studentList.length !== 1 ? 's' : ''} enrolled — ranked by Academy Score, Tests Attended & Accuracy.`}
         action={
           <Button variant="contained" onClick={handleOpenDialog} startIcon={<AddIcon />} sx={greenCtaSx}>
             Add student
@@ -221,7 +221,7 @@ export default function ManageStudentsPage() {
                   <TableCell align="right" sx={{ fontWeight: 'bold' }}>Academy Score</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 'bold' }}>Questions Solved</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 'bold' }}>Accuracy</TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 'bold' }}>Total XP</TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 'bold' }}>Tests Attended</TableCell>
                   <TableCell sx={{ fontWeight: 'bold' }}>Fee Status</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 'bold' }}>Actions</TableCell>
                 </TableRow>
@@ -296,12 +296,13 @@ export default function ManageStudentsPage() {
                           />
                         </TableCell>
                         <TableCell align="right">
-                          <Typography variant="body2" sx={{ fontWeight: 800, color: '#F59E0B' }}>
-                            {st.academy_xp ?? profile.total_xp ?? 0} XP
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            Academy XP
-                          </Typography>
+                          <Chip
+                            label={`${st.tests_attended ?? 0} tests`}
+                            size="small"
+                            color={(st.tests_attended ?? 0) > 0 ? 'primary' : 'default'}
+                            variant="outlined"
+                            sx={{ fontWeight: 800 }}
+                          />
                         </TableCell>
                         <TableCell>
                           {profile.fee_status ? (
@@ -415,15 +416,74 @@ export default function ManageStudentsPage() {
                 </Paper>
                 <Paper variant="outlined" sx={{ p: 2, borderRadius: '14px' }}>
                   <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 800 }}>
-                    ACADEMY XP
+                    TESTS ATTENDED
                   </Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 900, color: '#F59E0B' }}>
-                    {selectedStudentResults.student.performance_stats?.academy_xp ?? selectedStudentResults.student.total_xp ?? 0} XP
+                  <Typography variant="h6" sx={{ fontWeight: 900, color: '#3B82F6' }}>
+                    {selectedStudentResults.student.performance_stats?.tests_attended ?? selectedStudentResults.test_attempts?.length ?? 0}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Earned from academy tests
+                    Completed mock tests
                   </Typography>
                 </Paper>
+              </Box>
+
+              {/* Mock Tests Attended & Scores Table */}
+              <Box>
+                <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 1.5 }}>
+                  Mock Tests Attended & Detailed Results
+                </Typography>
+                {selectedStudentResults.test_attempts && selectedStudentResults.test_attempts.length > 0 ? (
+                  <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '12px' }}>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell sx={{ fontWeight: 800 }}>Test Name</TableCell>
+                          <TableCell sx={{ fontWeight: 800 }}>Date</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 800 }}>Score (Net)</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 800 }}>Attempted</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 800 }}>Correct</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 800 }}>Wrong</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 800 }}>Accuracy</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {selectedStudentResults.test_attempts.map((att: any) => (
+                          <TableRow key={att.id} hover>
+                            <TableCell sx={{ fontWeight: 800 }}>{att.test_title}</TableCell>
+                            <TableCell sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
+                              {new Date(att.completed_at).toLocaleDateString('en-IN', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </TableCell>
+                            <TableCell align="right" sx={{ fontWeight: 900, color: att.score >= 0 ? '#1B6B3A' : '#DC2626' }}>
+                              {att.score > 0 ? `+${att.score}` : att.score} pts
+                            </TableCell>
+                            <TableCell align="right">{att.attempted} / {att.total_questions}</TableCell>
+                            <TableCell align="right" sx={{ color: 'success.main', fontWeight: 700 }}>{att.correct}</TableCell>
+                            <TableCell align="right" sx={{ color: 'error.main', fontWeight: 700 }}>{att.wrong}</TableCell>
+                            <TableCell align="right">
+                              <Chip
+                                label={`${att.accuracy}%`}
+                                size="small"
+                                variant="outlined"
+                                color={att.accuracy >= 70 ? 'success' : 'default'}
+                                sx={{ fontWeight: 800 }}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                ) : (
+                  <Alert severity="info" sx={{ borderRadius: '12px' }}>
+                    No mock test attempts recorded yet for this student. Once the student completes tests in RankUp, their test scorecards and accuracy breakdown will be listed here.
+                  </Alert>
+                )}
               </Box>
 
               {/* Topic Breakdown */}

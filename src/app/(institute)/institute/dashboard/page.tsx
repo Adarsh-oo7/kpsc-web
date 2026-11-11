@@ -391,7 +391,7 @@ export default function InstituteDashboard() {
                             <TableCell align="right" sx={{ fontWeight: 800 }}>Academy Score</TableCell>
                             <TableCell align="right" sx={{ fontWeight: 800 }}>Solved</TableCell>
                             <TableCell align="right" sx={{ fontWeight: 800 }}>Accuracy</TableCell>
-                            <TableCell align="right" sx={{ fontWeight: 800 }}>Total XP</TableCell>
+                            <TableCell align="right" sx={{ fontWeight: 800 }}>Tests Attended</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
@@ -445,8 +445,14 @@ export default function InstituteDashboard() {
                                     sx={{ fontWeight: 800 }}
                                   />
                                 </TableCell>
-                                <TableCell align="right" sx={{ fontWeight: 700, color: '#F59E0B' }}>
-                                  {s.total_xp ?? 0}
+                                <TableCell align="right">
+                                  <Chip
+                                    label={`${st.tests_attended ?? 0} tests`}
+                                    size="small"
+                                    color={(st.tests_attended ?? 0) > 0 ? 'primary' : 'default'}
+                                    variant="outlined"
+                                    sx={{ fontWeight: 800 }}
+                                  />
                                 </TableCell>
                               </TableRow>
                             );

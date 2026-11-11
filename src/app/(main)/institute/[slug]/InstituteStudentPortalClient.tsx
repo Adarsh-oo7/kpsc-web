@@ -262,20 +262,18 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
       Object.entries(answers).forEach(([qId, letter]) => {
         formattedAnswers[String(qId)] = letter;
       });
-      const res = await apiClient.post('/submit-exam/', {
+      const currentTopicName = selectedTopicId === 'all'
+        ? `${inst.name} Full Mock Test`
+        : topics.find((t) => t.id === Number(selectedTopicId))?.name || `${inst.name} Practice Test`;
+
+      const res = await apiClient.post(`/institute/public/submit-test/${slug}/`, {
         question_ids: questionIds,
         answers: formattedAnswers,
-        shuffle: false,
+        test_title: currentTopicName,
       });
-      setTestResult(res.data?.results || {
-        score: 0,
-        total: questionIds.length,
-        correct: 0,
-        wrong: 0,
-        unanswered: questionIds.length,
-      });
+      setTestResult(res.data);
       await fetchPortal();
-    } catch (err) {
+    } catch {
       alert('Failed to submit test answers. Please try again.');
     } finally {
       setTestSubmitting(false);
@@ -479,7 +477,7 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
                 </Stack>
                 <Stack direction="row" spacing={1.25} alignItems="center">
                   <CheckCircleIcon sx={{ color: primaryColor, fontSize: 20 }} />
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Live Batch Leaderboard, XP Ranking & Accuracy Analysis</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Live Batch Leaderboard, Test Scores & Accuracy Analysis</Typography>
                 </Stack>
                 <Stack direction="row" spacing={1.25} alignItems="center">
                   <CheckCircleIcon sx={{ color: primaryColor, fontSize: 20 }} />
@@ -1015,7 +1013,7 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
                     {inst.name} — Live Student Leaderboard
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
-                    Ranked by Academy Test Score, Net Marks, Accuracy %, and XP.
+                    Ranked by Academy Test Score, Tests Attended, and Accuracy %.
                   </Typography>
 
                   {inst.show_leaderboard === false && membershipStatus !== 'owner' ? (
@@ -1036,7 +1034,7 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
                             <TableCell align="right" sx={{ fontWeight: 800 }}>Academy Score</TableCell>
                             <TableCell align="right" sx={{ fontWeight: 800 }}>Questions Solved</TableCell>
                             <TableCell align="right" sx={{ fontWeight: 800 }}>Accuracy</TableCell>
-                            <TableCell align="right" sx={{ fontWeight: 800 }}>Total XP</TableCell>
+                            <TableCell align="right" sx={{ fontWeight: 800 }}>Tests Attended</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
@@ -1088,8 +1086,14 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
                                   sx={{ fontWeight: 800 }}
                                 />
                               </TableCell>
-                              <TableCell align="right" sx={{ fontWeight: 800, color: primaryColor }}>
-                                {row.xp ?? 0} XP
+                              <TableCell align="right">
+                                <Chip
+                                  label={`${row.tests_attended ?? 0} tests`}
+                                  size="small"
+                                  color={(row.tests_attended ?? 0) > 0 ? 'primary' : 'default'}
+                                  variant="outlined"
+                                  sx={{ fontWeight: 800 }}
+                                />
                               </TableCell>
                             </TableRow>
                           ))}
