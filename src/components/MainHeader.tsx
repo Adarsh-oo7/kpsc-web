@@ -310,7 +310,7 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
           </IconButton>
           <Box
             suppressHydrationWarning
-            onClick={() => router.push(profile?.institute ? `/institute/${profile.institute.slug}` : '/home')}
+            onClick={() => router.push(profile?.institute ? `/${profile.institute.slug}/dashboard` : '/home')}
             sx={{
               display: 'flex',
               alignItems: 'center',
@@ -365,8 +365,8 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
           </Box>
         </Box>
 
-        {/* Center: Streak Badge (clickable) */}
-        {user && streak > 0 && (
+        {/* Center: Streak Badge (clickable, shown for regular students without an institute) */}
+        {user && !profile?.institute && streak > 0 && (
           <Box
             onClick={() => router.push('/analytics')}
             sx={{
@@ -394,8 +394,8 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
 
         {/* Right: XP + Notifications + Avatar */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          {/* XP Counter */}
-          {user && (
+          {/* XP Counter (shown only for regular KPSC Master students) */}
+          {user && !profile?.institute && (
             <Box sx={{
               display: 'flex', alignItems: 'center', gap: 0.5,
               background: 'rgba(139, 92, 246, 0.1)',

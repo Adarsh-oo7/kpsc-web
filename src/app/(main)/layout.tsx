@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 import { Box, Toolbar } from '@mui/material';
 import Sidebar from '@/components/Sidebar';
 import MainHeader from '@/components/MainHeader';
@@ -11,8 +11,23 @@ import { useAppContext } from '@/context/AppContext';
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const pathname = usePathname();
-  const { user } = useAppContext();
+  const router = useRouter();
+  const { user, profile } = useAppContext();
   const isAuthPage = pathname === '/login' || pathname === '/register';
+
+  useEffect(() => {
+    // If the student is enrolled in an academy/institute (e.g. RankUp) and is not an owner,
+    // restrict them exclusively to their institute portal and profile
+    if (!profile?.institute?.slug || profile.is_owner) return;
+    const slug = profile.institute.slug;
+    const allowedExact = ['/profile', '/login', '/register', '/notifications'];
+    const allowedPrefixes = [`/${slug}`, `/institute/${slug}`, '/profile'];
+    const isExact = allowedExact.includes(pathname);
+    const hasPrefix = allowedPrefixes.some((prefix) => pathname.startsWith(prefix));
+    if (!isExact && !hasPrefix) {
+      router.replace(`/${slug}/dashboard`);
+    }
+  }, [profile, pathname, router]);
 
   return (
     <Box sx={{

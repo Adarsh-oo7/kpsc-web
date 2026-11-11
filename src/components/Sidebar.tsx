@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import NextLink from 'next/link';
 import {
   Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText,
-  Box, Typography, Divider, useTheme, useMediaQuery, Avatar, LinearProgress
+  Box, Typography, Divider, useTheme, useMediaQuery, Avatar, LinearProgress, Chip
 } from '@mui/material';
 import { useAppContext } from '@/context/AppContext';
 import Image from 'next/image';
@@ -87,7 +87,7 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
       }}>
         <Box
           suppressHydrationWarning
-          onClick={() => onNavigate(institute ? `/institute/${institute.slug}` : '/home')}
+          onClick={() => onNavigate(institute ? `/${institute.slug}/dashboard` : '/home')}
           sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2, cursor: 'pointer' }}
         >
           <Box sx={{
@@ -131,8 +131,8 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
           </Box>
         </Box>
 
-        {/* User XP / Streak bar */}
-        {profile && (
+        {/* User XP / Streak bar (shown only for regular KPSC Master students without an institute) */}
+        {profile && !profile.institute && (
           <Box sx={{
             background: themeMode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
             border: themeMode === 'dark' ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0,0,0,0.08)',
@@ -170,6 +170,39 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
             </Typography>
           </Box>
         )}
+
+        {/* Academy badge for enrolled institute students (replaces generic XP bar) */}
+        {profile && profile.institute && (
+          <Box sx={{
+            background: themeMode === 'dark' ? 'rgba(245, 158, 11, 0.08)' : 'rgba(245, 158, 11, 0.06)',
+            border: '1px solid rgba(245, 158, 11, 0.25)',
+            borderRadius: '12px',
+            p: 1.5,
+          }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                <SchoolIcon sx={{ fontSize: 16, color: '#F59E0B' }} />
+                <Typography sx={{ fontSize: '0.75rem', color: '#F59E0B', fontWeight: 800 }}>
+                  Enrolled Student
+                </Typography>
+              </Box>
+              <Chip
+                label="Active"
+                size="small"
+                sx={{
+                  height: 20,
+                  fontSize: '0.65rem',
+                  fontWeight: 800,
+                  bgcolor: 'rgba(245, 158, 11, 0.18)',
+                  color: '#F59E0B',
+                }}
+              />
+            </Box>
+            <Typography sx={{ fontSize: '0.72rem', color: themeMode === 'dark' ? '#94A3B8' : '#64748B', mt: 0.75, fontWeight: 600 }}>
+              {profile.institute.name} Academy Portal
+            </Typography>
+          </Box>
+        )}
       </Box>
 
       {/* Navigation */}
@@ -177,7 +210,7 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
         {profile?.institute && (
           <Box sx={{ mb: 1, px: 0.5 }}>
             <ListItemButton
-              onClick={() => onNavigate(`/institute/${profile.institute.slug}`)}
+              onClick={() => onNavigate(`/${profile.institute.slug}/dashboard`)}
               sx={{
                 borderRadius: '12px',
                 py: 1,
@@ -212,17 +245,9 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
           {(profile?.institute
             ? [
                 { text: 'Academy Portal', icon: <SchoolIcon sx={{ color: '#F59E0B' }} />, path: `/${profile.institute.slug}/dashboard` },
-                { text: 'Mock Tests & MCQs', icon: <QuizIcon />, path: `/${profile.institute.slug}/dashboard` },
-                { text: 'Batch Leaderboard', icon: <LeaderboardIcon />, path: `/${profile.institute.slug}/dashboard` },
-                { text: 'Study Notes & Materials', icon: <MenuBookIcon />, path: `/${profile.institute.slug}/dashboard` },
-                { divider: true, label: 'Full Practice', section: 'study' },
-                { text: 'Kerala PSC Exams', icon: <AssignmentIcon />, path: '/exams' },
-                { text: 'Daily Quiz', icon: <QuizIcon />, path: '/quiz' },
-                { text: 'Current Affairs', icon: <NewspaperIcon />, path: '/current-affairs' },
-                { divider: true, label: 'My Progress', section: 'progress' },
-                { text: 'Analytics', icon: <BarChartIcon />, path: '/analytics' },
-                { text: 'Saved Questions', icon: <BookmarkIcon />, path: '/saved' },
-                { text: 'Wrong Answers', icon: <CancelIcon />, path: '/wrong-answers' },
+                { text: 'Mock Tests & MCQs', icon: <QuizIcon sx={{ color: '#F59E0B' }} />, path: `/${profile.institute.slug}/dashboard` },
+                { text: 'Batch Leaderboard', icon: <LeaderboardIcon sx={{ color: '#F59E0B' }} />, path: `/${profile.institute.slug}/dashboard` },
+                { text: 'Study Notes & Materials', icon: <MenuBookIcon sx={{ color: '#F59E0B' }} />, path: `/${profile.institute.slug}/dashboard` },
                 { divider: true, label: 'Account', section: 'account' },
                 { text: 'Profile', icon: <PersonIcon />, path: '/profile' },
               ]
