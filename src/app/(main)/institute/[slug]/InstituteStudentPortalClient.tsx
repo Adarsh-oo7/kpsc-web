@@ -49,6 +49,7 @@ import LoginIcon from '@mui/icons-material/Login';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import ShareIcon from '@mui/icons-material/Share';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
@@ -60,18 +61,25 @@ import GoogleSignInButton from '@/components/GoogleSignInButton';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
 import { apiErrorMessage, suggestUsername } from '@/lib/auth';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 interface PortalProps {
   slug: string;
-  initialInstitute: any;
+  initialInstitute?: any;
+  initialPortalData?: any;
 }
 
-export default function InstituteStudentPortalClient({ slug, initialInstitute }: PortalProps) {
+export default function InstituteStudentPortalClient({ slug, initialInstitute, initialPortalData }: PortalProps) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMdDown = useMediaQuery(theme.breakpoints.down('md'));
+
   const { user, profile, login, refreshProfile, isLoading: authLoading } = useAppContext();
   const [mounted, setMounted] = useState(false);
 
-  const [portalData, setPortalData] = useState<any>(null);
-  const [loadingPortal, setLoadingPortal] = useState(true);
+  const [portalData, setPortalData] = useState<any>(initialPortalData || (initialInstitute ? { institute: initialInstitute } : null));
+  const [loadingPortal, setLoadingPortal] = useState(!initialPortalData);
   const [portalTab, setPortalTab] = useState(0);
 
   useEffect(() => {
@@ -111,8 +119,8 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
   const primaryColor = inst?.primary_color || '#0D47A1';
   const accentColor = inst?.accent_color || '#F59E0B';
 
-  const fetchPortal = useCallback(async () => {
-    setLoadingPortal(true);
+  const fetchPortal = useCallback(async (showSpinner = false) => {
+    if (showSpinner) setLoadingPortal(true);
     try {
       const res = await apiClient.get(`/institute/public/portal/${slug}/`);
       setPortalData(res.data);
@@ -125,7 +133,7 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
 
   useEffect(() => {
     if (!authLoading) {
-      fetchPortal();
+      fetchPortal(false);
     }
   }, [authLoading, user, fetchPortal]);
 
@@ -394,23 +402,31 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
     }
   };
 
-  if (!mounted) {
-    return (
-      <Box sx={{ maxWidth: 1040, mx: 'auto', py: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '50vh' }}>
-        <CircularProgress sx={{ color: primaryColor }} />
-      </Box>
-    );
-  }
+  const handleShareOrCopy = async () => {
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      try {
+        await navigator.share({
+          title: `${inst?.name || 'Academy'} | Official PSC Portal`,
+          text: `Practice Mock Tests & compete on the live leaderboard for ${inst?.name || 'Academy'}!`,
+          url: shareUrl,
+        });
+        return;
+      } catch {
+        // Fallback to copy
+      }
+    }
+    handleCopyLink();
+  };
 
   return (
-    <Box sx={{ maxWidth: 1040, mx: 'auto', pb: 8 }}>
+    <Box sx={{ maxWidth: 1040, mx: 'auto', px: { xs: 1.5, sm: 2, md: 0 }, pb: 8 }}>
       {/* Branded Hero Header */}
       <Paper
         elevation={0}
         sx={{
-          mb: 3.5,
-          p: { xs: 3, md: 4.5 },
-          borderRadius: '24px',
+          mb: 3,
+          p: { xs: 2.25, sm: 3, md: 4 },
+          borderRadius: { xs: '18px', sm: '24px' },
           background: `linear-gradient(145deg, ${primaryColor} 0%, #091E42 100%)`,
           color: '#fff',
           position: 'relative',
@@ -420,27 +436,28 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
       >
         <Stack
           direction={{ xs: 'column', md: 'row' }}
-          spacing={3}
+          spacing={{ xs: 2.5, md: 3 }}
           alignItems={{ xs: 'flex-start', md: 'center' }}
           justifyContent="space-between"
         >
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2.5} alignItems={{ xs: 'flex-start', sm: 'center' }}>
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 2, sm: 2.5 }} alignItems={{ xs: 'flex-start', sm: 'center' }}>
             <Avatar
-              src={inst.logo || ''}
-              alt={inst.name}
+              src={inst?.logo || ''}
+              alt={inst?.name || 'Institute'}
               variant="rounded"
               sx={{
-                width: 96,
-                height: 96,
-                borderRadius: '20px',
+                width: { xs: 60, sm: 76, md: 92 },
+                height: { xs: 60, sm: 76, md: 92 },
+                borderRadius: { xs: '14px', sm: '20px' },
                 bgcolor: 'rgba(255,255,255,0.12)',
                 border: `2px solid ${accentColor}`,
                 boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
+                flexShrink: 0,
               }}
             >
-              <SchoolIcon sx={{ fontSize: 48 }} />
+              <SchoolIcon sx={{ fontSize: { xs: 34, sm: 42, md: 48 } }} />
             </Avatar>
-            <Box>
+            <Box sx={{ minWidth: 0 }}>
               <Chip
                 label="OFFICIAL ACADEMY PORTAL"
                 size="small"
@@ -448,68 +465,76 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
                   bgcolor: accentColor,
                   color: '#091E42',
                   fontWeight: 900,
-                  fontSize: '0.7rem',
+                  fontSize: '0.68rem',
                   letterSpacing: '0.08em',
-                  mb: 1,
+                  mb: 0.75,
+                  height: 22,
                 }}
               />
               <Typography
                 sx={{
                   fontFamily: "'Cabinet Grotesk', sans-serif",
                   fontWeight: 900,
-                  fontSize: { xs: '1.9rem', md: '2.5rem' },
+                  fontSize: { xs: '1.45rem', sm: '1.85rem', md: '2.4rem' },
                   letterSpacing: '-0.02em',
-                  lineHeight: 1.1,
+                  lineHeight: 1.15,
+                  wordBreak: 'break-word',
                 }}
               >
-                {inst.name}
+                {inst?.name}
               </Typography>
-              {inst.tagline && (
-                <Typography sx={{ mt: 0.75, color: 'rgba(255,255,255,0.9)', fontWeight: 600, fontSize: '1rem' }}>
+              {inst?.tagline && (
+                <Typography sx={{ mt: 0.5, color: 'rgba(255,255,255,0.9)', fontWeight: 600, fontSize: { xs: '0.85rem', sm: '0.98rem' } }}>
                   {inst.tagline}
                 </Typography>
               )}
-              <Stack direction="row" spacing={1.5} sx={{ mt: 1.5 }} flexWrap="wrap" useFlexGap>
+              <Stack direction="row" spacing={1} sx={{ mt: 1.25 }} flexWrap="wrap" useFlexGap>
                 <Chip
-                  label={`${inst.student_count ?? leaderboard.length} Students`}
+                  label={`${inst?.student_count ?? leaderboard.length} Students`}
                   size="small"
-                  sx={{ bgcolor: 'rgba(255,255,255,0.14)', color: '#fff', fontWeight: 700 }}
+                  sx={{ bgcolor: 'rgba(255,255,255,0.14)', color: '#fff', fontWeight: 700, fontSize: '0.72rem', height: 24 }}
                 />
                 <Chip
-                  label={`${inst.question_count ?? questions.length} Practice MCQs`}
+                  label={`${inst?.question_count ?? questions.length} Practice MCQs`}
                   size="small"
-                  sx={{ bgcolor: 'rgba(255,255,255,0.14)', color: '#fff', fontWeight: 700 }}
+                  sx={{ bgcolor: 'rgba(255,255,255,0.14)', color: '#fff', fontWeight: 700, fontSize: '0.72rem', height: 24 }}
                 />
                 <Chip
-                  label={`${inst.topic_count ?? topics.length} Test Topics`}
+                  label={`${inst?.topic_count ?? topics.length} Test Topics`}
                   size="small"
-                  sx={{ bgcolor: 'rgba(255,255,255,0.14)', color: '#fff', fontWeight: 700 }}
+                  sx={{ bgcolor: 'rgba(255,255,255,0.14)', color: '#fff', fontWeight: 700, fontSize: '0.72rem', height: 24 }}
                 />
               </Stack>
             </Box>
           </Stack>
 
-          <Stack direction={{ xs: 'row', md: 'column' }} spacing={1.25} flexWrap="wrap">
+          <Stack direction={{ xs: 'row', sm: 'row', md: 'column' }} spacing={1.25} sx={{ width: { xs: '100%', sm: 'auto' }, pt: { xs: 0.5, md: 0 } }}>
             <Button
               variant="outlined"
               size="small"
-              startIcon={<ContentCopyIcon />}
-              onClick={handleCopyLink}
+              fullWidth={isMobile}
+              startIcon={<ShareIcon />}
+              onClick={handleShareOrCopy}
               sx={{
                 color: '#fff',
                 borderColor: 'rgba(255,255,255,0.4)',
                 textTransform: 'none',
                 fontWeight: 700,
                 borderRadius: '10px',
+                height: 38,
+                flex: { xs: 1, sm: 'none' },
+                fontSize: { xs: '0.8rem', sm: '0.875rem' },
+                whiteSpace: 'nowrap',
               }}
             >
-              {copiedLink ? 'Link Copied!' : 'Copy Student Link'}
+              {copiedLink ? 'Link Copied!' : 'Share Portal'}
             </Button>
             {membershipStatus === 'owner' ? (
-              <Link href="/institute/dashboard" style={{ textDecoration: 'none' }}>
+              <Link href="/institute/dashboard" style={{ textDecoration: 'none', display: 'block', width: isMobile ? '100%' : 'auto' }}>
                 <Button
                   variant="contained"
                   size="small"
+                  fullWidth={isMobile}
                   startIcon={<AdminPanelSettingsIcon />}
                   sx={{
                     bgcolor: accentColor,
@@ -517,25 +542,32 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
                     fontWeight: 800,
                     textTransform: 'none',
                     borderRadius: '10px',
+                    height: 38,
+                    fontSize: { xs: '0.8rem', sm: '0.875rem' },
+                    whiteSpace: 'nowrap',
                     '&:hover': { bgcolor: '#fbbf24' },
                   }}
                 >
-                  Open Admin Dashboard
+                  Admin Dashboard
                 </Button>
               </Link>
             ) : (
-              <Link href="/login?tab=1" style={{ textDecoration: 'none' }}>
+              <Link href="/login?tab=1" style={{ textDecoration: 'none', display: 'block', width: isMobile ? '100%' : 'auto' }}>
                 <Button
                   variant="text"
                   size="small"
+                  fullWidth={isMobile}
                   startIcon={<AdminPanelSettingsIcon />}
                   sx={{
-                    color: 'rgba(255,255,255,0.8)',
+                    color: 'rgba(255,255,255,0.85)',
                     textTransform: 'none',
                     fontWeight: 700,
+                    height: 38,
+                    fontSize: { xs: '0.8rem', sm: '0.875rem' },
+                    whiteSpace: 'nowrap',
                   }}
                 >
-                  Academy Admin Login
+                  Admin Login
                 </Button>
               </Link>
             )}
@@ -830,7 +862,7 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
                 <Button
                   variant="outlined"
                   startIcon={<RefreshIcon />}
-                  onClick={fetchPortal}
+                  onClick={() => fetchPortal(true)}
                   sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '12px' }}
                 >
                   Check Approval Status
@@ -896,19 +928,19 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
                               key={mt.id}
                               variant="outlined"
                               sx={{
-                                borderRadius: '18px',
+                                borderRadius: { xs: '14px', sm: '18px' },
                                 border: isLive ? '1.5px solid #2E8B57' : '1px solid',
                                 borderColor: isLive ? '#2E8B57' : 'divider',
                                 background: isLive
                                   ? 'linear-gradient(135deg, rgba(46, 139, 87, 0.06) 0%, rgba(13, 71, 161, 0.04) 100%)'
                                   : 'background.paper',
-                                p: 1,
+                                p: { xs: 0.5, sm: 1 },
                               }}
                             >
-                              <CardContent>
-                                <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', md: 'center' }} spacing={2}>
-                                  <Box sx={{ flex: 1 }}>
-                                    <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }} flexWrap="wrap" useFlexGap>
+                              <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
+                                <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" alignItems={{ xs: 'stretch', md: 'center' }} spacing={2}>
+                                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                                    <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 1 }} flexWrap="wrap" useFlexGap>
                                       <Chip
                                         label={
                                           mt.has_attempted
@@ -929,54 +961,47 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
                                             ? 'warning'
                                             : 'default'
                                         }
-                                        sx={{ fontWeight: 800 }}
+                                        sx={{ fontWeight: 800, fontSize: { xs: '0.7rem', sm: '0.75rem' }, height: 24 }}
                                       />
                                       <Chip
-                                        icon={<EventAvailableIcon sx={{ fontSize: 14 }} />}
-                                        label={formatSchedule(mt.start_time, mt.end_time)}
-                                        size="small"
-                                        variant="outlined"
-                                        sx={{ fontWeight: 600 }}
-                                      />
-                                      <Chip
-                                        icon={<AccessTimeIcon sx={{ fontSize: 14 }} />}
+                                        icon={<AccessTimeIcon sx={{ fontSize: '13px !important' }} />}
                                         label={mt.time_limit_per_question > 0 ? `${mt.time_limit_per_question}s / Q` : `${mt.duration_minutes} Mins`}
                                         size="small"
                                         variant="outlined"
-                                        sx={{ fontWeight: 600 }}
+                                        sx={{ fontWeight: 600, fontSize: { xs: '0.7rem', sm: '0.75rem' }, height: 24 }}
                                       />
                                       <Chip
-                                        label={`${mt.question_count ?? 0} Questions`}
+                                        label={`${mt.question_count ?? 0} Qs`}
                                         size="small"
                                         variant="outlined"
-                                        sx={{ fontWeight: 700 }}
+                                        sx={{ fontWeight: 700, fontSize: { xs: '0.7rem', sm: '0.75rem' }, height: 24 }}
                                       />
                                       <Chip
-                                        label={mt.can_repeat ? 'Retakes Allowed' : 'Single Attempt Only'}
+                                        label={mt.can_repeat ? 'Retakes Allowed' : 'Single Attempt'}
                                         size="small"
                                         variant="outlined"
-                                        sx={{ fontWeight: 600 }}
+                                        sx={{ fontWeight: 600, fontSize: { xs: '0.7rem', sm: '0.75rem' }, height: 24 }}
                                       />
                                     </Stack>
 
-                                    <Typography variant="h6" sx={{ fontWeight: 900, mb: 0.5 }}>
+                                    <Typography variant="h6" sx={{ fontWeight: 900, mb: 0.5, fontSize: { xs: '1.05rem', sm: '1.25rem' } }}>
                                       {mt.title}
                                     </Typography>
                                     {mt.description && (
-                                      <Typography variant="body2" color="text.secondary">
+                                      <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.82rem', sm: '0.875rem' }, mb: 0.5 }}>
                                         {mt.description}
                                       </Typography>
                                     )}
-                                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
-                                      Kerala PSC Scheme (+1.0 for Correct, -0.33 for Wrong) • Results recorded in {inst.name}
+                                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                                      📅 {formatSchedule(mt.start_time, mt.end_time)} • PSC Scheme (+1.0 / -0.33)
                                     </Typography>
                                   </Box>
 
-                                  <Box sx={{ alignSelf: { xs: 'stretch', sm: 'auto' } }}>
+                                  <Box sx={{ alignSelf: { xs: 'stretch', sm: 'stretch', md: 'auto' }, flexShrink: 0 }}>
                                     {mt.has_attempted && !mt.can_repeat ? (
                                       <Button
                                         variant="outlined"
-                                        size="large"
+                                        size="medium"
                                         fullWidth
                                         startIcon={<AssessmentIcon />}
                                         onClick={() => {
@@ -989,14 +1014,14 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
                                           });
                                           setScorecardModalOpen(true);
                                         }}
-                                        sx={{ borderRadius: '12px', fontWeight: 800, textTransform: 'none', px: 3 }}
+                                        sx={{ borderRadius: '12px', fontWeight: 800, textTransform: 'none', px: 3, height: 42 }}
                                       >
                                         View Scorecard
                                       </Button>
                                     ) : mt.can_start ? (
                                       <Button
                                         variant="contained"
-                                        size="large"
+                                        size="medium"
                                         fullWidth
                                         startIcon={<PlayArrowIcon />}
                                         disabled={mockTestLoading}
@@ -1007,6 +1032,7 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
                                           textTransform: 'none',
                                           borderRadius: '12px',
                                           px: 3.5,
+                                          height: 42,
                                         }}
                                       >
                                         {mt.has_attempted ? 'Retake Test' : 'Start Test Now'}
@@ -1014,23 +1040,23 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
                                     ) : isUpcoming ? (
                                       <Button
                                         variant="outlined"
-                                        size="large"
+                                        size="medium"
                                         fullWidth
                                         disabled
                                         startIcon={<HourglassTopIcon />}
-                                        sx={{ borderRadius: '12px', fontWeight: 700, textTransform: 'none' }}
+                                        sx={{ borderRadius: '12px', fontWeight: 700, textTransform: 'none', height: 42 }}
                                       >
-                                        Scheduled: {formatSchedule(mt.start_time)}
+                                        Upcoming Test
                                       </Button>
                                     ) : (
                                       <Button
                                         variant="outlined"
-                                        size="large"
+                                        size="medium"
                                         fullWidth
                                         disabled
-                                        sx={{ borderRadius: '12px', fontWeight: 700, textTransform: 'none' }}
+                                        sx={{ borderRadius: '12px', fontWeight: 700, textTransform: 'none', height: 42 }}
                                       >
-                                        Test Window Closed
+                                        Test Closed
                                       </Button>
                                     )}
                                   </Box>
@@ -1135,81 +1161,81 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
                     <Box>
                       {/* Sticky Top Timer Bar for Mock Test */}
                       <Paper
-                        elevation={2}
+                        elevation={4}
                         sx={{
                           position: 'sticky',
-                          top: 72,
-                          zIndex: 10,
-                          p: 2,
-                          mb: 3,
-                          borderRadius: '16px',
+                          top: { xs: 58, sm: 66, md: 72 },
+                          zIndex: 100,
+                          px: { xs: 1.5, sm: 2.5 },
+                          py: { xs: 1, sm: 1.25 },
+                          mb: 2.5,
+                          borderRadius: { xs: '14px', sm: '18px' },
                           bgcolor: 'background.paper',
+                          backdropFilter: 'blur(12px)',
                           border: '1.5px solid',
                           borderColor: primaryColor,
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          flexWrap: 'wrap',
-                          gap: 1.5,
+                          boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
                         }}
                       >
-                        <Box>
-                          <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
-                            {activeMockTest ? activeMockTest.title : selectedTopicId === 'all' ? `${inst.name} Full Practice Test` : 'Practice Test'}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
-                            Answered {Object.keys(answers).length} of {(activeMockTest ? mockTestQuestions : filteredQuestions).length} Questions
-                          </Typography>
-                        </Box>
-
-                        <Stack direction="row" spacing={1.5} alignItems="center">
-                          {timerSeconds !== null && (
-                            <Box
-                              sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 0.75,
-                                bgcolor: timerSeconds < 300 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-                                border: `1.5px solid ${timerSeconds < 300 ? '#EF4444' : '#F59E0B'}`,
-                                px: 2,
-                                py: 0.5,
-                                borderRadius: '20px',
-                              }}
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
+                          <Box sx={{ minWidth: 0, flex: 1, pr: 0.5 }}>
+                            <Typography
+                              variant="subtitle2"
+                              noWrap
+                              sx={{ fontWeight: 900, fontSize: { xs: '0.82rem', sm: '0.95rem' } }}
                             >
-                              <AccessTimeIcon sx={{ fontSize: 18, color: timerSeconds < 300 ? '#EF4444' : '#F59E0B' }} />
-                              <Typography
+                              {activeMockTest ? activeMockTest.title : selectedTopicId === 'all' ? `${inst?.name} Practice` : 'Practice Test'}
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              sx={{ fontWeight: 700, fontSize: { xs: '0.68rem', sm: '0.75rem' }, display: 'block', lineHeight: 1.1 }}
+                            >
+                              Answered {Object.keys(answers).length} / {(activeMockTest ? mockTestQuestions : filteredQuestions).length} Qs
+                            </Typography>
+                          </Box>
+
+                          <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                            {timerSeconds !== null && (
+                              <Chip
+                                icon={<AccessTimeIcon sx={{ fontSize: '14px !important', color: timerSeconds < 300 ? '#EF4444' : '#F59E0B' }} />}
+                                label={formatTimer(timerSeconds)}
+                                size="small"
                                 sx={{
                                   fontWeight: 900,
-                                  fontFamily: "'JetBrains Mono'",
+                                  fontFamily: "'JetBrains Mono', monospace",
                                   color: timerSeconds < 300 ? '#EF4444' : '#F59E0B',
-                                  fontSize: '0.95rem',
+                                  bgcolor: timerSeconds < 300 ? 'rgba(239, 68, 68, 0.12)' : 'rgba(245, 158, 11, 0.12)',
+                                  border: `1px solid ${timerSeconds < 300 ? '#EF4444' : '#F59E0B'}`,
+                                  height: { xs: 26, sm: 30 },
+                                  fontSize: { xs: '0.75rem', sm: '0.82rem' },
                                 }}
-                              >
-                                {formatTimer(timerSeconds)}
-                              </Typography>
-                            </Box>
-                          )}
-
-                          <Button
-                            variant="contained"
-                            size="small"
-                            disabled={testSubmitting}
-                            onClick={handleSubmitTest}
-                            sx={{
-                              bgcolor: primaryColor,
-                              fontWeight: 800,
-                              textTransform: 'none',
-                              borderRadius: '10px',
-                              px: 2.5,
-                            }}
-                          >
-                            {testSubmitting ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : 'Submit Test'}
-                          </Button>
+                              />
+                            )}
+                            <Button
+                              variant="contained"
+                              size="small"
+                              disabled={testSubmitting}
+                              onClick={handleSubmitTest}
+                              sx={{
+                                bgcolor: primaryColor,
+                                fontWeight: 900,
+                                textTransform: 'none',
+                                borderRadius: '10px',
+                                px: { xs: 1.5, sm: 2 },
+                                py: { xs: 0.45, sm: 0.65 },
+                                fontSize: { xs: '0.75rem', sm: '0.82rem' },
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              {testSubmitting ? <CircularProgress size={14} sx={{ color: '#fff' }} /> : 'Submit'}
+                            </Button>
+                          </Stack>
                         </Stack>
                       </Paper>
 
                       {/* Question List */}
-                      <Stack spacing={2.5}>
+                      <Stack spacing={2}>
                         {(activeMockTest ? mockTestQuestions : filteredQuestions).map((q: any, idx: number) => {
                           const selected = answers[q.id] || '';
                           const isSubmitted = Boolean(testResult);
@@ -1218,60 +1244,95 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
                               key={q.id}
                               elevation={0}
                               sx={{
-                                p: 2.5,
-                                borderRadius: '16px',
+                                p: { xs: 1.75, sm: 2.5 },
+                                borderRadius: { xs: '14px', sm: '18px' },
                                 border: '1px solid',
                                 borderColor: 'divider',
                               }}
                             >
-                              <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
-                                <Chip label={`Q${idx + 1}`} size="small" sx={{ fontWeight: 800 }} />
-                                {q.topic_name && <Chip label={q.topic_name} size="small" variant="outlined" />}
+                              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.25 }}>
+                                <Chip label={`Q${idx + 1}`} size="small" sx={{ fontWeight: 900, height: 22, fontSize: '0.72rem' }} />
+                                {q.topic_name && (
+                                  <Chip label={q.topic_name} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.7rem' }} />
+                                )}
                               </Stack>
-                              <Typography sx={{ fontWeight: 700, fontSize: '1.02rem', mb: 2 }}>
+                              <Typography sx={{ fontWeight: 700, fontSize: { xs: '0.94rem', sm: '1.02rem' }, mb: 2, lineHeight: 1.45 }}>
                                 {q.question_text || q.text}
                               </Typography>
-                              <RadioGroup
-                                value={selected}
-                                onChange={(e) => {
-                                  if (!isSubmitted) {
-                                    setAnswers((prev) => ({ ...prev, [q.id]: e.target.value }));
-                                  }
-                                }}
-                              >
+
+                              <Stack spacing={1}>
                                 {(['A', 'B', 'C', 'D'] as const).map((optKey) => {
                                   const optText = q.options?.[optKey] || q[`option_${optKey.toLowerCase()}`] || '';
                                   const isCorrectOpt = isSubmitted && q.correct_answer === optKey;
                                   const isWrongSelected = isSubmitted && selected === optKey && q.correct_answer !== optKey;
+                                  const isOptionSelected = selected === optKey;
+
                                   return (
-                                    <FormControlLabel
+                                    <Box
                                       key={optKey}
-                                      value={optKey}
-                                      control={<Radio size="small" />}
-                                      label={`${optKey}. ${optText}`}
-                                      sx={{
-                                        mb: 0.75,
-                                        px: 1.5,
-                                        py: 0.5,
-                                        borderRadius: '10px',
-                                        bgcolor: isCorrectOpt
-                                          ? 'rgba(46, 139, 87, 0.14)'
-                                          : isWrongSelected
-                                          ? 'rgba(239, 68, 68, 0.14)'
-                                          : 'transparent',
+                                      onClick={() => {
+                                        if (!isSubmitted) {
+                                          setAnswers((prev) => ({ ...prev, [q.id]: optKey }));
+                                        }
                                       }}
-                                    />
+                                      sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        p: { xs: 1.1, sm: 1.4 },
+                                        borderRadius: '12px',
+                                        border: '1.5px solid',
+                                        borderColor: isCorrectOpt
+                                          ? '#2E8B57'
+                                          : isWrongSelected
+                                          ? '#EF4444'
+                                          : isOptionSelected
+                                          ? primaryColor
+                                          : 'divider',
+                                        bgcolor: isCorrectOpt
+                                          ? 'rgba(46, 139, 87, 0.12)'
+                                          : isWrongSelected
+                                          ? 'rgba(239, 68, 68, 0.12)'
+                                          : isOptionSelected
+                                          ? 'rgba(13, 71, 161, 0.08)'
+                                          : 'background.paper',
+                                        cursor: isSubmitted ? 'default' : 'pointer',
+                                        transition: 'all 0.15s ease',
+                                        '&:hover': {
+                                          borderColor: isSubmitted ? undefined : primaryColor,
+                                        },
+                                      }}
+                                    >
+                                      <Radio
+                                        size="small"
+                                        checked={isOptionSelected}
+                                        sx={{ p: 0.5, mr: 1, color: isOptionSelected ? primaryColor : undefined }}
+                                      />
+                                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                                        <Typography
+                                          sx={{
+                                            fontWeight: isOptionSelected ? 800 : 500,
+                                            fontSize: { xs: '0.86rem', sm: '0.94rem' },
+                                            wordBreak: 'break-word',
+                                            lineHeight: 1.4,
+                                          }}
+                                        >
+                                          <strong style={{ marginRight: '6px' }}>{optKey}.</strong>
+                                          {optText}
+                                        </Typography>
+                                      </Box>
+                                    </Box>
                                   );
                                 })}
-                              </RadioGroup>
+                              </Stack>
+
                               {isSubmitted && (
                                 <Box sx={{ mt: 1.5, pt: 1.5, borderTop: '1px dashed', borderColor: 'divider' }}>
-                                  <Typography variant="body2" sx={{ fontWeight: 800, color: 'success.main' }}>
+                                  <Typography variant="body2" sx={{ fontWeight: 800, color: 'success.main', fontSize: '0.88rem' }}>
                                     Correct Answer: Option {q.correct_answer}
                                   </Typography>
                                   {q.explanation && (
-                                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                                      {q.explanation}
+                                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, fontSize: '0.82rem' }}>
+                                      💡 {q.explanation}
                                     </Typography>
                                   )}
                                 </Box>
@@ -1328,9 +1389,87 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
                     </Alert>
                   ) : leaderboard.length === 0 ? (
                     <Alert severity="info" sx={{ borderRadius: '14px' }}>
-                      No students on the leaderboard yet. Join {inst.name} and complete a test to claim Rank #1!
+                      No students on the leaderboard yet. Join {inst?.name} and complete a test to claim Rank #1!
                     </Alert>
+                  ) : isMdDown ? (
+                    /* Mobile Sleek Cards View */
+                    <Stack spacing={1.5}>
+                      {leaderboard.map((row: any) => (
+                        <Paper
+                          key={row.username}
+                          variant="outlined"
+                          sx={{
+                            p: 1.5,
+                            borderRadius: '14px',
+                            borderLeft: '4px solid',
+                            borderLeftColor:
+                              row.rank === 1
+                                ? '#F59E0B'
+                                : row.rank === 2
+                                ? '#94A3B8'
+                                : row.rank === 3
+                                ? '#D97706'
+                                : 'divider',
+                          }}
+                        >
+                          <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1}>
+                            <Stack direction="row" spacing={1.25} alignItems="center" sx={{ minWidth: 0, flex: 1, pr: 0.5 }}>
+                              <Chip
+                                label={`#${row.rank}`}
+                                size="small"
+                                sx={{
+                                  fontWeight: 900,
+                                  fontSize: '0.72rem',
+                                  bgcolor:
+                                    row.rank === 1
+                                      ? '#F59E0B'
+                                      : row.rank === 2
+                                      ? '#94A3B8'
+                                      : row.rank === 3
+                                      ? '#D97706'
+                                      : 'action.selected',
+                                  color: row.rank <= 3 ? '#fff' : 'text.primary',
+                                  height: 24,
+                                  minWidth: 32,
+                                }}
+                              />
+                              <Avatar src={row.avatar || ''} sx={{ width: 34, height: 34, flexShrink: 0 }} />
+                              <Box sx={{ minWidth: 0 }}>
+                                <Typography variant="body2" noWrap sx={{ fontWeight: 800, fontSize: '0.88rem' }}>
+                                  {row.full_name || row.username}
+                                </Typography>
+                                <Typography variant="caption" noWrap color="text.secondary" sx={{ display: 'block', fontSize: '0.72rem' }}>
+                                  @{row.username}
+                                </Typography>
+                              </Box>
+                            </Stack>
+
+                            <Stack direction="column" alignItems="flex-end" spacing={0.5} sx={{ flexShrink: 0 }}>
+                              <Typography variant="body2" sx={{ fontWeight: 900, color: (row.academy_score ?? 0) >= 0 ? '#1B6B3A' : '#DC2626', fontSize: '0.9rem' }}>
+                                {(row.academy_score ?? 0) > 0 ? `+${row.academy_score}` : (row.academy_score ?? 0)} pts
+                              </Typography>
+                              <Stack direction="row" spacing={0.5} alignItems="center">
+                                <Chip
+                                  label={`${row.accuracy ?? 0}%`}
+                                  size="small"
+                                  variant="outlined"
+                                  color={(row.accuracy ?? 0) >= 70 ? 'success' : (row.accuracy ?? 0) >= 40 ? 'warning' : 'default'}
+                                  sx={{ height: 20, fontSize: '0.68rem', fontWeight: 800, px: 0.5 }}
+                                />
+                                <Chip
+                                  label={`${row.tests_attended ?? 0} tests`}
+                                  size="small"
+                                  variant="outlined"
+                                  sx={{ height: 20, fontSize: '0.68rem', fontWeight: 700, px: 0.5 }}
+                                />
+                              </Stack>
+                            </Stack>
+                          </Stack>
+                        </Paper>
+                      ))}
+                    </Stack>
                   ) : (
+                    /* Desktop Clean Table View */
                     <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '16px' }}>
                       <Table>
                         <TableHead>
@@ -1515,66 +1654,79 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
         onClose={() => setScorecardModalOpen(false)}
         maxWidth="md"
         fullWidth
+        PaperProps={{
+          sx: {
+            m: { xs: 1.25, sm: 2 },
+            borderRadius: { xs: '16px', sm: '20px' },
+            maxHeight: '92vh',
+          },
+        }}
       >
-        <DialogTitle sx={{ fontWeight: 900, pb: 1 }}>
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
-            <Box>
-              <Typography variant="h6" sx={{ fontWeight: 900 }}>
+        <DialogTitle sx={{ fontWeight: 900, pb: 1, px: { xs: 2, sm: 3 } }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
+            <Box sx={{ minWidth: 0, flex: 1, pr: 1 }}>
+              <Typography variant="h6" noWrap sx={{ fontWeight: 900, fontSize: { xs: '1.05rem', sm: '1.25rem' } }}>
                 {viewingScorecard?.test_title || 'Mock Test Scorecard'}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Kerala PSC Exam Marking Scheme (+1.0 Correct, -0.33 Wrong)
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                Kerala PSC Marking Scheme (+1.0 Correct, -0.33 Wrong)
               </Typography>
             </Box>
             <Chip
               label={`Score: ${viewingScorecard?.score ?? 0} pts`}
               color="primary"
-              sx={{ fontWeight: 900, fontSize: '0.9rem', px: 1 }}
+              sx={{ fontWeight: 900, fontSize: { xs: '0.8rem', sm: '0.9rem' }, px: 0.5, flexShrink: 0 }}
             />
           </Stack>
         </DialogTitle>
-        <DialogContent dividers>
+        <DialogContent dividers sx={{ p: { xs: 2, sm: 3 } }}>
           {viewingScorecard && (
             <Stack spacing={2.5}>
-              <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '16px', bgcolor: 'rgba(27, 107, 58, 0.05)' }}>
-                <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap justifyContent="space-around">
+              <Paper variant="outlined" sx={{ p: { xs: 1.5, sm: 2.5 }, borderRadius: '16px', bgcolor: 'rgba(27, 107, 58, 0.05)' }}>
+                <Box
+                  sx={{
+                    display: 'grid',
+                    gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(4, 1fr)' },
+                    gap: { xs: 1.5, sm: 2 },
+                  }}
+                >
                   <Box sx={{ textAlign: 'center' }}>
-                    <Typography variant="h5" sx={{ fontWeight: 900, color: 'success.main' }}>
+                    <Typography variant="h5" sx={{ fontWeight: 900, color: 'success.main', fontSize: { xs: '1.3rem', sm: '1.6rem' } }}>
                       {viewingScorecard.correct ?? 0}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, fontSize: '0.75rem' }}>
                       Correct (+1.0)
                     </Typography>
                   </Box>
                   <Box sx={{ textAlign: 'center' }}>
-                    <Typography variant="h5" sx={{ fontWeight: 900, color: 'error.main' }}>
+                    <Typography variant="h5" sx={{ fontWeight: 900, color: 'error.main', fontSize: { xs: '1.3rem', sm: '1.6rem' } }}>
                       {viewingScorecard.wrong ?? 0}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, fontSize: '0.75rem' }}>
                       Wrong (-0.33)
                     </Typography>
                   </Box>
                   <Box sx={{ textAlign: 'center' }}>
-                    <Typography variant="h5" sx={{ fontWeight: 900, color: 'text.secondary' }}>
+                    <Typography variant="h5" sx={{ fontWeight: 900, color: 'text.secondary', fontSize: { xs: '1.3rem', sm: '1.6rem' } }}>
                       {viewingScorecard.unanswered ?? ((viewingScorecard.total || 0) - ((viewingScorecard.correct || 0) + (viewingScorecard.wrong || 0)))}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
-                      Unanswered
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, fontSize: '0.75rem' }}>
+                      Unanswered (0)
                     </Typography>
                   </Box>
                   <Box sx={{ textAlign: 'center' }}>
-                    <Typography variant="h5" sx={{ fontWeight: 900, color: primaryColor }}>
+                    <Typography variant="h5" sx={{ fontWeight: 900, color: primaryColor, fontSize: { xs: '1.3rem', sm: '1.6rem' } }}>
                       {viewingScorecard.accuracy ?? (
                         (viewingScorecard.correct || 0) + (viewingScorecard.wrong || 0) > 0
                           ? Math.round(((viewingScorecard.correct || 0) / ((viewingScorecard.correct || 0) + (viewingScorecard.wrong || 0))) * 100)
                           : 0
                       )}%
                     </Typography>
-                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, fontSize: '0.75rem' }}>
                       Accuracy
                     </Typography>
                   </Box>
-                </Stack>
+                </Box>
               </Paper>
 
               <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'text.secondary', letterSpacing: '0.04em' }}>
@@ -1590,27 +1742,27 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
                       key={idx}
                       variant="outlined"
                       sx={{
-                        p: 2,
+                        p: { xs: 1.5, sm: 2 },
                         borderRadius: '14px',
                         borderLeft: '4px solid',
                         borderLeftColor: isCorrect ? '#2E8B57' : isUnanswered ? '#94A3B8' : '#EF4444',
                       }}
                     >
-                      <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
-                        <Chip label={`Q${idx + 1}`} size="small" sx={{ fontWeight: 800 }} />
+                      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                        <Chip label={`Q${idx + 1}`} size="small" sx={{ fontWeight: 800, height: 22 }} />
                         <Chip
-                          label={isCorrect ? '+1.0 Mark (Correct)' : isUnanswered ? '0 Marks (Unanswered)' : '-0.33 Mark (Wrong)'}
+                          label={isCorrect ? '+1.0 Mark' : isUnanswered ? '0 Marks' : '-0.33 Mark'}
                           size="small"
                           color={isCorrect ? 'success' : isUnanswered ? 'default' : 'error'}
-                          sx={{ fontWeight: 800 }}
+                          sx={{ fontWeight: 800, height: 22, fontSize: '0.72rem' }}
                         />
                       </Stack>
-                      <Typography variant="body1" sx={{ fontWeight: 700, mb: 1 }}>
+                      <Typography variant="body1" sx={{ fontWeight: 700, mb: 1, fontSize: { xs: '0.92rem', sm: '1rem' } }}>
                         {det.question_text}
                       </Typography>
-                      <Stack direction="row" spacing={3} sx={{ mb: 1 }}>
+                      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 0.5, sm: 3 }} sx={{ mb: 1 }}>
                         <Typography variant="body2" sx={{ color: isCorrect ? 'success.main' : isUnanswered ? 'text.secondary' : 'error.main', fontWeight: 700 }}>
-                          Your Choice: {det.selected_option ? `Option ${det.selected_option}` : 'None'}
+                          Your Choice: {det.selected_option ? `Option ${det.selected_option}` : 'None (Unanswered)'}
                         </Typography>
                         <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 800 }}>
                           Correct Answer: Option {det.correct_answer}

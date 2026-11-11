@@ -7,16 +7,28 @@ import InstituteStudentPortalClient from './InstituteStudentPortalClient';
 const GREEN = '#1B6B3A';
 const GREEN_LIGHT = '#2E8B57';
 
-async function getInstitute(slug: string) {
+async function getPortalData(slug: string) {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+    const res = await fetch(`${apiUrl}/api/institute/public/portal/${slug}/`, {
+      next: { revalidate: 30 },
+    });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (error) {
+    console.error('Error fetching portal data:', error);
+  }
+
+  try {
     const res = await fetch(`${apiUrl}/api/institute/public/detail/${slug}/`, {
       next: { revalidate: 60 },
     });
     if (!res.ok) return null;
-    return await res.json();
+    const detail = await res.json();
+    return { institute: detail };
   } catch (error) {
-    console.error('Error fetching institute:', error);
+    console.error('Error fetching institute detail:', error);
     return null;
   }
 }
@@ -27,7 +39,8 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const inst = await getInstitute(slug);
+  const portalData = await getPortalData(slug);
+  const inst = portalData?.institute;
 
   if (!inst) {
     return {
@@ -47,7 +60,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function InstituteSEOPage({ params }: PageProps) {
   const { slug } = await params;
-  const inst = await getInstitute(slug);
+  const portalData = await getPortalData(slug);
+  const inst = portalData?.institute;
 
   if (!inst) {
     return (
@@ -88,7 +102,11 @@ export default async function InstituteSEOPage({ params }: PageProps) {
         suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <InstituteStudentPortalClient slug={slug} initialInstitute={inst} />
+      <InstituteStudentPortalClient
+        slug={slug}
+        initialInstitute={inst}
+        initialPortalData={portalData}
+      />
     </Box>
   );
 }
