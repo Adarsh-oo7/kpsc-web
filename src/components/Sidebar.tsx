@@ -211,10 +211,10 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
         <List disablePadding>
           {(profile?.institute
             ? [
-                { text: 'Academy Portal', icon: <SchoolIcon sx={{ color: '#F59E0B' }} />, path: `/institute/${profile.institute.slug}` },
-                { text: 'Mock Tests & MCQs', icon: <QuizIcon />, path: `/institute/${profile.institute.slug}` },
-                { text: 'Batch Leaderboard', icon: <LeaderboardIcon />, path: '/leaderboard' },
-                { text: 'Study Notes & Materials', icon: <MenuBookIcon />, path: `/institute/${profile.institute.slug}` },
+                { text: 'Academy Portal', icon: <SchoolIcon sx={{ color: '#F59E0B' }} />, path: `/${profile.institute.slug}/dashboard` },
+                { text: 'Mock Tests & MCQs', icon: <QuizIcon />, path: `/${profile.institute.slug}/dashboard` },
+                { text: 'Batch Leaderboard', icon: <LeaderboardIcon />, path: `/${profile.institute.slug}/dashboard` },
+                { text: 'Study Notes & Materials', icon: <MenuBookIcon />, path: `/${profile.institute.slug}/dashboard` },
                 { divider: true, label: 'Full Practice', section: 'study' },
                 { text: 'Kerala PSC Exams', icon: <AssignmentIcon />, path: '/exams' },
                 { text: 'Daily Quiz', icon: <QuizIcon />, path: '/quiz' },

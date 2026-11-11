@@ -352,17 +352,21 @@ export default function InstituteDashboard() {
             <Grid size={{ xs: 12, md: 7 }}>
               <Card elevation={0} sx={{ border: '1.5px solid', borderColor: 'divider', borderRadius: '20px', height: '100%' }}>
                 <CardContent sx={{ p: 3 }}>
-                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
                     <Stack direction="row" spacing={1} alignItems="center">
                       <EmojiEventsIcon sx={{ color: '#F59E0B' }} />
                       <Typography sx={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 800 }}>
-                        Student Leaderboard & Test Results
+                        {academyTitle} — Student Leaderboard
                       </Typography>
                     </Stack>
                     <Button size="small" onClick={() => router.push('/institute/students')} sx={{ textTransform: 'none', fontWeight: 800 }}>
-                      Full Results & Details
+                      Detailed Results & Topics
                     </Button>
                   </Stack>
+
+                  <Typography sx={{ fontSize: '0.8rem', color: 'text.secondary', mb: 2 }}>
+                    Exclusive Academy Ranking: Computed strictly from tests and questions updated by {academyTitle} admin.
+                  </Typography>
 
                   {students.length === 0 ? (
                     <Box sx={{ py: 2 }}>
@@ -384,16 +388,24 @@ export default function InstituteDashboard() {
                           <TableRow>
                             <TableCell sx={{ fontWeight: 800 }}>Rank</TableCell>
                             <TableCell sx={{ fontWeight: 800 }}>Student</TableCell>
+                            <TableCell align="right" sx={{ fontWeight: 800 }}>Academy Score</TableCell>
                             <TableCell align="right" sx={{ fontWeight: 800 }}>Solved</TableCell>
                             <TableCell align="right" sx={{ fontWeight: 800 }}>Accuracy</TableCell>
-                            <TableCell align="right" sx={{ fontWeight: 800 }}>Net Score</TableCell>
-                            <TableCell align="right" sx={{ fontWeight: 800 }}>XP</TableCell>
+                            <TableCell align="right" sx={{ fontWeight: 800 }}>Total XP</TableCell>
                           </TableRow>
                         </TableHead>
                         <TableBody>
                           {students.slice(0, 8).map((s: any, idx: number) => {
                             const st = s.performance_stats || {};
                             const rank = s.rank || idx + 1;
+                            const academyScore = st.academy_score !== undefined && st.academy_score !== null
+                              ? st.academy_score
+                              : (st.net_marks ?? 0);
+                            const solvedCount = st.academy_attempted || st.total_attempted || 0;
+                            const accuracyPct = st.academy_accuracy !== undefined && (st.academy_attempted || 0) > 0
+                              ? st.academy_accuracy
+                              : (st.accuracy ?? 0);
+
                             return (
                               <TableRow
                                 key={s.id}
@@ -401,26 +413,39 @@ export default function InstituteDashboard() {
                                 sx={{ cursor: 'pointer' }}
                                 onClick={() => router.push('/institute/students')}
                               >
-                                <TableCell sx={{ fontWeight: 900 }}>#{rank}</TableCell>
+                                <TableCell sx={{ fontWeight: 900 }}>
+                                  <Chip
+                                    label={`#${rank}`}
+                                    size="small"
+                                    sx={{
+                                      fontWeight: 900,
+                                      bgcolor: rank === 1 ? '#FEF3C7' : rank === 2 ? '#E2E8F0' : rank === 3 ? '#FFEDD5' : 'action.hover',
+                                      color: rank === 1 ? '#D97706' : rank === 2 ? '#475569' : rank === 3 ? '#C2410C' : 'text.primary',
+                                    }}
+                                  />
+                                </TableCell>
                                 <TableCell>
                                   <Typography variant="body2" sx={{ fontWeight: 800 }}>
                                     {s.user?.full_name || s.user?.username}
                                   </Typography>
+                                  <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                                    @{s.user?.username}
+                                  </Typography>
                                 </TableCell>
-                                <TableCell align="right">{st.total_attempted ?? 0}</TableCell>
+                                <TableCell align="right" sx={{ fontWeight: 900, color: academyScore >= 0 ? '#1B6B3A' : '#DC2626', fontSize: '0.92rem' }}>
+                                  {academyScore > 0 ? `+${academyScore}` : academyScore} pts
+                                </TableCell>
+                                <TableCell align="right">{solvedCount}</TableCell>
                                 <TableCell align="right">
                                   <Chip
-                                    label={`${st.accuracy ?? 0}%`}
+                                    label={`${accuracyPct}%`}
                                     size="small"
-                                    color={(st.accuracy ?? 0) >= 70 ? 'success' : (st.accuracy ?? 0) >= 40 ? 'warning' : 'default'}
+                                    color={accuracyPct >= 70 ? 'success' : accuracyPct >= 40 ? 'warning' : 'default'}
                                     variant="outlined"
                                     sx={{ fontWeight: 800 }}
                                   />
                                 </TableCell>
-                                <TableCell align="right" sx={{ fontWeight: 800 }}>
-                                  {st.net_marks ?? 0}
-                                </TableCell>
-                                <TableCell align="right" sx={{ fontWeight: 700, color: GREEN }}>
+                                <TableCell align="right" sx={{ fontWeight: 700, color: '#F59E0B' }}>
                                   {s.total_xp ?? 0}
                                 </TableCell>
                               </TableRow>

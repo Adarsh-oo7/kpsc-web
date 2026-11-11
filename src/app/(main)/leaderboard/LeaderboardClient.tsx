@@ -39,8 +39,15 @@ export default function LeaderboardClient() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!ctxLoading && !user) router.push('/login?next=/leaderboard');
-  }, [user, ctxLoading, router]);
+    if (!ctxLoading) {
+      if (!user) {
+        router.push('/login?next=/leaderboard');
+      } else if (profile?.institute?.slug) {
+        // Enrolled academy students see only their own academy leaderboard
+        router.replace(`/${profile.institute.slug}/dashboard`);
+      }
+    }
+  }, [user, profile, ctxLoading, router]);
 
   const { data, error, isLoading, mutate } = useSWR(
     user ? '/leaderboard/' : null,
