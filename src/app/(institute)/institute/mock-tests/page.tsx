@@ -19,6 +19,8 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import ReplayIcon from '@mui/icons-material/Replay';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
 import { InstitutePageHeader, greenCtaSx, asList } from '@/components/institute/pageChrome';
@@ -80,6 +82,13 @@ export default function InstituteMockTestsPage() {
   const [questionSearch, setQuestionSearch] = useState('');
   const [isSavingQuestion, setIsSavingQuestion] = useState(false);
   const [questionError, setQuestionError] = useState('');
+
+  // Submissions & Leaderboard modal state
+  const [submissionsModalOpen, setSubmissionsModalOpen] = useState(false);
+  const [submissionsLoading, setSubmissionsLoading] = useState(false);
+  const [activeTestSubmissions, setActiveTestSubmissions] = useState<any>(null);
+  const [activeStudentAnswerSheet, setActiveStudentAnswerSheet] = useState<any>(null);
+  const [studentAnswerSheetOpen, setStudentAnswerSheetOpen] = useState(false);
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -282,6 +291,22 @@ export default function InstituteMockTestsPage() {
     }
   };
 
+  const handleOpenSubmissions = async (test: any) => {
+    setActiveTest(test);
+    setSubmissionsModalOpen(true);
+    setSubmissionsLoading(true);
+    setActiveTestSubmissions(null);
+    try {
+      const res = await apiClient.get(`/institute/mock-tests/${test.id}/submissions/`);
+      setActiveTestSubmissions(res.data);
+    } catch {
+      alert('Failed to load test submissions.');
+      setSubmissionsModalOpen(false);
+    } finally {
+      setSubmissionsLoading(false);
+    }
+  };
+
   const formatSchedule = (start?: string, end?: string) => {
     if (!start && !end) return 'Always Active';
     const sDate = start ? new Date(start) : null;
@@ -433,6 +458,16 @@ export default function InstituteMockTestsPage() {
                         </TableCell>
                         <TableCell align="right">
                           <Stack direction="row" spacing={1} justifyContent="flex-end">
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              color="primary"
+                              startIcon={<AssessmentIcon />}
+                              onClick={() => handleOpenSubmissions(test)}
+                              sx={{ textTransform: 'none', fontWeight: 800, borderRadius: '8px' }}
+                            >
+                              Results ({test.total_attempts ?? 0})
+                            </Button>
                             <Button
                               size="small"
                               variant="outlined"
@@ -971,6 +1006,274 @@ export default function InstituteMockTestsPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Submissions & Leaderboard Modal */}
+      <Dialog
+        open={submissionsModalOpen}
+        onClose={() => setSubmissionsModalOpen(false)}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '16px' } }}
+      >
+        <DialogTitle sx={{ fontWeight: 900, pb: 1 }}>
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 900 }}>
+                Test Results & Leaderboard — {activeTest?.title}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Detailed student submissions ranked by Net Score and Accuracy
+              </Typography>
+            </Box>
+            <Chip
+              label={`${activeTestSubmissions?.total_submissions ?? 0} Submissions`}
+              color="primary"
+              sx={{ fontWeight: 800 }}
+            />
+          </Stack>
+        </DialogTitle>
+        <DialogContent dividers sx={{ p: 3 }}>
+          {submissionsLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', p: 6 }}>
+              <CircularProgress />
+            </Box>
+          ) : !activeTestSubmissions?.submissions || activeTestSubmissions.submissions.length === 0 ? (
+            <Alert severity="info" sx={{ borderRadius: '12px' }}>
+              No students have completed this mock test yet. As soon as enrolled students submit, their live scores and answer sheets will appear here.
+            </Alert>
+          ) : (
+            <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '14px', overflow: 'hidden' }}>
+              <Table>
+                <TableHead sx={{ bgcolor: 'action.hover' }}>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 800, width: 80 }}>Rank</TableCell>
+                    <TableCell sx={{ fontWeight: 800 }}>Student</TableCell>
+                    <TableCell sx={{ fontWeight: 800 }} align="center">Score (Net)</TableCell>
+                    <TableCell sx={{ fontWeight: 800 }} align="center">Correct / Total</TableCell>
+                    <TableCell sx={{ fontWeight: 800 }} align="center">Accuracy</TableCell>
+                    <TableCell sx={{ fontWeight: 800 }} align="center">Submitted At</TableCell>
+                    <TableCell sx={{ fontWeight: 800 }} align="right">Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {activeTestSubmissions.submissions.map((sub: any) => {
+                    return (
+                      <TableRow key={sub.id} hover>
+                        <TableCell>
+                          <Chip
+                            label={`#${sub.rank}`}
+                            size="small"
+                            sx={{
+                              fontWeight: 900,
+                              bgcolor: sub.rank === 1 ? '#F59E0B' : sub.rank === 2 ? '#94A3B8' : sub.rank === 3 ? '#B45309' : 'action.selected',
+                              color: sub.rank <= 3 ? '#fff' : 'inherit',
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" sx={{ fontWeight: 800 }}>
+                            {sub.student_name}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            @{sub.username} {sub.email ? `• ${sub.email}` : ''}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Chip
+                            label={`${sub.score > 0 ? `+${sub.score}` : sub.score} pts`}
+                            size="small"
+                            color={sub.score > 0 ? 'success' : 'default'}
+                            sx={{ fontWeight: 800 }}
+                          />
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                            {sub.correct ?? sub.correct_answers ?? 0} / {sub.total_questions}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="center">
+                          <Chip
+                            label={`${sub.accuracy}%`}
+                            size="small"
+                            variant="outlined"
+                            color={sub.accuracy >= 70 ? 'success' : sub.accuracy >= 40 ? 'warning' : 'error'}
+                            sx={{ fontWeight: 800 }}
+                          />
+                        </TableCell>
+                        <TableCell align="center">
+                          <Typography variant="caption" color="text.secondary">
+                            {sub.completed_at ? new Date(sub.completed_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—'}
+                          </Typography>
+                        </TableCell>
+                        <TableCell align="right">
+                          <Button
+                            size="small"
+                            variant="contained"
+                            color="success"
+                            onClick={() => {
+                              setActiveStudentAnswerSheet(sub);
+                              setStudentAnswerSheetOpen(true);
+                            }}
+                            sx={{ textTransform: 'none', fontWeight: 800, borderRadius: '8px' }}
+                          >
+                            Inspect Answer Sheet
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setSubmissionsModalOpen(false)} variant="contained" sx={greenCtaSx}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Answer Sheet Inspection Dialog */}
+      <Dialog
+        open={studentAnswerSheetOpen}
+        onClose={() => setStudentAnswerSheetOpen(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: '16px' } }}
+      >
+        <DialogTitle sx={{ fontWeight: 900, pb: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 900 }}>
+            Student Answer Sheet — {activeStudentAnswerSheet?.student_name}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            Test: {activeTest?.title} • Submitted at: {activeStudentAnswerSheet?.completed_at ? new Date(activeStudentAnswerSheet.completed_at).toLocaleString('en-IN') : '—'}
+          </Typography>
+        </DialogTitle>
+        <DialogContent dividers sx={{ p: 3 }}>
+          {activeStudentAnswerSheet && (
+            <Stack spacing={2.5}>
+              <Paper variant="outlined" sx={{ p: 2, borderRadius: '12px', bgcolor: 'action.hover' }}>
+                <Stack direction="row" justifyContent="space-around" alignItems="center">
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="h6" sx={{ fontWeight: 900, color: 'primary.main' }}>
+                      {activeStudentAnswerSheet.score} pts
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                      Net Score
+                    </Typography>
+                  </Box>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="h6" sx={{ fontWeight: 900, color: 'success.main' }}>
+                      {activeStudentAnswerSheet.correct ?? activeStudentAnswerSheet.correct_answers ?? 0}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                      Correct (+1.0)
+                    </Typography>
+                  </Box>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="h6" sx={{ fontWeight: 900, color: 'error.main' }}>
+                      {activeStudentAnswerSheet.wrong ?? activeStudentAnswerSheet.wrong_answers ?? Math.max(0, (activeStudentAnswerSheet.total_questions || 0) - ((activeStudentAnswerSheet.correct ?? activeStudentAnswerSheet.correct_answers) || 0))}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                      Wrong (-0.33)
+                    </Typography>
+                  </Box>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="h6" sx={{ fontWeight: 900, color: 'info.main' }}>
+                      {activeStudentAnswerSheet.accuracy}%
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                      Accuracy
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Paper>
+
+              <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'text.secondary', letterSpacing: '0.04em' }}>
+                DETAILED QUESTION & ANSWER BREAKDOWN
+              </Typography>
+
+              {(() => {
+                const results = Array.isArray(activeStudentAnswerSheet.details)
+                  ? activeStudentAnswerSheet.details
+                  : (activeStudentAnswerSheet.details?.results || []);
+
+                if (!results.length) {
+                  return (
+                    <Alert severity="info" sx={{ borderRadius: '12px' }}>
+                      Detailed question breakdown is not available for this attempt.
+                    </Alert>
+                  );
+                }
+
+                return (
+                  <Stack spacing={2}>
+                    {results.map((det: any, idx: number) => {
+                      const isCorrect = det.is_correct;
+                      const isUnanswered = det.unanswered || !det.selected_option;
+                      return (
+                        <Paper
+                          key={idx}
+                          variant="outlined"
+                          sx={{
+                            p: 2,
+                            borderRadius: '14px',
+                            borderLeft: '4px solid',
+                            borderLeftColor: isCorrect ? '#2E8B57' : isUnanswered ? '#94A3B8' : '#EF4444',
+                          }}
+                        >
+                          <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
+                            <Chip label={`Q${idx + 1}`} size="small" sx={{ fontWeight: 800 }} />
+                            <Chip
+                              label={isCorrect ? '+1.0 Mark (Correct)' : isUnanswered ? '0 Marks (Unanswered)' : '-0.33 Mark (Wrong)'}
+                              size="small"
+                              color={isCorrect ? 'success' : isUnanswered ? 'default' : 'error'}
+                              sx={{ fontWeight: 800 }}
+                            />
+                          </Stack>
+                          <Typography variant="body1" sx={{ fontWeight: 700, mb: 1 }}>
+                            {det.question_text}
+                          </Typography>
+                          <Stack direction="row" spacing={3} sx={{ mb: 1 }}>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: isCorrect ? 'success.main' : isUnanswered ? 'text.secondary' : 'error.main',
+                                fontWeight: 700,
+                              }}
+                            >
+                              Student's Choice: {det.selected_option ? `Option ${det.selected_option}` : 'None (Unanswered)'}
+                            </Typography>
+                            <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 800 }}>
+                              Correct Answer: Option {det.correct_answer}
+                            </Typography>
+                          </Stack>
+                          {det.explanation && (
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                              sx={{ display: 'block', fontStyle: 'italic', bgcolor: 'action.hover', p: 1, borderRadius: '8px' }}
+                            >
+                              💡 {det.explanation}
+                            </Typography>
+                          )}
+                        </Paper>
+                      );
+                    })}
+                  </Stack>
+                );
+              })()}
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setStudentAnswerSheetOpen(false)} variant="contained" sx={greenCtaSx}>
+            Done
+          </Button>
+        </DialogActions>
+      </Dialog>
     </motion.div>
   );
 }
+

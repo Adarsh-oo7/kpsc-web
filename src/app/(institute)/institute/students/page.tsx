@@ -29,6 +29,10 @@ import {
   IconButton,
   Tooltip,
   Divider,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
@@ -39,6 +43,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
+import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
 import { InstitutePageHeader, greenCtaSx } from '@/components/institute/pageChrome';
@@ -73,6 +79,9 @@ export default function ManageStudentsPage() {
   const [resultsDialogOpen, setResultsDialogOpen] = useState(false);
   const [resultsLoading, setResultsLoading] = useState(false);
   const [selectedStudentResults, setSelectedStudentResults] = useState<any>(null);
+  const [selectedTestFilter, setSelectedTestFilter] = useState<string>('all');
+  const [activeAnswerSheet, setActiveAnswerSheet] = useState<any>(null);
+  const [answerSheetDialogOpen, setAnswerSheetDialogOpen] = useState(false);
 
   const filteredStudents = useMemo(() => {
     if (!studentList.length) return [];
@@ -168,6 +177,8 @@ export default function ManageStudentsPage() {
     setResultsDialogOpen(true);
     setResultsLoading(true);
     setSelectedStudentResults(null);
+    setSelectedTestFilter('all');
+    setActiveAnswerSheet(null);
     try {
       const res = await apiClient.get(`/institute/students/${studentProfileId}/results/`);
       setSelectedStudentResults(res.data);
@@ -429,9 +440,37 @@ export default function ManageStudentsPage() {
 
               {/* Mock Tests Attended & Scores Table */}
               <Box>
-                <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 1.5 }}>
-                  Mock Tests Attended & Detailed Results
-                </Typography>
+                <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} spacing={2} sx={{ mb: 2 }}>
+                  <Box>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+                      Mock Tests Attended & Detailed Results
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Select any test to inspect the student's question-by-question answer sheet
+                    </Typography>
+                  </Box>
+
+                  {selectedStudentResults.test_attempts && selectedStudentResults.test_attempts.length > 0 && (
+                    <FormControl size="small" sx={{ minWidth: 260 }}>
+                      <InputLabel>Filter by Mock Test</InputLabel>
+                      <Select
+                        value={selectedTestFilter}
+                        label="Filter by Mock Test"
+                        onChange={(e) => setSelectedTestFilter(e.target.value)}
+                      >
+                        <MenuItem value="all">
+                          All Attended Tests ({selectedStudentResults.test_attempts.length})
+                        </MenuItem>
+                        {selectedStudentResults.test_attempts.map((att: any) => (
+                          <MenuItem key={att.id} value={att.id.toString()}>
+                            {att.test_title} ({att.score > 0 ? `+${att.score}` : att.score} pts)
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  )}
+                </Stack>
+
                 {selectedStudentResults.test_attempts && selectedStudentResults.test_attempts.length > 0 ? (
                   <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '12px' }}>
                     <Table size="small">
@@ -444,38 +483,55 @@ export default function ManageStudentsPage() {
                           <TableCell align="right" sx={{ fontWeight: 800 }}>Correct</TableCell>
                           <TableCell align="right" sx={{ fontWeight: 800 }}>Wrong</TableCell>
                           <TableCell align="right" sx={{ fontWeight: 800 }}>Accuracy</TableCell>
+                          <TableCell align="right" sx={{ fontWeight: 800 }}>Answer Sheet</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {selectedStudentResults.test_attempts.map((att: any) => (
-                          <TableRow key={att.id} hover>
-                            <TableCell sx={{ fontWeight: 800 }}>{att.test_title}</TableCell>
-                            <TableCell sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
-                              {new Date(att.completed_at).toLocaleDateString('en-IN', {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </TableCell>
-                            <TableCell align="right" sx={{ fontWeight: 900, color: att.score >= 0 ? '#1B6B3A' : '#DC2626' }}>
-                              {att.score > 0 ? `+${att.score}` : att.score} pts
-                            </TableCell>
-                            <TableCell align="right">{att.attempted} / {att.total_questions}</TableCell>
-                            <TableCell align="right" sx={{ color: 'success.main', fontWeight: 700 }}>{att.correct}</TableCell>
-                            <TableCell align="right" sx={{ color: 'error.main', fontWeight: 700 }}>{att.wrong}</TableCell>
-                            <TableCell align="right">
-                              <Chip
-                                label={`${att.accuracy}%`}
-                                size="small"
-                                variant="outlined"
-                                color={att.accuracy >= 70 ? 'success' : 'default'}
-                                sx={{ fontWeight: 800 }}
-                              />
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                        {selectedStudentResults.test_attempts
+                          .filter((att: any) => (selectedTestFilter === 'all' ? true : att.id.toString() === selectedTestFilter))
+                          .map((att: any) => (
+                            <TableRow key={att.id} hover>
+                              <TableCell sx={{ fontWeight: 800 }}>{att.test_title}</TableCell>
+                              <TableCell sx={{ fontSize: '0.8rem', color: 'text.secondary' }}>
+                                {new Date(att.completed_at).toLocaleDateString('en-IN', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </TableCell>
+                              <TableCell align="right" sx={{ fontWeight: 900, color: att.score >= 0 ? '#1B6B3A' : '#DC2626' }}>
+                                {att.score > 0 ? `+${att.score}` : att.score} pts
+                              </TableCell>
+                              <TableCell align="right">{att.attempted} / {att.total_questions}</TableCell>
+                              <TableCell align="right" sx={{ color: 'success.main', fontWeight: 700 }}>{att.correct}</TableCell>
+                              <TableCell align="right" sx={{ color: 'error.main', fontWeight: 700 }}>{att.wrong}</TableCell>
+                              <TableCell align="right">
+                                <Chip
+                                  label={`${att.accuracy}%`}
+                                  size="small"
+                                  variant="outlined"
+                                  color={att.accuracy >= 70 ? 'success' : 'default'}
+                                  sx={{ fontWeight: 800 }}
+                                />
+                              </TableCell>
+                              <TableCell align="right">
+                                <Button
+                                  size="small"
+                                  variant="outlined"
+                                  startIcon={<FormatListNumberedIcon />}
+                                  onClick={() => {
+                                    setActiveAnswerSheet(att);
+                                    setAnswerSheetDialogOpen(true);
+                                  }}
+                                  sx={{ textTransform: 'none', fontWeight: 800, borderRadius: '8px', whiteSpace: 'nowrap' }}
+                                >
+                                  View Answers
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
                       </TableBody>
                     </Table>
                   </TableContainer>
@@ -720,6 +776,134 @@ export default function ManageStudentsPage() {
           <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
           <Button onClick={handleDeleteStudent} variant="contained" color="error" disabled={isDeleting}>
             {isDeleting ? <CircularProgress size={24} /> : 'Remove Student'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Answer Sheet Modal for Specific Test Attempt */}
+      <Dialog
+        open={answerSheetDialogOpen}
+        onClose={() => setAnswerSheetDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: 900, pb: 1 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 900 }}>
+                {activeAnswerSheet?.test_title}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Answer Sheet for {selectedStudentResults?.student?.user?.full_name || selectedStudentResults?.student?.user?.username} • Kerala PSC Scheme (+1.0 / -0.33)
+              </Typography>
+            </Box>
+            <Chip
+              label={`Score: ${activeAnswerSheet?.score > 0 ? `+${activeAnswerSheet?.score}` : activeAnswerSheet?.score} pts`}
+              color="primary"
+              sx={{ fontWeight: 900, fontSize: '0.9rem', px: 1 }}
+            />
+          </Stack>
+        </DialogTitle>
+        <DialogContent dividers>
+          {activeAnswerSheet && (
+            <Stack spacing={2.5}>
+              <Paper variant="outlined" sx={{ p: 2, borderRadius: '14px', bgcolor: 'rgba(27, 107, 58, 0.05)' }}>
+                <Stack direction="row" spacing={2} justifyContent="space-around" flexWrap="wrap" useFlexGap>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="h6" sx={{ fontWeight: 900, color: 'success.main' }}>
+                      {activeAnswerSheet.correct}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                      Correct (+1.0)
+                    </Typography>
+                  </Box>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="h6" sx={{ fontWeight: 900, color: 'error.main' }}>
+                      {activeAnswerSheet.wrong}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                      Wrong (-0.33)
+                    </Typography>
+                  </Box>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="h6" sx={{ fontWeight: 900, color: 'text.secondary' }}>
+                      {activeAnswerSheet.unanswered ?? (activeAnswerSheet.total_questions - (activeAnswerSheet.correct + activeAnswerSheet.wrong))}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                      Unanswered (0)
+                    </Typography>
+                  </Box>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="h6" sx={{ fontWeight: 900, color: 'primary.main' }}>
+                      {activeAnswerSheet.accuracy}%
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                      Accuracy
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Paper>
+
+              <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'text.secondary', letterSpacing: '0.04em' }}>
+                DETAILED QUESTION & ANSWER BREAKDOWN
+              </Typography>
+
+              {activeAnswerSheet.details && activeAnswerSheet.details.length > 0 ? (
+                <Stack spacing={2}>
+                  {activeAnswerSheet.details.map((det: any, idx: number) => {
+                    const isCorrect = det.is_correct;
+                    const isUnanswered = det.unanswered || !det.selected_option;
+                    return (
+                      <Paper
+                        key={idx}
+                        variant="outlined"
+                        sx={{
+                          p: 2,
+                          borderRadius: '14px',
+                          borderLeft: '4px solid',
+                          borderLeftColor: isCorrect ? '#2E8B57' : isUnanswered ? '#94A3B8' : '#EF4444',
+                        }}
+                      >
+                        <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
+                          <Chip label={`Q${idx + 1}`} size="small" sx={{ fontWeight: 800 }} />
+                          <Chip
+                            label={isCorrect ? '+1.0 Mark (Correct)' : isUnanswered ? '0 Marks (Unanswered)' : '-0.33 Mark (Wrong)'}
+                            size="small"
+                            color={isCorrect ? 'success' : isUnanswered ? 'default' : 'error'}
+                            sx={{ fontWeight: 800 }}
+                          />
+                        </Stack>
+                        <Typography variant="body1" sx={{ fontWeight: 700, mb: 1 }}>
+                          {det.question_text}
+                        </Typography>
+                        <Stack direction="row" spacing={3} sx={{ mb: 1 }}>
+                          <Typography variant="body2" sx={{ color: isCorrect ? 'success.main' : isUnanswered ? 'text.secondary' : 'error.main', fontWeight: 700 }}>
+                            Student's Choice: {det.selected_option ? `Option ${det.selected_option}` : 'None'}
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 800 }}>
+                            Correct Answer: Option {det.correct_answer}
+                          </Typography>
+                        </Stack>
+                        {det.explanation && (
+                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontStyle: 'italic', bgcolor: 'action.hover', p: 1, borderRadius: '8px' }}>
+                            💡 {det.explanation}
+                          </Typography>
+                        )}
+                      </Paper>
+                    );
+                  })}
+                </Stack>
+              ) : (
+                <Alert severity="info">
+                  Detailed question breakdown is not available for this legacy attempt.
+                </Alert>
+              )}
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setAnswerSheetDialogOpen(false)} variant="contained" sx={greenCtaSx}>
+            Done
           </Button>
         </DialogActions>
       </Dialog>
