@@ -48,6 +48,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import GoogleSignInButton from '@/components/GoogleSignInButton';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
 import { apiErrorMessage, suggestUsername } from '@/lib/auth';
@@ -217,6 +218,30 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
       await fetchPortal();
     } catch (err: any) {
       setAuthError(apiErrorMessage(err, 'Could not create student account. Please check your details.'));
+    } finally {
+      setAuthSubmitting(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credential: string) => {
+    setAuthError('');
+    setAuthSubmitting(true);
+    try {
+      const response = await apiClient.post('/auth/google/', { credential });
+      const { access, refresh } = response.data;
+      const prof = await login(access, refresh);
+      if (prof && !prof.institute && !prof.is_owner && inst?.id) {
+        try {
+          await apiClient.post('/institute-join-request/', { institute: inst.id });
+          setJoinStatusMsg(`Signed in with Google! Your request to join ${inst.name} has been sent.`);
+        } catch {
+          // ignore if already requested or joined
+        }
+      }
+      await refreshProfile();
+      await fetchPortal();
+    } catch (err: any) {
+      setAuthError(apiErrorMessage(err, 'Google Sign-In failed. Please try again or use username/password.'));
     } finally {
       setAuthSubmitting(false);
     }
@@ -464,6 +489,39 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
             </Box>
 
             <Paper elevation={0} sx={{ p: 3, borderRadius: '18px', bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider' }}>
+              {/* Quick 1-Click Google OAuth */}
+              <Box sx={{ mb: 2 }}>
+                <Typography sx={{ fontSize: '0.78rem', fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 1, textAlign: 'center' }}>
+                  Quick 1-Click Access
+                </Typography>
+                <Box
+                  sx={{
+                    borderRadius: '12px',
+                    border: '1.5px solid',
+                    borderColor: 'divider',
+                    py: 0.75,
+                    px: 1,
+                    bgcolor: 'background.paper',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+                  }}
+                >
+                  <GoogleSignInButton
+                    onSuccess={handleGoogleSuccess}
+                    onError={(err) => setAuthError(err || 'Google Sign-In failed.')}
+                    text="continue_with"
+                  />
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', my: 2 }}>
+                  <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
+                  <Typography variant="caption" sx={{ px: 1.5, color: 'text.secondary', fontWeight: 700, letterSpacing: '0.06em' }}>
+                    OR CONTINUE WITH EMAIL
+                  </Typography>
+                  <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
+                </Box>
+              </Box>
+
               <Tabs
                 value={authTab}
                 onChange={(_, v) => {

@@ -200,7 +200,10 @@ export default function LoginClient({
   }
 
   const registerHref = nextPath ? `/register?next=${encodeURIComponent(nextPath)}` : '/register';
-  const googleEnabled = Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID);
+  const googleEnabled = Boolean(
+    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
+    '795825096579-qv24gfimk7vdaspjkc347fr401h257kp.apps.googleusercontent.com'
+  );
 
   return (
     <Box

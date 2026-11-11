@@ -41,12 +41,21 @@ function loadGsiScript(): Promise<void> {
   });
 }
 
+const DEFAULT_CLIENT_ID = '795825096579-qv24gfimk7vdaspjkc347fr401h257kp.apps.googleusercontent.com';
+
 interface GoogleSignInButtonProps {
   onSuccess: (credential: string) => void;
   onError: (error: string) => void;
+  text?: 'signin_with' | 'signup_with' | 'continue_with';
+  width?: number;
 }
 
-export default function GoogleSignInButton({ onSuccess, onError }: GoogleSignInButtonProps) {
+export default function GoogleSignInButton({
+  onSuccess,
+  onError,
+  text = 'signin_with',
+  width,
+}: GoogleSignInButtonProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   gsiSuccess.current = onSuccess;
   gsiError.current = onError;
@@ -55,7 +64,7 @@ export default function GoogleSignInButton({ onSuccess, onError }: GoogleSignInB
     let cancelled = false;
 
     const start = async () => {
-      const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+      const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || DEFAULT_CLIENT_ID;
       if (!clientId) {
         return;
       }
@@ -87,9 +96,9 @@ export default function GoogleSignInButton({ onSuccess, onError }: GoogleSignInB
           type: 'standard',
           theme: 'outline',
           size: 'large',
-          text: 'signin_with',
+          text,
           shape: 'rectangular',
-          width: Math.max(container.offsetWidth || 0, 280),
+          width: width || Math.max(container.offsetWidth || 0, 280),
         });
       } catch {
         if (!cancelled) gsiError.current('Error loading Google Sign-In.');
@@ -106,11 +115,11 @@ export default function GoogleSignInButton({ onSuccess, onError }: GoogleSignInB
       }
       if (containerRef.current) containerRef.current.innerHTML = '';
     };
-  }, []);
+  }, [text, width]);
 
   return (
-    <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', mt: 1 }}>
-      <div ref={containerRef} style={{ width: '100%', minHeight: 40 }} />
+    <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', mt: 0.5 }}>
+      <div ref={containerRef} style={{ width: '100%', display: 'flex', justifyContent: 'center', minHeight: 40 }} />
     </Box>
   );
 }
