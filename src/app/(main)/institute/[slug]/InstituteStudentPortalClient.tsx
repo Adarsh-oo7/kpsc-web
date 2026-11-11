@@ -29,6 +29,10 @@ import {
   CardContent,
   IconButton,
   InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import ContactMailIcon from '@mui/icons-material/ContactMail';
 import PhoneIcon from '@mui/icons-material/Phone';
@@ -48,6 +52,10 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import ReplayIcon from '@mui/icons-material/Replay';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 import GoogleSignInButton from '@/components/GoogleSignInButton';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
@@ -91,6 +99,14 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
   const [testSubmitting, setTestSubmitting] = useState(false);
   const [testResult, setTestResult] = useState<any>(null);
 
+  // Scheduled Mock Test state
+  const [activeMockTest, setActiveMockTest] = useState<any>(null);
+  const [mockTestQuestions, setMockTestQuestions] = useState<any[]>([]);
+  const [mockTestLoading, setMockTestLoading] = useState(false);
+  const [timerSeconds, setTimerSeconds] = useState<number | null>(null);
+  const [scorecardModalOpen, setScorecardModalOpen] = useState(false);
+  const [viewingScorecard, setViewingScorecard] = useState<any>(null);
+
   const inst = portalData?.institute || initialInstitute;
   const primaryColor = inst?.primary_color || '#0D47A1';
   const accentColor = inst?.accent_color || '#F59E0B';
@@ -116,9 +132,52 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
   const membershipStatus: string = portalData?.membership_status || 'anonymous';
   const topics: any[] = portalData?.topics || [];
   const questions: any[] = portalData?.questions || [];
+  const mockTests: any[] = portalData?.mock_tests || [];
   const notes: any[] = portalData?.notes || [];
   const messages: any[] = portalData?.messages || [];
   const leaderboard: any[] = portalData?.leaderboard || [];
+
+  const formatSchedule = (start?: string, end?: string) => {
+    if (!start && !end) return 'Always Active';
+    const sDate = start ? new Date(start) : null;
+    const eDate = end ? new Date(end) : null;
+    const timeOptions: Intl.DateTimeFormatOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
+    const dateOptions: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+
+    if (sDate && eDate) {
+      const sameDay = sDate.toDateString() === eDate.toDateString();
+      if (sameDay) {
+        return `${sDate.toLocaleDateString(undefined, dateOptions)}, ${sDate.toLocaleTimeString(undefined, timeOptions)} – ${eDate.toLocaleTimeString(undefined, timeOptions)}`;
+      }
+      return `${sDate.toLocaleDateString(undefined, dateOptions)} ${sDate.toLocaleTimeString(undefined, timeOptions)} – ${eDate.toLocaleDateString(undefined, dateOptions)} ${eDate.toLocaleTimeString(undefined, timeOptions)}`;
+    }
+    if (sDate) return `Starts: ${sDate.toLocaleDateString(undefined, dateOptions)} ${sDate.toLocaleTimeString(undefined, timeOptions)}`;
+    if (eDate) return `Ends: ${eDate.toLocaleDateString(undefined, dateOptions)} ${eDate.toLocaleTimeString(undefined, timeOptions)}`;
+    return 'Always Active';
+  };
+
+  const formatTimer = (totalSeconds: number | null) => {
+    if (totalSeconds === null) return '';
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
+  // Live countdown timer for active mock tests
+  useEffect(() => {
+    if (!testActive || timerSeconds === null || timerSeconds <= 0) return;
+    const interval = setInterval(() => {
+      setTimerSeconds((prev) => {
+        if (prev === null || prev <= 1) {
+          clearInterval(interval);
+          handleSubmitTest();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [testActive, timerSeconds]);
 
   const filteredQuestions = useMemo(() => {
     if (selectedTopicId === 'all') return questions;
@@ -248,33 +307,76 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
   };
 
   const handleStartTest = () => {
+    setActiveMockTest(null);
+    setMockTestQuestions([]);
+    setTimerSeconds(null);
     setAnswers({});
     setTestResult(null);
     setTestActive(true);
   };
 
+  const handleStartMockTest = async (testItem: any) => {
+    setMockTestLoading(true);
+    try {
+      const res = await apiClient.get(`/institute/public/mock-test/${slug}/${testItem.id}/questions/`);
+      setActiveMockTest(res.data.test);
+      setMockTestQuestions(res.data.questions);
+      setAnswers({});
+      setTestResult(null);
+      if (res.data.test.duration_minutes > 0) {
+        setTimerSeconds(res.data.test.duration_minutes * 60);
+      } else {
+        setTimerSeconds(null);
+      }
+      setTestActive(true);
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Unable to start this mock test at this time.');
+    } finally {
+      setMockTestLoading(false);
+    }
+  };
+
+  const handleCloseTest = () => {
+    setTestActive(false);
+    setActiveMockTest(null);
+    setMockTestQuestions([]);
+    setAnswers({});
+    setTestResult(null);
+    setTimerSeconds(null);
+  };
+
   const handleSubmitTest = async () => {
-    if (!filteredQuestions.length) return;
+    const qList = activeMockTest ? mockTestQuestions : filteredQuestions;
+    if (!qList.length) return;
     setTestSubmitting(true);
     try {
-      const questionIds = filteredQuestions.map((q) => q.id);
+      const questionIds = qList.map((q) => q.id);
       const formattedAnswers: Record<string, string> = {};
       Object.entries(answers).forEach(([qId, letter]) => {
         formattedAnswers[String(qId)] = letter;
       });
-      const currentTopicName = selectedTopicId === 'all'
+      const currentTopicName = activeMockTest
+        ? activeMockTest.title
+        : selectedTopicId === 'all'
         ? `${inst.name} Full Mock Test`
         : topics.find((t) => t.id === Number(selectedTopicId))?.name || `${inst.name} Practice Test`;
 
-      const res = await apiClient.post(`/institute/public/submit-test/${slug}/`, {
+      const payload: any = {
         question_ids: questionIds,
         answers: formattedAnswers,
         test_title: currentTopicName,
-      });
+      };
+      if (activeMockTest) {
+        payload.mock_test_id = activeMockTest.id;
+      }
+
+      const res = await apiClient.post(`/institute/public/submit-test/${slug}/`, payload);
       setTestResult(res.data);
+      setViewingScorecard(res.data);
+      setScorecardModalOpen(true);
       await fetchPortal();
-    } catch {
-      alert('Failed to submit test answers. Please try again.');
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to submit test answers. Please try again.');
     } finally {
       setTestSubmitting(false);
     }
@@ -779,15 +881,178 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
               {/* TAB 0: ACADEMY TESTS & QUESTIONS */}
               {portalTab === 0 && (
                 <Box>
-                  {/* Topics Filter Pills */}
-                  {topics.length > 0 && (
+                  {/* SECTION 1: OFFICIAL SCHEDULED MOCK TESTS */}
+                  {!testActive && mockTests.length > 0 && (
+                    <Box sx={{ mb: 4 }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1.5, color: 'text.secondary', letterSpacing: '0.04em' }}>
+                        OFFICIAL ACADEMY MOCK TESTS ({mockTests.length})
+                      </Typography>
+                      <Stack spacing={2}>
+                        {mockTests.map((mt: any) => {
+                          const isLive = mt.status === 'live';
+                          const isUpcoming = mt.status === 'upcoming';
+                          return (
+                            <Card
+                              key={mt.id}
+                              variant="outlined"
+                              sx={{
+                                borderRadius: '18px',
+                                border: isLive ? '1.5px solid #2E8B57' : '1px solid',
+                                borderColor: isLive ? '#2E8B57' : 'divider',
+                                background: isLive
+                                  ? 'linear-gradient(135deg, rgba(46, 139, 87, 0.06) 0%, rgba(13, 71, 161, 0.04) 100%)'
+                                  : 'background.paper',
+                                p: 1,
+                              }}
+                            >
+                              <CardContent>
+                                <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', md: 'center' }} spacing={2}>
+                                  <Box sx={{ flex: 1 }}>
+                                    <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }} flexWrap="wrap" useFlexGap>
+                                      <Chip
+                                        label={
+                                          mt.has_attempted
+                                            ? `Completed • ${mt.latest_score} pts (${mt.latest_accuracy}%)`
+                                            : isLive
+                                            ? 'Live Now'
+                                            : isUpcoming
+                                            ? 'Upcoming'
+                                            : 'Closed'
+                                        }
+                                        size="small"
+                                        color={
+                                          mt.has_attempted
+                                            ? 'primary'
+                                            : isLive
+                                            ? 'success'
+                                            : isUpcoming
+                                            ? 'warning'
+                                            : 'default'
+                                        }
+                                        sx={{ fontWeight: 800 }}
+                                      />
+                                      <Chip
+                                        icon={<EventAvailableIcon sx={{ fontSize: 14 }} />}
+                                        label={formatSchedule(mt.start_time, mt.end_time)}
+                                        size="small"
+                                        variant="outlined"
+                                        sx={{ fontWeight: 600 }}
+                                      />
+                                      <Chip
+                                        icon={<AccessTimeIcon sx={{ fontSize: 14 }} />}
+                                        label={mt.time_limit_per_question > 0 ? `${mt.time_limit_per_question}s / Q` : `${mt.duration_minutes} Mins`}
+                                        size="small"
+                                        variant="outlined"
+                                        sx={{ fontWeight: 600 }}
+                                      />
+                                      <Chip
+                                        label={`${mt.question_count ?? 0} Questions`}
+                                        size="small"
+                                        variant="outlined"
+                                        sx={{ fontWeight: 700 }}
+                                      />
+                                      <Chip
+                                        label={mt.can_repeat ? 'Retakes Allowed' : 'Single Attempt Only'}
+                                        size="small"
+                                        variant="outlined"
+                                        sx={{ fontWeight: 600 }}
+                                      />
+                                    </Stack>
+
+                                    <Typography variant="h6" sx={{ fontWeight: 900, mb: 0.5 }}>
+                                      {mt.title}
+                                    </Typography>
+                                    {mt.description && (
+                                      <Typography variant="body2" color="text.secondary">
+                                        {mt.description}
+                                      </Typography>
+                                    )}
+                                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
+                                      Kerala PSC Scheme (+1.0 for Correct, -0.33 for Wrong) • Results recorded in {inst.name}
+                                    </Typography>
+                                  </Box>
+
+                                  <Box sx={{ alignSelf: { xs: 'stretch', sm: 'auto' } }}>
+                                    {mt.has_attempted && !mt.can_repeat ? (
+                                      <Button
+                                        variant="outlined"
+                                        size="large"
+                                        fullWidth
+                                        startIcon={<AssessmentIcon />}
+                                        onClick={() => {
+                                          setViewingScorecard({
+                                            test_title: mt.title,
+                                            score: mt.latest_score,
+                                            total: mt.question_count,
+                                            completed_at: mt.completed_at,
+                                            details: mt.attempt_details?.results || [],
+                                          });
+                                          setScorecardModalOpen(true);
+                                        }}
+                                        sx={{ borderRadius: '12px', fontWeight: 800, textTransform: 'none', px: 3 }}
+                                      >
+                                        View Scorecard
+                                      </Button>
+                                    ) : mt.can_start ? (
+                                      <Button
+                                        variant="contained"
+                                        size="large"
+                                        fullWidth
+                                        startIcon={<PlayArrowIcon />}
+                                        disabled={mockTestLoading}
+                                        onClick={() => handleStartMockTest(mt)}
+                                        sx={{
+                                          background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
+                                          fontWeight: 800,
+                                          textTransform: 'none',
+                                          borderRadius: '12px',
+                                          px: 3.5,
+                                        }}
+                                      >
+                                        {mt.has_attempted ? 'Retake Test' : 'Start Test Now'}
+                                      </Button>
+                                    ) : isUpcoming ? (
+                                      <Button
+                                        variant="outlined"
+                                        size="large"
+                                        fullWidth
+                                        disabled
+                                        startIcon={<HourglassTopIcon />}
+                                        sx={{ borderRadius: '12px', fontWeight: 700, textTransform: 'none' }}
+                                      >
+                                        Scheduled: {formatSchedule(mt.start_time)}
+                                      </Button>
+                                    ) : (
+                                      <Button
+                                        variant="outlined"
+                                        size="large"
+                                        fullWidth
+                                        disabled
+                                        sx={{ borderRadius: '12px', fontWeight: 700, textTransform: 'none' }}
+                                      >
+                                        Test Window Closed
+                                      </Button>
+                                    )}
+                                  </Box>
+                                </Stack>
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+                      </Stack>
+                      <Divider sx={{ my: 4 }} />
+                    </Box>
+                  )}
+
+                  {/* SECTION 2: TOPICS PRACTICE QUESTIONS */}
+                  {!testActive && topics.length > 0 && (
                     <Box sx={{ mb: 3 }}>
                       <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1.25, color: 'text.secondary' }}>
-                        SELECT TOPIC / TEST SECTION
+                        PRACTICE QUESTION BANK BY TOPIC
                       </Typography>
                       <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                         <Chip
-                          label={`All Topics (${questions.length})`}
+                          label={`All Questions (${questions.length})`}
                           clickable
                           onClick={() => {
                             setSelectedTopicId('all');
@@ -831,77 +1096,121 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
                         ? `Once your membership in ${inst.name} is approved by the academy admin, you can attempt all ${inst.question_count || 0} academy test questions right here.`
                         : `Please log in or register above and join ${inst.name} to start attempting academy tests.`}
                     </Alert>
-                  ) : filteredQuestions.length === 0 ? (
-                    <Alert severity="info" sx={{ borderRadius: '14px' }}>
-                      No questions have been published in this topic yet. Check back soon!
-                    </Alert>
                   ) : !testActive ? (
-                    <Card variant="outlined" sx={{ borderRadius: '18px', p: 1 }}>
-                      <CardContent>
-                        <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} spacing={2}>
-                          <Box>
-                            <Typography variant="h6" sx={{ fontWeight: 900 }}>
-                              {selectedTopicId === 'all'
-                                ? `${inst.name} — Full Academy Practice Test`
-                                : topics.find((t) => t.id === selectedTopicId)?.name || 'Topic Test'}
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                              {filteredQuestions.length} Questions • PSC Marking (+1 for Correct, -0.33 for Wrong) • Results recorded on {inst.name} Leaderboard
-                            </Typography>
-                          </Box>
+                    filteredQuestions.length > 0 && (
+                      <Card variant="outlined" sx={{ borderRadius: '18px', p: 1 }}>
+                        <CardContent>
+                          <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} spacing={2}>
+                            <Box>
+                              <Typography variant="h6" sx={{ fontWeight: 900 }}>
+                                {selectedTopicId === 'all'
+                                  ? `${inst.name} — Topic Practice Set`
+                                  : topics.find((t) => t.id === selectedTopicId)?.name || 'Topic Test'}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                                {filteredQuestions.length} Questions • PSC Marking (+1 for Correct, -0.33 for Wrong) • Results recorded on {inst.name} Leaderboard
+                              </Typography>
+                            </Box>
+                            <Button
+                              variant="contained"
+                              size="large"
+                              startIcon={<PlayArrowIcon />}
+                              onClick={handleStartTest}
+                              sx={{
+                                bgcolor: primaryColor,
+                                fontWeight: 800,
+                                textTransform: 'none',
+                                borderRadius: '12px',
+                                px: 3.5,
+                              }}
+                            >
+                              Start Practice
+                            </Button>
+                          </Stack>
+                        </CardContent>
+                      </Card>
+                    )
+                  ) : (
+                    /* ACTIVE TEST VIEW */
+                    <Box>
+                      {/* Sticky Top Timer Bar for Mock Test */}
+                      <Paper
+                        elevation={2}
+                        sx={{
+                          position: 'sticky',
+                          top: 72,
+                          zIndex: 10,
+                          p: 2,
+                          mb: 3,
+                          borderRadius: '16px',
+                          bgcolor: 'background.paper',
+                          border: '1.5px solid',
+                          borderColor: primaryColor,
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          flexWrap: 'wrap',
+                          gap: 1.5,
+                        }}
+                      >
+                        <Box>
+                          <Typography variant="subtitle1" sx={{ fontWeight: 900 }}>
+                            {activeMockTest ? activeMockTest.title : selectedTopicId === 'all' ? `${inst.name} Full Practice Test` : 'Practice Test'}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                            Answered {Object.keys(answers).length} of {(activeMockTest ? mockTestQuestions : filteredQuestions).length} Questions
+                          </Typography>
+                        </Box>
+
+                        <Stack direction="row" spacing={1.5} alignItems="center">
+                          {timerSeconds !== null && (
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 0.75,
+                                bgcolor: timerSeconds < 300 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                                border: `1.5px solid ${timerSeconds < 300 ? '#EF4444' : '#F59E0B'}`,
+                                px: 2,
+                                py: 0.5,
+                                borderRadius: '20px',
+                              }}
+                            >
+                              <AccessTimeIcon sx={{ fontSize: 18, color: timerSeconds < 300 ? '#EF4444' : '#F59E0B' }} />
+                              <Typography
+                                sx={{
+                                  fontWeight: 900,
+                                  fontFamily: "'JetBrains Mono'",
+                                  color: timerSeconds < 300 ? '#EF4444' : '#F59E0B',
+                                  fontSize: '0.95rem',
+                                }}
+                              >
+                                {formatTimer(timerSeconds)}
+                              </Typography>
+                            </Box>
+                          )}
+
                           <Button
                             variant="contained"
-                            size="large"
-                            startIcon={<PlayArrowIcon />}
-                            onClick={handleStartTest}
+                            size="small"
+                            disabled={testSubmitting}
+                            onClick={handleSubmitTest}
                             sx={{
                               bgcolor: primaryColor,
                               fontWeight: 800,
                               textTransform: 'none',
-                              borderRadius: '12px',
-                              px: 3.5,
+                              borderRadius: '10px',
+                              px: 2.5,
                             }}
                           >
-                            Start Test Now
+                            {testSubmitting ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : 'Submit Test'}
                           </Button>
                         </Stack>
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    <Box>
-                      {testResult && (
-                        <Paper
-                          elevation={0}
-                          sx={{
-                            p: 3,
-                            mb: 3,
-                            borderRadius: '16px',
-                            bgcolor: 'rgba(46, 139, 87, 0.08)',
-                            border: '1.5px solid #2E8B57',
-                          }}
-                        >
-                          <Typography variant="h6" sx={{ fontWeight: 900, mb: 1 }}>
-                            Test Submitted! Score: {testResult.score} / {testResult.total}
-                          </Typography>
-                          <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
-                            <Chip label={`Correct: ${testResult.correct}`} color="success" sx={{ fontWeight: 800 }} />
-                            <Chip label={`Wrong: ${testResult.wrong}`} color="error" sx={{ fontWeight: 800 }} />
-                            <Chip label={`Unanswered: ${testResult.unanswered}`} sx={{ fontWeight: 800 }} />
-                            <Chip
-                              label={`Accuracy: ${
-                                testResult.correct + testResult.wrong > 0
-                                  ? Math.round((testResult.correct / (testResult.correct + testResult.wrong)) * 100)
-                                  : 0
-                              }%`}
-                              color="primary"
-                              sx={{ fontWeight: 800 }}
-                            />
-                          </Stack>
-                        </Paper>
-                      )}
+                      </Paper>
 
+                      {/* Question List */}
                       <Stack spacing={2.5}>
-                        {filteredQuestions.map((q: any, idx: number) => {
+                        {(activeMockTest ? mockTestQuestions : filteredQuestions).map((q: any, idx: number) => {
                           const selected = answers[q.id] || '';
                           const isSubmitted = Boolean(testResult);
                           return (
@@ -972,16 +1281,13 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
                         })}
                       </Stack>
 
-                      <Stack direction="row" spacing={2} justifyContent="flex-end" sx={{ mt: 3 }}>
+                      <Stack direction="row" spacing={2} justifyContent="space-between" sx={{ mt: 3.5 }}>
                         <Button
                           variant="outlined"
-                          onClick={() => {
-                            setTestActive(false);
-                            setTestResult(null);
-                          }}
+                          onClick={handleCloseTest}
                           sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '12px' }}
                         >
-                          Back
+                          Exit Test
                         </Button>
                         {!testResult && (
                           <Button
@@ -997,7 +1303,7 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
                               px: 4,
                             }}
                           >
-                            {testSubmitting ? <CircularProgress size={22} sx={{ color: '#fff' }} /> : 'Submit Test & View Score'}
+                            {testSubmitting ? <CircularProgress size={22} sx={{ color: '#fff' }} /> : 'Submit Test & View Results'}
                           </Button>
                         )}
                       </Stack>
@@ -1202,6 +1508,132 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute }:
           )}
         </Box>
       </Paper>
+
+      {/* Scorecard & Detailed Answer Key Modal */}
+      <Dialog
+        open={scorecardModalOpen}
+        onClose={() => setScorecardModalOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontWeight: 900, pb: 1 }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 900 }}>
+                {viewingScorecard?.test_title || 'Mock Test Scorecard'}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Kerala PSC Exam Marking Scheme (+1.0 Correct, -0.33 Wrong)
+              </Typography>
+            </Box>
+            <Chip
+              label={`Score: ${viewingScorecard?.score ?? 0} pts`}
+              color="primary"
+              sx={{ fontWeight: 900, fontSize: '0.9rem', px: 1 }}
+            />
+          </Stack>
+        </DialogTitle>
+        <DialogContent dividers>
+          {viewingScorecard && (
+            <Stack spacing={2.5}>
+              <Paper variant="outlined" sx={{ p: 2.5, borderRadius: '16px', bgcolor: 'rgba(27, 107, 58, 0.05)' }}>
+                <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap justifyContent="space-around">
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="h5" sx={{ fontWeight: 900, color: 'success.main' }}>
+                      {viewingScorecard.correct ?? 0}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                      Correct (+1.0)
+                    </Typography>
+                  </Box>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="h5" sx={{ fontWeight: 900, color: 'error.main' }}>
+                      {viewingScorecard.wrong ?? 0}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                      Wrong (-0.33)
+                    </Typography>
+                  </Box>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="h5" sx={{ fontWeight: 900, color: 'text.secondary' }}>
+                      {viewingScorecard.unanswered ?? ((viewingScorecard.total || 0) - ((viewingScorecard.correct || 0) + (viewingScorecard.wrong || 0)))}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                      Unanswered
+                    </Typography>
+                  </Box>
+                  <Box sx={{ textAlign: 'center' }}>
+                    <Typography variant="h5" sx={{ fontWeight: 900, color: primaryColor }}>
+                      {viewingScorecard.accuracy ?? (
+                        (viewingScorecard.correct || 0) + (viewingScorecard.wrong || 0) > 0
+                          ? Math.round(((viewingScorecard.correct || 0) / ((viewingScorecard.correct || 0) + (viewingScorecard.wrong || 0))) * 100)
+                          : 0
+                      )}%
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700 }}>
+                      Accuracy
+                    </Typography>
+                  </Box>
+                </Stack>
+              </Paper>
+
+              <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'text.secondary', letterSpacing: '0.04em' }}>
+                DETAILED QUESTION & ANSWER REVIEW
+              </Typography>
+
+              <Stack spacing={2}>
+                {(viewingScorecard.details || []).map((det: any, idx: number) => {
+                  const isCorrect = det.is_correct;
+                  const isUnanswered = det.unanswered || !det.selected_option;
+                  return (
+                    <Paper
+                      key={idx}
+                      variant="outlined"
+                      sx={{
+                        p: 2,
+                        borderRadius: '14px',
+                        borderLeft: '4px solid',
+                        borderLeftColor: isCorrect ? '#2E8B57' : isUnanswered ? '#94A3B8' : '#EF4444',
+                      }}
+                    >
+                      <Stack direction="row" justifyContent="space-between" sx={{ mb: 1 }}>
+                        <Chip label={`Q${idx + 1}`} size="small" sx={{ fontWeight: 800 }} />
+                        <Chip
+                          label={isCorrect ? '+1.0 Mark (Correct)' : isUnanswered ? '0 Marks (Unanswered)' : '-0.33 Mark (Wrong)'}
+                          size="small"
+                          color={isCorrect ? 'success' : isUnanswered ? 'default' : 'error'}
+                          sx={{ fontWeight: 800 }}
+                        />
+                      </Stack>
+                      <Typography variant="body1" sx={{ fontWeight: 700, mb: 1 }}>
+                        {det.question_text}
+                      </Typography>
+                      <Stack direction="row" spacing={3} sx={{ mb: 1 }}>
+                        <Typography variant="body2" sx={{ color: isCorrect ? 'success.main' : isUnanswered ? 'text.secondary' : 'error.main', fontWeight: 700 }}>
+                          Your Choice: {det.selected_option ? `Option ${det.selected_option}` : 'None'}
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: 'success.main', fontWeight: 800 }}>
+                          Correct Answer: Option {det.correct_answer}
+                        </Typography>
+                      </Stack>
+                      {det.explanation && (
+                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', fontStyle: 'italic', bgcolor: 'action.hover', p: 1, borderRadius: '8px' }}>
+                          💡 {det.explanation}
+                        </Typography>
+                      )}
+                    </Paper>
+                  );
+                })}
+              </Stack>
+            </Stack>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setScorecardModalOpen(false)} variant="contained" sx={{ bgcolor: primaryColor, borderRadius: '10px', fontWeight: 800 }}>
+            Done
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

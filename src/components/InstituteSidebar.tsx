@@ -13,6 +13,7 @@ import PaymentsIcon from '@mui/icons-material/Payments';
 import GroupsIcon from '@mui/icons-material/Groups';
 import DescriptionIcon from '@mui/icons-material/Description';
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import { usePathname } from 'next/navigation';
 import { useAppContext } from '@/context/AppContext';
 
@@ -25,6 +26,7 @@ interface InstituteSidebarProps {
 const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/institute/dashboard' },
   { text: 'Students', icon: <PeopleIcon />, path: '/institute/students' },
+  { text: 'Mock Tests', icon: <AssignmentIcon />, path: '/institute/mock-tests' },
   { text: 'Batches', icon: <GroupsIcon />, path: '/institute/batches' },
   { text: 'Study Materials', icon: <DescriptionIcon />, path: '/institute/notes' },
   { text: 'Questions', icon: <LibraryBooksIcon />, path: '/institute/questions' },

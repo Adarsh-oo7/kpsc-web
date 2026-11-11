@@ -31,6 +31,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import NoteAddIcon from '@mui/icons-material/NoteAdd';
+import QuizIcon from '@mui/icons-material/Quiz';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
@@ -259,16 +260,19 @@ export default function InstituteDashboard() {
                 Quick Actions
               </Typography>
               <Grid container spacing={1.5}>
-                <Grid size={{ xs: 6, sm: 3 }}>
+                <Grid size={{ xs: 6, sm: 2.4 }}>
+                  <ActionButton icon={<QuizIcon />} label="Mock Tests" onClick={() => router.push('/institute/mock-tests')} />
+                </Grid>
+                <Grid size={{ xs: 6, sm: 2.4 }}>
                   <ActionButton icon={<AssignmentIcon />} label="Add Questions" onClick={() => router.push('/institute/questions')} />
                 </Grid>
-                <Grid size={{ xs: 6, sm: 3 }}>
+                <Grid size={{ xs: 6, sm: 2.4 }}>
                   <ActionButton icon={<PersonAddIcon />} label="Students & Results" onClick={() => router.push('/institute/students')} />
                 </Grid>
-                <Grid size={{ xs: 6, sm: 3 }}>
+                <Grid size={{ xs: 6, sm: 2.4 }}>
                   <ActionButton icon={<PersonSearchIcon />} label={`Join Requests (${requests.length})`} onClick={() => router.push('/institute/requests')} />
                 </Grid>
-                <Grid size={{ xs: 6, sm: 3 }}>
+                <Grid size={{ xs: 6, sm: 2.4 }}>
                   <ActionButton icon={<NoteAddIcon />} label="Upload Notes" onClick={() => router.push('/institute/notes')} />
                 </Grid>
               </Grid>
