@@ -419,7 +419,7 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
   };
 
   return (
-    <Box sx={{ maxWidth: 1040, mx: 'auto', px: { xs: 1.5, sm: 2, md: 0 }, pb: 8 }}>
+    <Box sx={{ maxWidth: 1040, mx: 'auto', pb: 8 }}>
       {/* Branded Hero Header */}
       <Paper
         elevation={0}
@@ -436,28 +436,29 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
       >
         <Stack
           direction={{ xs: 'column', md: 'row' }}
-          spacing={{ xs: 2.5, md: 3 }}
-          alignItems={{ xs: 'flex-start', md: 'center' }}
+          spacing={{ xs: 2.25, md: 3 }}
+          alignItems={{ xs: 'stretch', md: 'center' }}
           justifyContent="space-between"
         >
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={{ xs: 2, sm: 2.5 }} alignItems={{ xs: 'flex-start', sm: 'center' }}>
+          <Stack direction="row" spacing={{ xs: 1.75, sm: 2.5 }} alignItems="flex-start">
             <Avatar
               src={inst?.logo || ''}
               alt={inst?.name || 'Institute'}
               variant="rounded"
               sx={{
-                width: { xs: 60, sm: 76, md: 92 },
-                height: { xs: 60, sm: 76, md: 92 },
+                width: { xs: 58, sm: 76, md: 92 },
+                height: { xs: 58, sm: 76, md: 92 },
                 borderRadius: { xs: '14px', sm: '20px' },
                 bgcolor: 'rgba(255,255,255,0.12)',
                 border: `2px solid ${accentColor}`,
                 boxShadow: '0 8px 24px rgba(0,0,0,0.35)',
                 flexShrink: 0,
+                mt: { xs: 0.25, sm: 0 },
               }}
             >
-              <SchoolIcon sx={{ fontSize: { xs: 34, sm: 42, md: 48 } }} />
+              <SchoolIcon sx={{ fontSize: { xs: 32, sm: 42, md: 48 } }} />
             </Avatar>
-            <Box sx={{ minWidth: 0 }}>
+            <Box sx={{ minWidth: 0, flex: 1 }}>
               <Chip
                 label="OFFICIAL ACADEMY PORTAL"
                 size="small"
@@ -465,17 +466,17 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                   bgcolor: accentColor,
                   color: '#091E42',
                   fontWeight: 900,
-                  fontSize: '0.68rem',
+                  fontSize: '0.65rem',
                   letterSpacing: '0.08em',
                   mb: 0.75,
-                  height: 22,
+                  height: 21,
                 }}
               />
               <Typography
                 sx={{
                   fontFamily: "'Cabinet Grotesk', sans-serif",
                   fontWeight: 900,
-                  fontSize: { xs: '1.45rem', sm: '1.85rem', md: '2.4rem' },
+                  fontSize: { xs: '1.4rem', sm: '1.85rem', md: '2.4rem' },
                   letterSpacing: '-0.02em',
                   lineHeight: 1.15,
                   wordBreak: 'break-word',
@@ -484,58 +485,66 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                 {inst?.name}
               </Typography>
               {inst?.tagline && (
-                <Typography sx={{ mt: 0.5, color: 'rgba(255,255,255,0.9)', fontWeight: 600, fontSize: { xs: '0.85rem', sm: '0.98rem' } }}>
+                <Typography sx={{ mt: 0.5, color: 'rgba(255,255,255,0.88)', fontWeight: 500, fontSize: { xs: '0.82rem', sm: '0.96rem' }, lineHeight: 1.4 }}>
                   {inst.tagline}
                 </Typography>
               )}
-              <Stack direction="row" spacing={1} sx={{ mt: 1.25 }} flexWrap="wrap" useFlexGap>
+              <Stack direction="row" spacing={0.75} sx={{ mt: 1.25 }} flexWrap="wrap" useFlexGap>
                 <Chip
                   label={`${inst?.student_count ?? leaderboard.length} Students`}
                   size="small"
-                  sx={{ bgcolor: 'rgba(255,255,255,0.14)', color: '#fff', fontWeight: 700, fontSize: '0.72rem', height: 24 }}
+                  sx={{ bgcolor: 'rgba(255,255,255,0.14)', color: '#fff', fontWeight: 700, fontSize: '0.7rem', height: 23 }}
                 />
                 <Chip
                   label={`${inst?.question_count ?? questions.length} Practice MCQs`}
                   size="small"
-                  sx={{ bgcolor: 'rgba(255,255,255,0.14)', color: '#fff', fontWeight: 700, fontSize: '0.72rem', height: 24 }}
+                  sx={{ bgcolor: 'rgba(255,255,255,0.14)', color: '#fff', fontWeight: 700, fontSize: '0.7rem', height: 23 }}
                 />
                 <Chip
                   label={`${inst?.topic_count ?? topics.length} Test Topics`}
                   size="small"
-                  sx={{ bgcolor: 'rgba(255,255,255,0.14)', color: '#fff', fontWeight: 700, fontSize: '0.72rem', height: 24 }}
+                  sx={{ bgcolor: 'rgba(255,255,255,0.14)', color: '#fff', fontWeight: 700, fontSize: '0.7rem', height: 23 }}
                 />
               </Stack>
             </Box>
           </Stack>
 
-          <Stack direction={{ xs: 'row', sm: 'row', md: 'column' }} spacing={1.25} sx={{ width: { xs: '100%', sm: 'auto' }, pt: { xs: 0.5, md: 0 } }}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr 1fr', md: '1fr' },
+              gap: 1,
+              width: { xs: '100%', md: 'auto' },
+              minWidth: { md: 185 },
+              flexShrink: 0,
+            }}
+          >
             <Button
               variant="outlined"
               size="small"
-              fullWidth={isMobile}
-              startIcon={<ShareIcon />}
+              fullWidth
+              startIcon={<ShareIcon sx={{ fontSize: '16px !important' }} />}
               onClick={handleShareOrCopy}
               sx={{
                 color: '#fff',
-                borderColor: 'rgba(255,255,255,0.4)',
+                borderColor: 'rgba(255,255,255,0.38)',
                 textTransform: 'none',
                 fontWeight: 700,
                 borderRadius: '10px',
                 height: 38,
-                flex: { xs: 1, sm: 'none' },
-                fontSize: { xs: '0.8rem', sm: '0.875rem' },
+                fontSize: { xs: '0.78rem', sm: '0.85rem' },
                 whiteSpace: 'nowrap',
               }}
             >
               {copiedLink ? 'Link Copied!' : 'Share Portal'}
             </Button>
             {membershipStatus === 'owner' ? (
-              <Link href="/institute/dashboard" style={{ textDecoration: 'none', display: 'block', width: isMobile ? '100%' : 'auto' }}>
+              <Link href="/institute/dashboard" style={{ textDecoration: 'none', display: 'block', width: '100%' }}>
                 <Button
                   variant="contained"
                   size="small"
-                  fullWidth={isMobile}
-                  startIcon={<AdminPanelSettingsIcon />}
+                  fullWidth
+                  startIcon={<AdminPanelSettingsIcon sx={{ fontSize: '16px !important' }} />}
                   sx={{
                     bgcolor: accentColor,
                     color: '#091E42',
@@ -543,7 +552,7 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                     textTransform: 'none',
                     borderRadius: '10px',
                     height: 38,
-                    fontSize: { xs: '0.8rem', sm: '0.875rem' },
+                    fontSize: { xs: '0.78rem', sm: '0.85rem' },
                     whiteSpace: 'nowrap',
                     '&:hover': { bgcolor: '#fbbf24' },
                   }}
@@ -552,18 +561,20 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                 </Button>
               </Link>
             ) : (
-              <Link href="/login?tab=1" style={{ textDecoration: 'none', display: 'block', width: isMobile ? '100%' : 'auto' }}>
+              <Link href="/login?tab=1" style={{ textDecoration: 'none', display: 'block', width: '100%' }}>
                 <Button
-                  variant="text"
+                  variant="outlined"
                   size="small"
-                  fullWidth={isMobile}
-                  startIcon={<AdminPanelSettingsIcon />}
+                  fullWidth
+                  startIcon={<AdminPanelSettingsIcon sx={{ fontSize: '16px !important' }} />}
                   sx={{
-                    color: 'rgba(255,255,255,0.85)',
+                    color: 'rgba(255,255,255,0.9)',
+                    borderColor: 'rgba(255,255,255,0.22)',
                     textTransform: 'none',
                     fontWeight: 700,
+                    borderRadius: '10px',
                     height: 38,
-                    fontSize: { xs: '0.8rem', sm: '0.875rem' },
+                    fontSize: { xs: '0.78rem', sm: '0.85rem' },
                     whiteSpace: 'nowrap',
                   }}
                 >
@@ -571,7 +582,7 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                 </Button>
               </Link>
             )}
-          </Stack>
+          </Box>
         </Stack>
       </Paper>
 
@@ -586,44 +597,50 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
         <Paper
           elevation={0}
           sx={{
-            p: { xs: 2.5, md: 4 },
-            mb: 4,
-            borderRadius: '22px',
-            border: '2px solid',
+            p: { xs: 2, sm: 3, md: 4 },
+            mb: 3.5,
+            borderRadius: { xs: '18px', sm: '22px' },
+            border: '1.5px solid',
             borderColor: primaryColor,
           }}
         >
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1.05fr 0.95fr' }, gap: 4, alignItems: 'center' }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1.05fr 0.95fr' }, gap: { xs: 2.5, md: 4 }, alignItems: 'center' }}>
             <Box>
-              <Typography sx={{ fontSize: '0.78rem', fontWeight: 800, color: primaryColor, textTransform: 'uppercase', letterSpacing: '0.1em', mb: 1 }}>
+              <Typography sx={{ fontSize: '0.72rem', fontWeight: 800, color: primaryColor, textTransform: 'uppercase', letterSpacing: '0.1em', mb: 0.75 }}>
                 Student Portal Access
               </Typography>
-              <Typography sx={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 900, fontSize: { xs: '1.5rem', md: '1.85rem' }, mb: 1.5 }}>
-                Log in or Join {inst.name}
+              <Typography sx={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 900, fontSize: { xs: '1.35rem', sm: '1.65rem', md: '1.85rem' }, mb: 1, lineHeight: 1.2 }}>
+                Sign in or Join {inst?.name}
               </Typography>
-              <Typography sx={{ color: 'text.secondary', mb: 2.5, lineHeight: 1.6 }}>
-                Sign in with your student account or create a new account below. Once you sign in here, your join request is automatically sent to <strong>{inst.name}</strong> so you can attempt academy tests, view study notes, and compete on the live {inst.name} leaderboard.
+              <Typography sx={{ color: 'text.secondary', mb: 2, lineHeight: 1.55, fontSize: { xs: '0.85rem', sm: '0.94rem' } }}>
+                Log in with your student account or create a new account below to attend scheduled mock tests, view instant answer keys, and compete on the live <strong>{inst?.name}</strong> batch leaderboard.
               </Typography>
-              <Stack spacing={1.25}>
-                <Stack direction="row" spacing={1.25} alignItems="center">
-                  <CheckCircleIcon sx={{ color: primaryColor, fontSize: 20 }} />
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Exclusive Mock Tests & Topic MCQs curated by {inst.name}</Typography>
+              <Stack spacing={1}>
+                <Stack direction="row" spacing={1.25} alignItems="flex-start">
+                  <CheckCircleIcon sx={{ color: primaryColor, fontSize: 18, mt: 0.25, flexShrink: 0 }} />
+                  <Typography variant="body2" sx={{ fontWeight: 600, fontSize: { xs: '0.82rem', sm: '0.88rem' } }}>
+                    Scheduled Mock Tests & Topic MCQs curated by {inst?.name}
+                  </Typography>
                 </Stack>
-                <Stack direction="row" spacing={1.25} alignItems="center">
-                  <CheckCircleIcon sx={{ color: primaryColor, fontSize: 20 }} />
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Live Batch Leaderboard, Test Scores & Accuracy Analysis</Typography>
+                <Stack direction="row" spacing={1.25} alignItems="flex-start">
+                  <CheckCircleIcon sx={{ color: primaryColor, fontSize: 18, mt: 0.25, flexShrink: 0 }} />
+                  <Typography variant="body2" sx={{ fontWeight: 600, fontSize: { xs: '0.82rem', sm: '0.88rem' } }}>
+                    Live Batch Leaderboard, Net Marks & Accuracy Analysis
+                  </Typography>
                 </Stack>
-                <Stack direction="row" spacing={1.25} alignItems="center">
-                  <CheckCircleIcon sx={{ color: primaryColor, fontSize: 20 }} />
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>Instant Answer Key & Detailed Explanations</Typography>
+                <Stack direction="row" spacing={1.25} alignItems="flex-start">
+                  <CheckCircleIcon sx={{ color: primaryColor, fontSize: 18, mt: 0.25, flexShrink: 0 }} />
+                  <Typography variant="body2" sx={{ fontWeight: 600, fontSize: { xs: '0.82rem', sm: '0.88rem' } }}>
+                    Instant Scorecard & Detailed Answer Key Explanations
+                  </Typography>
                 </Stack>
               </Stack>
             </Box>
 
-            <Paper elevation={0} sx={{ p: 3, borderRadius: '18px', bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider' }}>
+            <Paper elevation={0} sx={{ p: { xs: 1.75, sm: 2.5, md: 3 }, borderRadius: '16px', bgcolor: 'action.hover', border: '1px solid', borderColor: 'divider' }}>
               {/* Quick 1-Click Google OAuth */}
-              <Box sx={{ mb: 2 }}>
-                <Typography sx={{ fontSize: '0.78rem', fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 1, textAlign: 'center' }}>
+              <Box sx={{ mb: 1.75 }}>
+                <Typography sx={{ fontSize: '0.72rem', fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.06em', mb: 1, textAlign: 'center' }}>
                   Quick 1-Click Access
                 </Typography>
                 <Box
@@ -636,6 +653,7 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                     bgcolor: 'background.paper',
                     display: 'flex',
                     justifyContent: 'center',
+                    overflow: 'hidden',
                     boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
                   }}
                 >
@@ -645,10 +663,10 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                     text="continue_with"
                   />
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', my: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', my: 1.75 }}>
                   <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
-                  <Typography variant="caption" sx={{ px: 1.5, color: 'text.secondary', fontWeight: 700, letterSpacing: '0.06em' }}>
-                    OR CONTINUE WITH EMAIL
+                  <Typography variant="caption" sx={{ px: 1.25, color: 'text.secondary', fontWeight: 700, fontSize: '0.68rem', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>
+                    OR USE USERNAME / EMAIL
                   </Typography>
                   <Box sx={{ flex: 1, height: '1px', bgcolor: 'divider' }} />
                 </Box>
@@ -661,28 +679,39 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                   setAuthError('');
                 }}
                 variant="fullWidth"
-                sx={{ mb: 2.5 }}
+                sx={{
+                  mb: 2,
+                  minHeight: 42,
+                  '& .MuiTab-root': {
+                    minHeight: 42,
+                    py: 1,
+                    px: 1,
+                    fontSize: { xs: '0.82rem', sm: '0.88rem' },
+                    textTransform: 'none',
+                    fontWeight: 800,
+                  },
+                }}
               >
-                <Tab value="login" label="Student Login" icon={<LoginIcon sx={{ fontSize: 18 }} />} iconPosition="start" sx={{ textTransform: 'none', fontWeight: 800 }} />
-                <Tab value="register" label="New Student" icon={<PersonAddIcon sx={{ fontSize: 18 }} />} iconPosition="start" sx={{ textTransform: 'none', fontWeight: 800 }} />
+                <Tab value="login" label="Student Login" icon={<LoginIcon sx={{ fontSize: 16 }} />} iconPosition="start" />
+                <Tab value="register" label="New Student" icon={<PersonAddIcon sx={{ fontSize: 16 }} />} iconPosition="start" />
               </Tabs>
 
               {authError && (
-                <Alert severity="error" sx={{ mb: 2, borderRadius: '10px' }}>
+                <Alert severity="error" sx={{ mb: 2, borderRadius: '10px', fontSize: '0.82rem' }}>
                   {authError}
                 </Alert>
               )}
 
               {authTab === 'login' ? (
                 <form onSubmit={handleStudentLogin}>
-                  <Stack spacing={2}>
+                  <Stack spacing={1.75}>
                     <TextField
                       label="Username or Email"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       fullWidth
                       required
-                      size="medium"
+                      size="small"
                     />
                     <TextField
                       label="Password"
@@ -691,11 +720,12 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                       onChange={(e) => setPassword(e.target.value)}
                       fullWidth
                       required
+                      size="small"
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
-                            <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                              {showPassword ? <VisibilityOff /> : <Visibility />}
+                            <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" size="small">
+                              {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
                             </IconButton>
                           </InputAdornment>
                         ),
@@ -707,21 +737,22 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                       size="large"
                       disabled={authSubmitting}
                       sx={{
-                        py: 1.4,
+                        py: 1.25,
                         fontWeight: 800,
+                        fontSize: '0.9rem',
                         textTransform: 'none',
                         borderRadius: '12px',
                         bgcolor: primaryColor,
                         '&:hover': { bgcolor: '#091E42' },
                       }}
                     >
-                      {authSubmitting ? <CircularProgress size={22} sx={{ color: '#fff' }} /> : `Login & Enter ${inst.name}`}
+                      {authSubmitting ? <CircularProgress size={20} sx={{ color: '#fff' }} /> : `Sign In to ${inst?.name}`}
                     </Button>
                   </Stack>
                 </form>
               ) : (
                 <form onSubmit={handleStudentRegister}>
-                  <Stack spacing={1.75}>
+                  <Stack spacing={1.5}>
                     <TextField
                       label="Full Name"
                       value={fullName}
@@ -768,8 +799,8 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                       InputProps={{
                         endAdornment: (
                           <InputAdornment position="end">
-                            <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                              {showPassword ? <VisibilityOff /> : <Visibility />}
+                            <IconButton onClick={() => setShowPassword(!showPassword)} edge="end" size="small">
+                              {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
                             </IconButton>
                           </InputAdornment>
                         ),
@@ -781,15 +812,16 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                       size="large"
                       disabled={authSubmitting}
                       sx={{
-                        py: 1.4,
+                        py: 1.25,
                         fontWeight: 800,
+                        fontSize: '0.9rem',
                         textTransform: 'none',
                         borderRadius: '12px',
                         bgcolor: primaryColor,
                         '&:hover': { bgcolor: '#091E42' },
                       }}
                     >
-                      {authSubmitting ? <CircularProgress size={22} sx={{ color: '#fff' }} /> : `Register & Request to Join ${inst.name}`}
+                      {authSubmitting ? <CircularProgress size={20} sx={{ color: '#fff' }} /> : `Create Account & Join`}
                     </Button>
                   </Stack>
                 </form>
@@ -804,9 +836,9 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
         <Paper
           elevation={0}
           sx={{
-            p: 2.5,
-            mb: 3.5,
-            borderRadius: '18px',
+            p: { xs: 2, sm: 2.5 },
+            mb: 3,
+            borderRadius: { xs: '16px', sm: '18px' },
             border: '1.5px solid',
             borderColor:
               membershipStatus === 'member' || membershipStatus === 'owner'
@@ -817,93 +849,106 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
             bgcolor: 'background.paper',
           }}
         >
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'flex-start', sm: 'center' }} justifyContent="space-between">
-            <Stack direction="row" spacing={1.5} alignItems="center">
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'stretch', sm: 'center' }} justifyContent="space-between">
+            <Stack direction="row" spacing={1.5} alignItems="flex-start">
               {membershipStatus === 'member' || membershipStatus === 'owner' ? (
-                <CheckCircleIcon color="success" sx={{ fontSize: 32 }} />
+                <CheckCircleIcon color="success" sx={{ fontSize: 28, mt: 0.25, flexShrink: 0 }} />
               ) : (
-                <HourglassTopIcon color="warning" sx={{ fontSize: 32 }} />
+                <HourglassTopIcon color="warning" sx={{ fontSize: 28, mt: 0.25, flexShrink: 0 }} />
               )}
-              <Box>
-                <Typography sx={{ fontWeight: 800, fontSize: '1.05rem' }}>
-                  {membershipStatus === 'owner' && `You are logged in as the ${inst.name} Admin`}
-                  {membershipStatus === 'member' && `Welcome, ${user.username}! You are an enrolled student of ${inst.name}.`}
+              <Box sx={{ minWidth: 0 }}>
+                <Typography sx={{ fontWeight: 800, fontSize: { xs: '0.95rem', sm: '1.05rem' }, lineHeight: 1.3 }}>
+                  {membershipStatus === 'owner' && `${inst?.name} Admin View`}
+                  {membershipStatus === 'member' && `Welcome, ${user.username}! Enrolled in ${inst?.name}`}
                   {membershipStatus === 'pending' && `Join Request Pending Approval`}
-                  {membershipStatus === 'none' && `Join ${inst.name} to unlock academy tests & materials`}
-                  {membershipStatus === 'other_institute' && `You are currently enrolled in another institute`}
+                  {membershipStatus === 'none' && `Join ${inst?.name} to Unlock Tests`}
+                  {membershipStatus === 'other_institute' && `Currently Enrolled in Another Academy`}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 0.35, fontSize: { xs: '0.8rem', sm: '0.875rem' }, lineHeight: 1.45 }}>
                   {membershipStatus === 'member' || membershipStatus === 'owner'
-                    ? `You have full access to ${inst.name}'s test questions, study notes, and live batch leaderboard.`
+                    ? `Full access to ${inst?.name} scheduled mock tests, practice MCQs, study notes, and batch leaderboard.`
                     : membershipStatus === 'pending'
-                    ? `Your request to join ${inst.name} has been sent. Once the ${inst.name} Admin approves your request, academy tests will unlock automatically.`
-                    : `Click "Request to Join ${inst.name}" so the academy admin can approve your student account.`}
+                    ? `Your request has been sent to ${inst?.name}. Tests will unlock automatically once approved.`
+                    : `Tap "Request to Join" so the ${inst?.name} admin can approve your student account.`}
                 </Typography>
               </Box>
             </Stack>
 
-            <Stack direction="row" spacing={1}>
-              {membershipStatus === 'none' && (
-                <Button
-                  variant="contained"
-                  onClick={() => handleRequestJoin()}
-                  disabled={joinSubmitting}
-                  sx={{
-                    textTransform: 'none',
-                    fontWeight: 800,
-                    borderRadius: '12px',
-                    bgcolor: primaryColor,
-                  }}
-                >
-                  {joinSubmitting ? <CircularProgress size={20} sx={{ color: '#fff' }} /> : `Request to Join ${inst.name}`}
-                </Button>
-              )}
-              {membershipStatus === 'pending' && (
-                <Button
-                  variant="outlined"
-                  startIcon={<RefreshIcon />}
-                  onClick={() => fetchPortal(true)}
-                  sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '12px' }}
-                >
-                  Check Approval Status
-                </Button>
-              )}
-            </Stack>
+            {(membershipStatus === 'none' || membershipStatus === 'pending') && (
+              <Box sx={{ flexShrink: 0 }}>
+                {membershipStatus === 'none' && (
+                  <Button
+                    variant="contained"
+                    fullWidth={isMobile}
+                    onClick={() => handleRequestJoin()}
+                    disabled={joinSubmitting}
+                    sx={{
+                      textTransform: 'none',
+                      fontWeight: 800,
+                      borderRadius: '10px',
+                      bgcolor: primaryColor,
+                    }}
+                  >
+                    {joinSubmitting ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : `Request to Join ${inst?.name}`}
+                  </Button>
+                )}
+                {membershipStatus === 'pending' && (
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    fullWidth={isMobile}
+                    startIcon={<RefreshIcon />}
+                    onClick={() => fetchPortal(true)}
+                    sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '10px' }}
+                  >
+                    Check Approval Status
+                  </Button>
+                )}
+              </Box>
+            )}
           </Stack>
         </Paper>
       )}
 
       {/* Main Portal Navigation Tabs */}
-      <Paper elevation={0} sx={{ borderRadius: '20px', border: '1.5px solid', borderColor: 'divider', overflow: 'hidden' }}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'action.hover', px: 2 }}>
+      <Paper elevation={0} sx={{ borderRadius: { xs: '16px', sm: '20px' }, border: '1.5px solid', borderColor: 'divider', overflow: 'hidden' }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'action.hover', px: { xs: 0.5, sm: 2 } }}>
           <Tabs
             value={portalTab}
             onChange={(_, v) => setPortalTab(v)}
-            variant="scrollable"
+            variant={isMobile ? 'fullWidth' : 'scrollable'}
             scrollButtons="auto"
+            sx={{
+              minHeight: { xs: 48, sm: 56 },
+              '& .MuiTab-root': {
+                minHeight: { xs: 48, sm: 56 },
+                py: 1.25,
+                px: { xs: 1, sm: 2.5 },
+                fontSize: { xs: '0.78rem', sm: '0.88rem' },
+                textTransform: 'none',
+                fontWeight: 800,
+              },
+            }}
           >
             <Tab
-              icon={<QuizIcon sx={{ fontSize: 20 }} />}
+              icon={<QuizIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />}
               iconPosition="start"
-              label={`Academy Tests & Questions (${inst.question_count ?? questions.length})`}
-              sx={{ textTransform: 'none', fontWeight: 800, py: 2 }}
+              label={isMobile ? `Tests (${(mockTests.length || 0) + (inst?.question_count ?? questions.length)})` : `Tests & Questions (${inst?.question_count ?? questions.length})`}
             />
             <Tab
-              icon={<EmojiEventsIcon sx={{ fontSize: 20 }} />}
+              icon={<EmojiEventsIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />}
               iconPosition="start"
-              label={`Batch Leaderboard (${leaderboard.length})`}
-              sx={{ textTransform: 'none', fontWeight: 800, py: 2 }}
+              label={`Leaderboard (${leaderboard.length})`}
             />
             <Tab
-              icon={<DescriptionIcon sx={{ fontSize: 20 }} />}
+              icon={<DescriptionIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />}
               iconPosition="start"
-              label={`Notes & Info`}
-              sx={{ textTransform: 'none', fontWeight: 800, py: 2 }}
+              label={isMobile ? 'Notes' : 'Notes & Info'}
             />
           </Tabs>
         </Box>
 
-        <Box sx={{ p: { xs: 2.5, md: 4 } }}>
+        <Box sx={{ p: { xs: 1.75, sm: 2.5, md: 3.5 } }}>
           {loadingPortal ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
               <CircularProgress />

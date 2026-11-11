@@ -67,9 +67,9 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
           color: 'text.primary',
         }}
       >
-        <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64, px: { xs: 2, sm: 3 } }}>
+        <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64, px: { xs: 1.5, sm: 3 } }}>
           {/* Left: Mobile Menu Toggle & Brand/Logo */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, sm: 1 }, minWidth: 0 }}>
             <IconButton
               onClick={() => setVisitorDrawerOpen(true)}
               edge="start"
@@ -80,26 +80,30 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
             </IconButton>
             <Box 
               onClick={() => router.push('/')}
-              sx={{ display: 'flex', alignItems: 'center', gap: 1.25, cursor: 'pointer' }}
+              sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer', minWidth: 0 }}
             >
               <Box sx={{
-                width: 32, height: 32,
+                width: 30, height: 30,
                 position: 'relative',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
               }}>
                 <Image
                   src="/KPSC MASTER.png"
                   alt="KPSC Master Logo"
-                  width={32}
-                  height={32}
+                  width={30}
+                  height={30}
                   style={{ objectFit: 'contain' }}
                 />
               </Box>
               <Typography
+                noWrap
                 sx={{
                   fontFamily: "'Cabinet Grotesk', sans-serif",
-                  fontWeight: 900, fontSize: '1.1rem',
-                  color: 'text.primary', letterSpacing: '-0.02em',
+                  fontWeight: 900,
+                  fontSize: { xs: '0.98rem', sm: '1.1rem' },
+                  color: 'text.primary',
+                  letterSpacing: '-0.02em',
                 }}
               >
                 KPSC Master
@@ -138,33 +142,42 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
           </Stack>
 
           {/* Right: Actions */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, sm: 1.5 }, flexShrink: 0 }}>
             <Tooltip title={themeMode === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
               <IconButton onClick={toggleThemeMode} aria-label="Toggle theme" sx={{ color: 'text.secondary' }}>
                 {themeMode === 'dark' ? <LightModeIcon fontSize="small" /> : <DarkModeIcon fontSize="small" />}
               </IconButton>
             </Tooltip>
 
-            <Button
-              variant="text"
-              size="small"
-              onClick={() => router.push('/login')}
-              sx={{ fontWeight: 700, fontSize: '0.85rem' }}
-            >
-              Login
-            </Button>
-            <Button
-              variant="contained"
-              size="small"
-              onClick={() => router.push('/register')}
-              sx={{ 
-                background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
-                py: 0.75, px: 2, borderRadius: '8px',
-                fontWeight: 700, fontSize: '0.85rem'
-              }}
-            >
-              Register
-            </Button>
+            {!pathname?.startsWith('/institute/') && (
+              <>
+                <Button
+                  variant="text"
+                  size="small"
+                  onClick={() => router.push('/login')}
+                  sx={{ fontWeight: 700, fontSize: '0.85rem', display: { xs: 'none', sm: 'inline-flex' } }}
+                >
+                  Login
+                </Button>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={() => router.push('/register')}
+                  sx={{ 
+                    background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
+                    py: 0.65,
+                    px: { xs: 1.5, sm: 2 },
+                    borderRadius: '8px',
+                    fontWeight: 700,
+                    fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                    textTransform: 'none',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Register
+                </Button>
+              </>
+            )}
           </Box>
         </Toolbar>
 

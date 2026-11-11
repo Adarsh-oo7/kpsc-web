@@ -178,29 +178,53 @@ export default function InstituteDashboard() {
               sx={{
                 p: 2,
                 borderRadius: '16px',
-                bgcolor: 'rgba(255,255,255,0.1)',
-                border: '1px solid rgba(255,255,255,0.22)',
-                minWidth: { xs: '100%', md: 320 },
+                bgcolor: 'rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                width: { xs: '100%', md: 'auto' },
+                minWidth: { md: 340 },
               }}
             >
-              <Typography sx={{ fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: accentColor, mb: 0.5 }}>
+              <Typography sx={{ fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', color: accentColor, mb: 0.75 }}>
                 Shareable Student Login & Test Link
               </Typography>
-              <Typography sx={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff', wordBreak: 'break-all', mb: 1.25 }}>
-                {studentPortalUrl}
-              </Typography>
-              <Stack direction="row" spacing={1}>
+              <Box
+                sx={{
+                  px: 1.25,
+                  py: 0.75,
+                  mb: 1.25,
+                  borderRadius: '8px',
+                  bgcolor: 'rgba(0,0,0,0.28)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontSize: { xs: '0.78rem', sm: '0.82rem' },
+                    fontWeight: 700,
+                    fontFamily: "'JetBrains Mono', monospace",
+                    color: '#fff',
+                    wordBreak: 'break-all',
+                  }}
+                >
+                  {studentPortalUrl}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
                 <Button
                   size="small"
                   variant="contained"
-                  startIcon={<ContentCopyIcon />}
+                  fullWidth
+                  startIcon={<ContentCopyIcon sx={{ fontSize: '15px !important' }} />}
                   onClick={handleCopyPortalLink}
                   sx={{
                     bgcolor: accentColor,
                     color: '#091E42',
                     fontWeight: 800,
+                    fontSize: '0.8rem',
                     textTransform: 'none',
                     borderRadius: '10px',
+                    py: 0.75,
+                    whiteSpace: 'nowrap',
                     '&:hover': { bgcolor: '#fbbf24' },
                   }}
                 >
@@ -209,19 +233,23 @@ export default function InstituteDashboard() {
                 <Button
                   size="small"
                   variant="outlined"
-                  endIcon={<OpenInNewIcon />}
+                  fullWidth
+                  endIcon={<OpenInNewIcon sx={{ fontSize: '15px !important' }} />}
                   onClick={() => router.push(`/institute/${academySlug}`)}
                   sx={{
                     color: '#fff',
                     borderColor: 'rgba(255,255,255,0.4)',
                     fontWeight: 700,
+                    fontSize: '0.8rem',
                     textTransform: 'none',
                     borderRadius: '10px',
+                    py: 0.75,
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   Preview Portal
                 </Button>
-              </Stack>
+              </Box>
             </Paper>
           )}
         </Stack>
@@ -355,16 +383,16 @@ export default function InstituteDashboard() {
             {/* Student Leaderboard & Test Results Summary */}
             <Grid size={{ xs: 12, md: 7 }}>
               <Card elevation={0} sx={{ border: '1.5px solid', borderColor: 'divider', borderRadius: '20px', height: '100%' }}>
-                <CardContent sx={{ p: 3 }}>
-                  <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                <CardContent sx={{ p: { xs: 2, sm: 3 } }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" useFlexGap spacing={1} sx={{ mb: 1 }}>
                     <Stack direction="row" spacing={1} alignItems="center">
                       <EmojiEventsIcon sx={{ color: '#F59E0B' }} />
-                      <Typography sx={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 800 }}>
+                      <Typography sx={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 800, fontSize: { xs: '0.98rem', sm: '1.08rem' } }}>
                         {academyTitle} — Student Leaderboard
                       </Typography>
                     </Stack>
-                    <Button size="small" onClick={() => router.push('/institute/students')} sx={{ textTransform: 'none', fontWeight: 800 }}>
-                      Detailed Results & Topics
+                    <Button size="small" onClick={() => router.push('/institute/students')} sx={{ textTransform: 'none', fontWeight: 800, fontSize: '0.8rem' }}>
+                      Detailed Results →
                     </Button>
                   </Stack>
 
@@ -386,8 +414,8 @@ export default function InstituteDashboard() {
                       </Button>
                     </Box>
                   ) : (
-                    <TableContainer>
-                      <Table size="small">
+                    <TableContainer sx={{ overflowX: 'auto' }}>
+                      <Table size="small" sx={{ minWidth: 500 }}>
                         <TableHead>
                           <TableRow>
                             <TableCell sx={{ fontWeight: 800 }}>Rank</TableCell>
@@ -506,11 +534,13 @@ function ActionButton({ icon, label, onClick }: { icon: ReactNode; label: string
       onClick={onClick}
       startIcon={icon}
       sx={{
-        py: 1.4,
-        px: 1.5,
+        py: 1.25,
+        px: { xs: 1.25, sm: 1.5 },
         borderRadius: '12px',
         textTransform: 'none',
         fontWeight: 700,
+        fontSize: { xs: '0.78rem', sm: '0.84rem' },
+        whiteSpace: 'nowrap',
         borderColor: 'divider',
         color: 'text.primary',
         justifyContent: 'flex-start',

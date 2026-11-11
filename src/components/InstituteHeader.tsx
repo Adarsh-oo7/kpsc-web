@@ -7,6 +7,7 @@ import ProfileMenu from '@/components/ProfileMenu';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import MenuIcon from '@mui/icons-material/Menu';
 import { instituteDrawerWidth } from './InstituteSidebar';
+import { useAppContext } from '@/context/AppContext';
 
 interface InstituteHeaderProps {
   onDrawerToggle: () => void;
@@ -14,6 +15,10 @@ interface InstituteHeaderProps {
 
 export default function InstituteHeader({ onDrawerToggle }: InstituteHeaderProps) {
   const router = useRouter();
+  const { profile } = useAppContext();
+  const instSlug = profile?.institute?.slug;
+  const instName = profile?.institute?.name || 'Academy Portal';
+  const instLogo = profile?.institute?.logo;
 
   return (
     <AppBar
@@ -26,31 +31,38 @@ export default function InstituteHeader({ onDrawerToggle }: InstituteHeaderProps
         ml: { lg: `${instituteDrawerWidth}px` },
       }}
     >
-      <Toolbar sx={{ minHeight: { xs: 64, sm: 64 } }}>
+      <Toolbar sx={{ minHeight: { xs: 60, sm: 64 }, px: { xs: 1.5, sm: 3 } }}>
         {/* Mobile hamburger + logo */}
-        <Box sx={{ display: { lg: 'none', xs: 'flex' }, alignItems: 'center', gap: 1.5, mr: 2 }}>
+        <Box sx={{ display: { lg: 'none', xs: 'flex' }, alignItems: 'center', gap: 1, mr: 1, minWidth: 0 }}>
           <IconButton
             color="inherit"
             aria-label="open drawer"
             edge="start"
             onClick={onDrawerToggle}
+            sx={{ p: 0.75 }}
           >
             <MenuIcon />
           </IconButton>
 
           {/* Logo on mobile topbar */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
             <Box sx={{
-              width: 32, height: 32,
+              width: 30, height: 30,
               borderRadius: '8px',
               bgcolor: 'white',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               overflow: 'hidden',
+              flexShrink: 0,
             }}>
-              <Image src="/logo.png" alt="KPSC Master" width={28} height={28} style={{ objectFit: 'contain' }} />
+              {instLogo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={instLogo} alt={instName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <Image src="/KPSC MASTER.png" alt="Logo" width={26} height={26} style={{ objectFit: 'contain' }} />
+              )}
             </Box>
-            <Typography sx={{ fontWeight: 800, fontSize: '0.9rem', color: 'white', letterSpacing: '-0.01em' }}>
-              KPSC Master
+            <Typography noWrap sx={{ fontWeight: 800, fontSize: '0.88rem', color: 'white', letterSpacing: '-0.01em' }}>
+              {instName}
             </Typography>
           </Box>
         </Box>
@@ -62,14 +74,19 @@ export default function InstituteHeader({ onDrawerToggle }: InstituteHeaderProps
         <Button
           variant="outlined"
           color="inherit"
-          startIcon={<ExitToAppIcon />}
-          onClick={() => router.push('/')}
+          size="small"
+          startIcon={<ExitToAppIcon sx={{ fontSize: '16px !important' }} />}
+          onClick={() => router.push(instSlug ? `/institute/${instSlug}` : '/')}
           sx={{
-            mr: 2,
+            mr: { xs: 1, sm: 2 },
+            px: { xs: 1.25, sm: 1.75 },
+            py: 0.6,
             borderRadius: '10px',
-            borderColor: 'rgba(255,255,255,0.15)',
-            fontSize: '0.8rem',
+            borderColor: 'rgba(255,255,255,0.18)',
+            fontSize: { xs: '0.75rem', sm: '0.8rem' },
+            fontWeight: 700,
             textTransform: 'none',
+            whiteSpace: 'nowrap',
             '&:hover': {
               borderColor: 'rgba(255,255,255,0.35)',
               bgcolor: 'rgba(255,255,255,0.06)',
