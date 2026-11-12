@@ -37,6 +37,15 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+function getAbsoluteImageUrl(imageUrl?: string | null): string {
+  if (!imageUrl) return 'https://www.kpscmaster.in/KPSC%20MASTER.png';
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl;
+  }
+  const baseUrl = 'https://api.kpscmaster.in';
+  return `${baseUrl}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const portalData = await getPortalData(slug);
@@ -49,11 +58,40 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
+  const title = `${inst.name} — Official PSC Learning & Test Portal`;
+  const description =
+    inst.tagline ||
+    `Join ${inst.name} to attend official Kerala PSC mock tests, practice questions, and view batch leaderboards.`;
+  const logoUrl = getAbsoluteImageUrl(inst.logo || inst.login_image_1);
+  const pageUrl = `https://www.kpscmaster.in/institute/${slug}`;
+
   return {
-    title: `${inst.name} | Official PSC Learning & Test Portal`,
-    description: inst.tagline || `Log in or join ${inst.name} on KPSC Master to practice tests, view results, and compete on the batch leaderboard.`,
+    title,
+    description,
     alternates: {
       canonical: `/institute/${slug}`,
+    },
+    openGraph: {
+      type: 'website',
+      url: pageUrl,
+      siteName: `${inst.name} • Official Academy Portal`,
+      title,
+      description,
+      images: [
+        {
+          url: logoUrl,
+          width: 600,
+          height: 600,
+          alt: `${inst.name} Logo`,
+          type: logoUrl.endsWith('.png') ? 'image/png' : 'image/jpeg',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary',
+      title,
+      description,
+      images: [logoUrl],
     },
   };
 }
@@ -81,7 +119,7 @@ export default async function InstituteSEOPage({ params }: PageProps) {
     );
   }
 
-  const logoUrl = inst.logo || '';
+  const logoUrl = getAbsoluteImageUrl(inst.logo || inst.login_image_1);
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'EducationalOrganization',
