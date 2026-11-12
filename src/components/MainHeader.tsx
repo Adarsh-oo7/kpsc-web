@@ -28,9 +28,15 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
   const isOwner = Boolean(isInstituteOwner || profile?.is_owner);
   const router = useRouter();
   const pathname = usePathname();
+  const isEnrolledInInstitute = Boolean(profile?.institute);
   const isInstitutePortal = Boolean(
     (pathname?.startsWith('/institute/') && !pathname?.startsWith('/institutes')) ||
     (pathname?.endsWith('/dashboard') && pathname !== '/dashboard')
+  );
+  const showSidebar = Boolean(
+    user &&
+    !isOwner &&
+    (isEnrolledInInstitute || !isInstitutePortal)
   );
   const [notifAnchor, setNotifAnchor] = useState<HTMLButtonElement | null>(null);
   const [profileAnchor, setProfileAnchor] = useState<HTMLButtonElement | null>(null);
@@ -310,8 +316,8 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
     <AppBar
       position="fixed"
       sx={{
-        width: (user && !isInstitutePortal && !isOwner) ? { lg: `calc(100% - ${drawerWidth}px)` } : '100%',
-        ml: (user && !isInstitutePortal && !isOwner) ? { lg: `${drawerWidth}px` } : 0,
+        width: showSidebar ? { lg: `calc(100% - ${drawerWidth}px)` } : '100%',
+        ml: showSidebar ? { lg: `${drawerWidth}px` } : 0,
         background: themeMode === 'dark' ? 'rgba(15,17,23,0.85)' : 'rgba(255,255,255,0.85)',
         backdropFilter: 'blur(16px)',
         borderBottom: themeMode === 'dark' ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
@@ -323,7 +329,7 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
       <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64, px: { xs: 2, sm: 3 } }}>
         {/* Left: Menu toggle (mobile) + Brand on mobile */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          {!isInstitutePortal && !isOwner && (
+          {showSidebar && (
             <IconButton
               onClick={onDrawerToggle}
               edge="start"

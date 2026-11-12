@@ -256,9 +256,9 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
                   ? [{ text: 'Admin Dashboard', icon: <AdminPanelSettingsIcon sx={{ color: '#22C55E' }} />, path: '/institute/dashboard' }]
                   : []),
                 { text: 'Academy Portal', icon: <SchoolIcon sx={{ color: '#F59E0B' }} />, path: `/${profile.institute.slug}/dashboard` },
-                { text: 'Mock Tests & MCQs', icon: <QuizIcon sx={{ color: '#F59E0B' }} />, path: `/${profile.institute.slug}/dashboard` },
-                { text: 'Batch Leaderboard', icon: <LeaderboardIcon sx={{ color: '#F59E0B' }} />, path: `/${profile.institute.slug}/dashboard` },
-                { text: 'Study Notes & Materials', icon: <MenuBookIcon sx={{ color: '#F59E0B' }} />, path: `/${profile.institute.slug}/dashboard` },
+                { text: 'Mock Tests & MCQs', icon: <QuizIcon sx={{ color: '#F59E0B' }} />, path: `/${profile.institute.slug}/dashboard#tests` },
+                { text: 'Batch Leaderboard', icon: <LeaderboardIcon sx={{ color: '#F59E0B' }} />, path: `/${profile.institute.slug}/dashboard#leaderboard` },
+                { text: 'Study Notes & Materials', icon: <MenuBookIcon sx={{ color: '#F59E0B' }} />, path: `/${profile.institute.slug}/dashboard#notes` },
                 { divider: true, label: 'Account', section: 'account' },
                 { text: 'Profile', icon: <PersonIcon />, path: '/profile' },
               ]
@@ -275,11 +275,31 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
             }
             const path = item.path;
             if (!path) return null;
-            const isActive = pathname === path || (path !== '/' && pathname?.startsWith(path));
+            const isTabItem = path.includes('#');
+            const targetHash = isTabItem ? path.split('#')[1] : null;
+            const currentHash = typeof window !== 'undefined' ? window.location.hash.replace('#', '') : '';
+            const isActive = isTabItem
+              ? pathname === path.split('#')[0] && (currentHash === targetHash || (!currentHash && targetHash === 'tests'))
+              : pathname === path || (!isTabItem && path !== '/' && pathname?.startsWith(path));
+
+            const activeColor = profile?.institute ? '#F59E0B' : '#2E8B57';
+            const activeBg = profile?.institute 
+              ? (themeMode === 'dark' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(245, 158, 11, 0.1)')
+              : (themeMode === 'dark' ? 'rgba(27, 107, 58, 0.18)' : 'rgba(27, 107, 58, 0.08)');
+
             return (
               <ListItem key={item.path} disablePadding sx={{ mb: 0.25 }}>
                 <ListItemButton
-                  onClick={() => onNavigate(item.path!)}
+                  onClick={() => {
+                    onNavigate(item.path!);
+                    if (typeof window !== 'undefined' && item.path!.includes('#')) {
+                      const hash = item.path!.split('#')[1];
+                      if (hash) {
+                        window.location.hash = hash;
+                        window.dispatchEvent(new HashChangeEvent('hashchange'));
+                      }
+                    }
+                  }}
                   selected={isActive}
                   sx={{
                     borderRadius: '10px',
@@ -287,7 +307,7 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
                     px: 1.5,
                     minHeight: 44,
                     '& .MuiListItemIcon-root': {
-                      color: isActive ? '#2E8B57' : (themeMode === 'dark' ? '#4A5568' : '#64748B'),
+                      color: isActive ? activeColor : (themeMode === 'dark' ? '#4A5568' : '#64748B'),
                       minWidth: 36,
                       transition: 'color 0.2s ease',
                     },
@@ -295,14 +315,14 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
                       fontSize: '0.875rem',
                       fontWeight: isActive ? 700 : 500,
                       color: isActive 
-                        ? (themeMode === 'dark' ? '#F0F4F8' : '#2E8B57') 
+                        ? (themeMode === 'dark' ? '#F0F4F8' : activeColor) 
                         : (themeMode === 'dark' ? '#8892A4' : '#475569'),
                       fontFamily: "'Satoshi', sans-serif",
                       transition: 'all 0.2s ease',
                     },
                     ...(isActive ? {
-                      background: themeMode === 'dark' ? 'rgba(27, 107, 58, 0.18)' : 'rgba(27, 107, 58, 0.08)',
-                      borderLeft: '3px solid #2E8B57',
+                      background: activeBg,
+                      borderLeft: `3px solid ${activeColor}`,
                       pl: '13px',
                     } : {}),
                   }}
@@ -315,12 +335,17 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
           })}
         </List>
       </Box>
- 
+
       {/* Footer */}
       <Box sx={{ p: 2, borderTop: themeMode === 'dark' ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)', textAlign: 'center' }}>
         <Typography sx={{ fontSize: '0.65rem', color: themeMode === 'dark' ? '#4A5568' : '#64748B', lineHeight: 1.5 }}>
-          © 2026 KPSC Master
+          © 2026 {profile?.institute ? profile.institute.name : 'KPSC Master'}
         </Typography>
+        {profile?.institute && (
+          <Typography sx={{ fontSize: '0.62rem', color: '#F59E0B', fontWeight: 700, mt: 0.25 }}>
+            Powered by KPSC Master
+          </Typography>
+        )}
         <Typography
           component={NextLink}
           href="/about"

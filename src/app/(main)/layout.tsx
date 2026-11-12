@@ -15,14 +15,25 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const { user, profile } = useAppContext();
   const isAuthPage = pathname === '/login' || pathname === '/register';
 
-  // Identify institute portal pages (e.g. /institute/rankup, /rankup/dashboard)
-  // These pages should never display the standard KPSC sidebar
+  // Check if current student is enrolled in an academy
+  const isEnrolledInInstitute = Boolean(profile?.institute);
+
+  // Identify institute portal preview/landing pages (e.g. /institute/rankup, /rankup/dashboard)
   const isInstitutePortal = Boolean(
     (pathname?.startsWith('/institute/') && !pathname?.startsWith('/institutes')) ||
     (pathname?.endsWith('/dashboard') && pathname !== '/dashboard')
   );
 
-  const showSidebar = Boolean(user && !isInstitutePortal && !profile?.is_owner);
+  // Show sidebar:
+  // - Enrolled student in an institute: YES, always show their own dedicated academy sidebar!
+  // - Normal KPSC student (not in any institute): YES, show normal KPSC sidebar (hide only when visiting another institute's public preview page)
+  // - Student waiting for admin approval (not enrolled yet): NO sidebar on institute preview
+  // - Academy owner: NO student sidebar (owners use the dedicated Academy Admin Portal at /institute/dashboard)
+  const showSidebar = Boolean(
+    user &&
+    !profile?.is_owner &&
+    (isEnrolledInInstitute || !isInstitutePortal)
+  );
 
   useEffect(() => {
     // If the student is enrolled in an academy/institute (e.g. RankUp) and is not an owner,

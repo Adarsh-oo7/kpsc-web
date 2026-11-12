@@ -81,6 +81,20 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
 
   useEffect(() => {
     setMounted(true);
+    const syncTabWithHash = () => {
+      if (typeof window === 'undefined') return;
+      const hash = window.location.hash;
+      if (hash === '#tests' || hash === '#mock-tests') {
+        setPortalTab(0);
+      } else if (hash === '#leaderboard') {
+        setPortalTab(1);
+      } else if (hash === '#notes' || hash === '#materials') {
+        setPortalTab(2);
+      }
+    };
+    syncTabWithHash();
+    window.addEventListener('hashchange', syncTabWithHash);
+    return () => window.removeEventListener('hashchange', syncTabWithHash);
   }, []);
 
   // Auth box state for unauthenticated students
@@ -925,7 +939,13 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
         <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'action.hover', px: { xs: 0.5, sm: 2 } }}>
           <Tabs
             value={portalTab}
-            onChange={(_, v) => setPortalTab(v)}
+            onChange={(_, v) => {
+              setPortalTab(v);
+              if (typeof window !== 'undefined') {
+                const h = v === 0 ? '#tests' : v === 1 ? '#leaderboard' : '#notes';
+                window.history.replaceState(null, '', h);
+              }
+            }}
             variant="scrollable"
             scrollButtons="auto"
             allowScrollButtonsMobile
