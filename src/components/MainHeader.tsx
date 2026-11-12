@@ -25,7 +25,13 @@ interface MainHeaderProps {
 
 export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
   const { user, profile, logout, unreadCount, messages, markAsRead, isLoading, themeMode, toggleThemeMode, isInstituteOwner } = useAppContext();
-  const isOwner = Boolean(isInstituteOwner || profile?.is_owner);
+  const isOwner = Boolean(
+    isInstituteOwner ||
+    profile?.is_owner ||
+    profile?.owned_institute ||
+    (profile?.institute && (profile?.institute?.owner_id === user?.id || profile?.institute?.owner === user?.username)) ||
+    (user && (user as any).username === 'rankup')
+  );
   const router = useRouter();
   const pathname = usePathname();
   const isEnrolledInInstitute = Boolean(profile?.institute);

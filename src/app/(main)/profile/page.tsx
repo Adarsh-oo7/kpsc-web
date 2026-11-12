@@ -7,7 +7,7 @@ import {
   Box, Typography, TextField, Button, Alert, Card, CardContent,
   Select, MenuItem, InputLabel, FormControl, CircularProgress,
   Avatar, Input, Grid, Chip, Stack, Divider, Tab, Tabs, Tooltip,
-  Dialog, DialogContent, DialogTitle, IconButton, LinearProgress, useTheme
+  Dialog, DialogContent, DialogTitle, DialogActions, IconButton, LinearProgress, useTheme
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
@@ -19,6 +19,9 @@ import SchoolIcon from '@mui/icons-material/School';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import CloseIcon from '@mui/icons-material/Close';
 import BoltIcon from '@mui/icons-material/Bolt';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
@@ -100,6 +103,26 @@ export default function ProfilePage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [exitDialogOpen, setExitDialogOpen] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
+
+  const handleExitInstitute = async () => {
+    setIsExiting(true);
+    setError('');
+    setSuccess('');
+    try {
+      const res = await apiClient.post('/institute/student/leave/');
+      setExitDialogOpen(false);
+      setSuccess(res.data?.detail || 'You have successfully exited the academy.');
+      mutate((prev: any) => (prev ? { ...prev, institute: null } : prev), false);
+      await refreshProfile();
+    } catch (err: any) {
+      const msg = err.response?.data?.error || err.response?.data?.detail || 'Failed to exit academy. Please try again.';
+      setError(msg);
+    } finally {
+      setIsExiting(false);
+    }
+  };
 
   // APIs
   const { data: profileData, error: profileError, mutate } = useSWR(
@@ -328,6 +351,164 @@ export default function ProfilePage() {
           </Stack>
         </CardContent>
       </Card>
+
+      {/* Academy Membership Section */}
+      {profileData?.institute && (
+        <Card
+          sx={{
+            background: isDark
+              ? 'linear-gradient(135deg, rgba(13,71,161,0.18) 0%, rgba(15,23,42,0.92) 100%)'
+              : 'linear-gradient(135deg, rgba(13,71,161,0.06) 0%, #FFFFFF 100%)',
+            border: '1.5px solid',
+            borderColor: isDark ? 'rgba(59, 130, 246, 0.3)' : 'rgba(13, 71, 161, 0.2)',
+            borderRadius: '20px',
+            mb: 4,
+            boxShadow: isDark ? '0 8px 30px rgba(0,0,0,0.3)' : '0 8px 30px rgba(13,71,161,0.06)',
+            overflow: 'hidden',
+          }}
+        >
+          <CardContent sx={{ p: { xs: 2.5, sm: 3 } }}>
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={2.5}
+              alignItems={{ xs: 'flex-start', sm: 'center' }}
+              justifyContent="space-between"
+            >
+              <Stack direction="row" spacing={2} alignItems="center" sx={{ minWidth: 0 }}>
+                <Avatar
+                  src={
+                    profileData.institute.logo
+                      ? profileData.institute.logo.startsWith('http')
+                        ? profileData.institute.logo
+                        : `https://api.kpscmaster.in${profileData.institute.logo.startsWith('/') ? '' : '/'}${profileData.institute.logo}`
+                      : undefined
+                  }
+                  alt={profileData.institute.name}
+                  sx={{
+                    width: { xs: 50, sm: 58 },
+                    height: { xs: 50, sm: 58 },
+                    border: '2px solid rgba(59, 130, 246, 0.35)',
+                    bgcolor: profileData.institute.primary_color || '#0D47A1',
+                    color: '#fff',
+                    fontWeight: 900,
+                    fontSize: '1.2rem',
+                    flexShrink: 0,
+                  }}
+                >
+                  {profileData.institute.name?.charAt(0)}
+                </Avatar>
+                <Box sx={{ minWidth: 0 }}>
+                  <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontFamily: "'Cabinet Grotesk', sans-serif",
+                        fontWeight: 900,
+                        color: 'text.primary',
+                        fontSize: { xs: '1.05rem', sm: '1.2rem' },
+                        lineHeight: 1.25,
+                      }}
+                    >
+                      {profileData.institute.name}
+                    </Typography>
+                    <Chip
+                      label={profileData.is_owner ? 'Academy Owner' : 'Enrolled Student'}
+                      size="small"
+                      color={profileData.is_owner ? 'warning' : 'success'}
+                      sx={{ fontWeight: 800, height: 22, fontSize: '0.68rem' }}
+                    />
+                  </Stack>
+                  {profileData.institute.tagline ? (
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ mt: 0.35, fontSize: { xs: '0.8rem', sm: '0.86rem' }, lineHeight: 1.35 }}
+                    >
+                      {profileData.institute.tagline}
+                    </Typography>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.35, fontSize: '0.8rem' }}>
+                      Official Academy Member • Full test and study materials access
+                    </Typography>
+                  )}
+                </Box>
+              </Stack>
+
+              <Stack
+                direction="row"
+                spacing={1.25}
+                alignItems="center"
+                sx={{ width: { xs: '100%', sm: 'auto' }, flexShrink: 0 }}
+              >
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={() => router.push(`/${profileData.institute.slug}/dashboard`)}
+                  sx={{
+                    textTransform: 'none',
+                    fontWeight: 700,
+                    borderRadius: '10px',
+                    px: { xs: 1.5, sm: 2 },
+                    py: 0.75,
+                    fontSize: '0.82rem',
+                    flex: { xs: 1, sm: 'none' },
+                  }}
+                >
+                  Academy Portal
+                </Button>
+
+                {profileData.is_owner ? (
+                  <Button
+                    variant="contained"
+                    size="small"
+                    startIcon={<AdminPanelSettingsIcon sx={{ fontSize: '16px !important' }} />}
+                    onClick={() => router.push('/institute/dashboard')}
+                    sx={{
+                      bgcolor: '#16a34a',
+                      color: '#fff',
+                      textTransform: 'none',
+                      fontWeight: 800,
+                      borderRadius: '10px',
+                      px: { xs: 1.5, sm: 2 },
+                      py: 0.75,
+                      fontSize: '0.82rem',
+                      '&:hover': { bgcolor: '#15803d' },
+                      flex: { xs: 1, sm: 'none' },
+                    }}
+                  >
+                    Admin Dashboard
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    size="small"
+                    startIcon={<ExitToAppIcon sx={{ fontSize: '16px !important' }} />}
+                    onClick={() => setExitDialogOpen(true)}
+                    sx={{
+                      textTransform: 'none',
+                      fontWeight: 800,
+                      borderRadius: '10px',
+                      px: { xs: 1.5, sm: 2 },
+                      py: 0.75,
+                      fontSize: '0.82rem',
+                      borderColor: 'rgba(239, 68, 68, 0.45)',
+                      color: '#EF4444',
+                      '&:hover': {
+                        borderColor: '#EF4444',
+                        bgcolor: 'rgba(239, 68, 68, 0.08)',
+                      },
+                      flex: { xs: 1, sm: 'none' },
+                    }}
+                  >
+                    Exit Academy
+                  </Button>
+                )}
+              </Stack>
+            </Stack>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Styled Navigation Tabs */}
       <Box sx={{ borderBottom: '1px solid', borderColor: 'divider', mb: 4, display: 'flex', gap: 4 }}>
@@ -983,6 +1164,58 @@ export default function ProfilePage() {
             </Grid>
           </Box>
         </DialogContent>
+      </Dialog>
+
+      {/* Exit Academy Confirmation Dialog */}
+      <Dialog
+        open={exitDialogOpen}
+        onClose={() => !isExiting && setExitDialogOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            p: 1,
+            maxWidth: 440,
+            width: '100%',
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 900, fontSize: '1.2rem', pb: 1, fontFamily: "'Cabinet Grotesk', sans-serif" }}>
+          Exit {profileData?.institute?.name}?
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ color: 'text.secondary', fontSize: '0.88rem', lineHeight: 1.5, mb: 2 }}>
+            Are you sure you want to leave <strong>{profileData?.institute?.name}</strong>?
+          </Typography>
+          <Alert severity="warning" sx={{ borderRadius: '12px', fontSize: '0.82rem', fontWeight: 600 }}>
+            You will immediately lose access to this academy&apos;s exclusive mock tests, study materials, and private student leaderboard. Your general KPSC Master account, streaks, and XP will remain safe.
+          </Alert>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
+          <Button
+            variant="outlined"
+            onClick={() => setExitDialogOpen(false)}
+            disabled={isExiting}
+            sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '10px' }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleExitInstitute}
+            disabled={isExiting}
+            startIcon={isExiting ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : <ExitToAppIcon />}
+            sx={{
+              textTransform: 'none',
+              fontWeight: 800,
+              borderRadius: '10px',
+              bgcolor: '#DC2626',
+              '&:hover': { bgcolor: '#B91C1C' },
+            }}
+          >
+            {isExiting ? 'Exiting...' : 'Yes, Exit Academy'}
+          </Button>
+        </DialogActions>
       </Dialog>
     </Box>
   );

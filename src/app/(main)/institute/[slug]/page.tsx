@@ -66,7 +66,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const pageUrl = `https://www.kpscmaster.in/institute/${slug}`;
 
   return {
-    title,
+    title: {
+      absolute: title,
+    },
     description,
     alternates: {
       canonical: `/institute/${slug}`,
@@ -88,7 +90,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       ],
     },
     twitter: {
-      card: 'summary',
+      card: 'summary_large_image',
       title,
       description,
       images: [logoUrl],

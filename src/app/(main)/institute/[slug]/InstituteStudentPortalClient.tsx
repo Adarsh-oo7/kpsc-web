@@ -53,6 +53,7 @@ import ShareIcon from '@mui/icons-material/Share';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import ReplayIcon from '@mui/icons-material/Replay';
@@ -110,6 +111,8 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
   const [joinStatusMsg, setJoinStatusMsg] = useState('');
   const [joinSubmitting, setJoinSubmitting] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [exitModalOpen, setExitModalOpen] = useState(false);
+  const [exitingInstitute, setExitingInstitute] = useState(false);
 
   // Practice / Test mode state
   const [selectedTopicId, setSelectedTopicId] = useState<number | 'all'>('all');
@@ -219,6 +222,22 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
       await fetchPortal();
     } finally {
       setJoinSubmitting(false);
+    }
+  };
+
+  const handleExitInstitute = async () => {
+    setExitingInstitute(true);
+    try {
+      const res = await apiClient.post('/institute/student/leave/');
+      setExitModalOpen(false);
+      setJoinStatusMsg(res.data?.detail || `You have successfully exited ${inst?.name}.`);
+      await refreshProfile();
+      await fetchPortal(true);
+    } catch (err: any) {
+      const msg = err.response?.data?.error || err.response?.data?.detail || 'Failed to exit academy. Please try again.';
+      alert(msg);
+    } finally {
+      setExitingInstitute(false);
     }
   };
 
@@ -895,6 +914,35 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                   }}
                 >
                   Go to Admin Dashboard
+                </Button>
+              </Box>
+            )}
+
+            {membershipStatus === 'member' && (
+              <Box sx={{ flexShrink: 0, width: { xs: '100%', sm: 'auto' } }}>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  size="small"
+                  startIcon={<ExitToAppIcon sx={{ fontSize: '16px !important' }} />}
+                  onClick={() => setExitModalOpen(true)}
+                  sx={{
+                    width: { xs: '100%', sm: 'auto' },
+                    textTransform: 'none',
+                    fontWeight: 700,
+                    borderRadius: '10px',
+                    borderColor: 'rgba(239, 68, 68, 0.45)',
+                    color: '#EF4444',
+                    px: { xs: 2, sm: 2.25 },
+                    py: 0.85,
+                    fontSize: { xs: '0.8rem', sm: '0.86rem' },
+                    '&:hover': {
+                      borderColor: '#EF4444',
+                      bgcolor: 'rgba(239, 68, 68, 0.08)',
+                    },
+                  }}
+                >
+                  Exit Academy
                 </Button>
               </Box>
             )}
@@ -1896,6 +1944,58 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
         <DialogActions sx={{ p: 2 }}>
           <Button onClick={() => setScorecardModalOpen(false)} variant="contained" sx={{ bgcolor: primaryColor, borderRadius: '10px', fontWeight: 800 }}>
             Done
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Exit Academy Confirmation Dialog */}
+      <Dialog
+        open={exitModalOpen}
+        onClose={() => !exitingInstitute && setExitModalOpen(false)}
+        PaperProps={{
+          sx: {
+            borderRadius: '20px',
+            p: 1,
+            maxWidth: 440,
+            width: '100%',
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 900, fontSize: '1.2rem', pb: 1, fontFamily: "'Cabinet Grotesk', sans-serif" }}>
+          Exit {inst?.name}?
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ color: 'text.secondary', fontSize: '0.88rem', lineHeight: 1.5, mb: 2 }}>
+            Are you sure you want to leave <strong>{inst?.name}</strong>?
+          </Typography>
+          <Alert severity="warning" sx={{ borderRadius: '12px', fontSize: '0.82rem', fontWeight: 600 }}>
+            You will lose access to {inst?.name}&apos;s exclusive scheduled mock tests, study materials, and private student leaderboard. You can re-request admission at any time.
+          </Alert>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5, gap: 1 }}>
+          <Button
+            variant="outlined"
+            onClick={() => setExitModalOpen(false)}
+            disabled={exitingInstitute}
+            sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '10px' }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleExitInstitute}
+            disabled={exitingInstitute}
+            startIcon={exitingInstitute ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : <ExitToAppIcon />}
+            sx={{
+              textTransform: 'none',
+              fontWeight: 800,
+              borderRadius: '10px',
+              bgcolor: '#DC2626',
+              '&:hover': { bgcolor: '#B91C1C' },
+            }}
+          >
+            {exitingInstitute ? 'Exiting...' : 'Yes, Exit Academy'}
           </Button>
         </DialogActions>
       </Dialog>

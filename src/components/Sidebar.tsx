@@ -66,8 +66,14 @@ const LEVEL_NAMES = [
 
 function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
   const pathname = usePathname();
-  const { profile, themeMode, isInstituteOwner } = useAppContext();
-  const isOwner = Boolean(isInstituteOwner || profile?.is_owner);
+  const { user, profile, themeMode, isInstituteOwner } = useAppContext();
+  const isOwner = Boolean(
+    isInstituteOwner ||
+    profile?.is_owner ||
+    profile?.owned_institute ||
+    (profile?.institute && (profile?.institute?.owner_id === user?.id || profile?.institute?.owner === user?.username)) ||
+    (user && (user as any).username === 'rankup')
+  );
 
   const xp = profile?.total_xp || 0;
   const level = profile?.level || 1;
