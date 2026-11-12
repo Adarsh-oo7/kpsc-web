@@ -336,7 +336,9 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
       setMockTestQuestions(res.data.questions);
       setAnswers({});
       setTestResult(null);
-      if (res.data.test.duration_minutes > 0) {
+      if (res.data.test.time_limit_per_question > 0 && (res.data.questions?.length || 0) > 0) {
+        setTimerSeconds(res.data.test.time_limit_per_question * res.data.questions.length);
+      } else if (res.data.test.duration_minutes > 0) {
         setTimerSeconds(res.data.test.duration_minutes * 60);
       } else {
         setTimerSeconds(null);
