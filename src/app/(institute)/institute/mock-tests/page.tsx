@@ -83,6 +83,8 @@ export default function InstituteMockTestsPage() {
   const [questionSearch, setQuestionSearch] = useState('');
   const [isSavingQuestion, setIsSavingQuestion] = useState(false);
   const [questionError, setQuestionError] = useState('');
+  const [questionSuccessMsg, setQuestionSuccessMsg] = useState('');
+  const [questionSubmitted, setQuestionSubmitted] = useState(false);
 
   // Submissions & Leaderboard modal state
   const [submissionsModalOpen, setSubmissionsModalOpen] = useState(false);
@@ -207,6 +209,8 @@ export default function InstituteMockTestsPage() {
     setQuestionsModalOpen(true);
     setQuestionsTab(0);
     setQuestionError('');
+    setQuestionSuccessMsg('');
+    setQuestionSubmitted(false);
     setSelectedBankIds([]);
     setNewQuestionForm({
       ...initialQuestionForm,
@@ -225,16 +229,25 @@ export default function InstituteMockTestsPage() {
     setActiveTest(null);
     setActiveTestDetail(null);
     setNewQuestionForm(initialQuestionForm);
+    setQuestionError('');
+    setQuestionSuccessMsg('');
+    setQuestionSubmitted(false);
     mutate();
   };
 
   const handleCreateQuestionForTest = async () => {
+    setQuestionSubmitted(true);
     if (!newQuestionForm.question_text?.trim() || !newQuestionForm.option_a?.trim() || !newQuestionForm.option_b?.trim() || !newQuestionForm.option_c?.trim() || !newQuestionForm.option_d?.trim()) {
-      setQuestionError('Question text and all 4 options (A, B, C, D) are required.');
+      setQuestionError('Question text and all 4 options (A, B, C, D) are required. Please fill in the highlighted fields.');
+      return;
+    }
+    if (!activeTest?.id) {
+      setQuestionError('No active mock test selected.');
       return;
     }
     setIsSavingQuestion(true);
     setQuestionError('');
+    setQuestionSuccessMsg('');
     try {
       const payload: any = {
         question_text: newQuestionForm.question_text.trim(),
@@ -249,7 +262,7 @@ export default function InstituteMockTestsPage() {
       if (newQuestionForm.topic) {
         payload.topic = Number(newQuestionForm.topic);
       }
-      await apiClient.post(`/institute/mock-tests/${activeTest.id}/add-question/`, payload);
+      const resAdd = await apiClient.post(`/institute/mock-tests/${activeTest.id}/add-question/`, payload);
       // Reload active test detail
       const res = await apiClient.get(`/institute/mock-tests/${activeTest.id}/`);
       setActiveTestDetail(res.data);
@@ -257,6 +270,8 @@ export default function InstituteMockTestsPage() {
         ...initialQuestionForm,
         topic: topics.length > 0 ? topics[0].id.toString() : '',
       });
+      setQuestionSubmitted(false);
+      setQuestionSuccessMsg(`Question added successfully! Test now has ${resAdd.data?.question_count ?? (res.data?.questions_list?.length || 1)} questions.`);
       setQuestionsTab(0);
       mutate();
     } catch (err: any) {
@@ -744,12 +759,45 @@ export default function InstituteMockTestsPage() {
 
         <DialogContent dividers sx={{ minHeight: 400 }}>
           {questionError && <Alert severity="error" sx={{ mb: 2 }}>{questionError}</Alert>}
+          {questionSuccessMsg && <Alert severity="success" sx={{ mb: 2 }}>{questionSuccessMsg}</Alert>}
 
           {/* TAB 0: Current Questions in Test */}
           {questionsTab === 0 && (
             <Box>
               {activeTestDetail?.questions_list?.length > 0 ? (
                 <Stack spacing={2}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1, flexWrap: 'wrap', gap: 1 }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'text.secondary' }}>
+                      {activeTestDetail.questions_list.length} questions currently in this test:
+                    </Typography>
+                    <Stack direction="row" spacing={1}>
+                      <Button
+                        size="small"
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={() => {
+                          setQuestionsTab(1);
+                          setQuestionError('');
+                          setQuestionSuccessMsg('');
+                        }}
+                        sx={greenCtaSx}
+                      >
+                        Add Question
+                      </Button>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        onClick={() => {
+                          setQuestionsTab(2);
+                          setQuestionError('');
+                          setQuestionSuccessMsg('');
+                        }}
+                      >
+                        Pick from Bank
+                      </Button>
+                    </Stack>
+                  </Box>
+
                   {activeTestDetail.questions_list.map((q: any, idx: number) => (
                     <Paper key={q.id} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
                       <Stack direction="row" justifyContent="space-between" alignItems="flex-start">
@@ -801,9 +849,14 @@ export default function InstituteMockTestsPage() {
                     No questions have been added to this mock test yet.
                   </Typography>
                   <Button
-                    variant="outlined"
-                    onClick={() => setQuestionsTab(1)}
-                    sx={{ mt: 2, borderRadius: '8px' }}
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={() => {
+                      setQuestionsTab(1);
+                      setQuestionError('');
+                      setQuestionSuccessMsg('');
+                    }}
+                    sx={{ ...greenCtaSx, mt: 2 }}
                   >
                     Add Question Now
                   </Button>
@@ -820,47 +873,72 @@ export default function InstituteMockTestsPage() {
               </Typography>
 
               <TextField
-                label="Question Text"
+                label="Question Text *"
                 multiline
                 rows={3}
                 fullWidth
                 required
+                error={questionSubmitted && !newQuestionForm.question_text.trim()}
+                helperText={questionSubmitted && !newQuestionForm.question_text.trim() ? 'Question text is required' : undefined}
                 value={newQuestionForm.question_text}
-                onChange={(e) => setNewQuestionForm({ ...newQuestionForm, question_text: e.target.value })}
+                onChange={(e) => {
+                  setNewQuestionForm({ ...newQuestionForm, question_text: e.target.value });
+                  if (questionError) setQuestionError('');
+                }}
                 placeholder="Type question here..."
               />
 
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                 <TextField
-                  label="Option A"
+                  label="Option A *"
                   fullWidth
                   required
+                  error={questionSubmitted && !newQuestionForm.option_a.trim()}
+                  helperText={questionSubmitted && !newQuestionForm.option_a.trim() ? 'Option A is required' : undefined}
                   value={newQuestionForm.option_a}
-                  onChange={(e) => setNewQuestionForm({ ...newQuestionForm, option_a: e.target.value })}
+                  onChange={(e) => {
+                    setNewQuestionForm({ ...newQuestionForm, option_a: e.target.value });
+                    if (questionError) setQuestionError('');
+                  }}
                 />
                 <TextField
-                  label="Option B"
+                  label="Option B *"
                   fullWidth
                   required
+                  error={questionSubmitted && !newQuestionForm.option_b.trim()}
+                  helperText={questionSubmitted && !newQuestionForm.option_b.trim() ? 'Option B is required' : undefined}
                   value={newQuestionForm.option_b}
-                  onChange={(e) => setNewQuestionForm({ ...newQuestionForm, option_b: e.target.value })}
+                  onChange={(e) => {
+                    setNewQuestionForm({ ...newQuestionForm, option_b: e.target.value });
+                    if (questionError) setQuestionError('');
+                  }}
                 />
               </Stack>
 
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                 <TextField
-                  label="Option C"
+                  label="Option C *"
                   fullWidth
                   required
+                  error={questionSubmitted && !newQuestionForm.option_c.trim()}
+                  helperText={questionSubmitted && !newQuestionForm.option_c.trim() ? 'Option C is required' : undefined}
                   value={newQuestionForm.option_c}
-                  onChange={(e) => setNewQuestionForm({ ...newQuestionForm, option_c: e.target.value })}
+                  onChange={(e) => {
+                    setNewQuestionForm({ ...newQuestionForm, option_c: e.target.value });
+                    if (questionError) setQuestionError('');
+                  }}
                 />
                 <TextField
-                  label="Option D"
+                  label="Option D *"
                   fullWidth
                   required
+                  error={questionSubmitted && !newQuestionForm.option_d.trim()}
+                  helperText={questionSubmitted && !newQuestionForm.option_d.trim() ? 'Option D is required' : undefined}
                   value={newQuestionForm.option_d}
-                  onChange={(e) => setNewQuestionForm({ ...newQuestionForm, option_d: e.target.value })}
+                  onChange={(e) => {
+                    setNewQuestionForm({ ...newQuestionForm, option_d: e.target.value });
+                    if (questionError) setQuestionError('');
+                  }}
                 />
               </Stack>
 
@@ -921,13 +999,15 @@ export default function InstituteMockTestsPage() {
                 placeholder="Explain why this answer is correct..."
               />
 
+              {questionError && <Alert severity="error">{questionError}</Alert>}
+
               <Button
                 variant="contained"
                 onClick={handleCreateQuestionForTest}
                 disabled={isSavingQuestion}
-                sx={{ ...greenCtaSx, alignSelf: 'flex-start', mt: 1 }}
+                sx={{ ...greenCtaSx, alignSelf: { xs: 'stretch', sm: 'flex-start' }, mt: 1, py: 1.25, px: 3, fontWeight: 800 }}
               >
-                {isSavingQuestion ? <CircularProgress size={20} /> : 'Save & Add to Mock Test'}
+                {isSavingQuestion ? <CircularProgress size={20} sx={{ color: '#fff' }} /> : 'Save & Add to Mock Test'}
               </Button>
             </Stack>
           )}
@@ -1014,10 +1094,51 @@ export default function InstituteMockTestsPage() {
             </Box>
           )}
         </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={handleCloseQuestionsModal} variant="contained" sx={greenCtaSx}>
-            Done
+        <DialogActions sx={{ p: 2, px: 3, justifyContent: 'space-between', bgcolor: 'action.hover' }}>
+          <Button
+            onClick={() => {
+              if (questionsTab !== 0) {
+                setQuestionsTab(0);
+                setQuestionError('');
+              } else {
+                handleCloseQuestionsModal();
+              }
+            }}
+            color="inherit"
+            sx={{ fontWeight: 700 }}
+          >
+            {questionsTab === 0 ? 'Close' : '← Back to Questions'}
           </Button>
+
+          <Stack direction="row" spacing={1.5} alignItems="center">
+            {questionsTab === 1 && (
+              <Button
+                variant="contained"
+                onClick={handleCreateQuestionForTest}
+                disabled={isSavingQuestion}
+                sx={greenCtaSx}
+              >
+                {isSavingQuestion ? <CircularProgress size={20} sx={{ color: '#fff' }} /> : 'Save & Add Question'}
+              </Button>
+            )}
+
+            {questionsTab === 2 && (
+              <Button
+                variant="contained"
+                onClick={handleAttachBankQuestions}
+                disabled={isSavingQuestion || !selectedBankIds.length}
+                sx={greenCtaSx}
+              >
+                {isSavingQuestion ? <CircularProgress size={20} sx={{ color: '#fff' }} /> : `Add Selected (${selectedBankIds.length}) to Test`}
+              </Button>
+            )}
+
+            {questionsTab === 0 && (
+              <Button onClick={handleCloseQuestionsModal} variant="contained" sx={greenCtaSx}>
+                Done
+              </Button>
+            )}
+          </Stack>
         </DialogActions>
       </Dialog>
 

@@ -53,6 +53,7 @@ export default function ManageQuestionsPage() {
   const [form, setForm] = useState(initialFormState);
   const [searchQuery, setSearchQuery] = useState('');
   const [formError, setFormError] = useState('');
+  const [formSubmitted, setFormSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -86,6 +87,7 @@ export default function ManageQuestionsPage() {
       });
     }
     setFormError('');
+    setFormSubmitted(false);
     setDialogOpen(true);
   };
 
@@ -94,15 +96,18 @@ export default function ManageQuestionsPage() {
     setEditingQuestion(null);
     setForm(initialFormState);
     setFormError('');
+    setFormSubmitted(false);
   };
 
   const handleFormChange = (e: any) => {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    if (formError) setFormError('');
   };
 
   const handleSubmit = async () => {
+    setFormSubmitted(true);
     if (!form.question_text?.trim() || !form.option_a?.trim() || !form.option_b?.trim() || !form.option_c?.trim() || !form.option_d?.trim()) {
-      setFormError('Question text and all 4 options (A, B, C, D) are required.');
+      setFormError('Question text and all 4 options (A, B, C, D) are required. Please fill in the highlighted fields.');
       return;
     }
     setIsSubmitting(true);
@@ -270,21 +275,60 @@ export default function ManageQuestionsPage() {
               multiline
               rows={3}
               autoFocus
+              required
+              error={formSubmitted && !form.question_text?.trim()}
+              helperText={formSubmitted && !form.question_text?.trim() ? 'Question text is required' : undefined}
               placeholder="Enter your question here..."
             />
 
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField name="option_a" label="Option A *" value={form.option_a} onChange={handleFormChange} fullWidth required />
+                <TextField
+                  name="option_a"
+                  label="Option A *"
+                  value={form.option_a}
+                  onChange={handleFormChange}
+                  fullWidth
+                  required
+                  error={formSubmitted && !form.option_a?.trim()}
+                  helperText={formSubmitted && !form.option_a?.trim() ? 'Option A is required' : undefined}
+                />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField name="option_b" label="Option B *" value={form.option_b} onChange={handleFormChange} fullWidth required />
+                <TextField
+                  name="option_b"
+                  label="Option B *"
+                  value={form.option_b}
+                  onChange={handleFormChange}
+                  fullWidth
+                  required
+                  error={formSubmitted && !form.option_b?.trim()}
+                  helperText={formSubmitted && !form.option_b?.trim() ? 'Option B is required' : undefined}
+                />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField name="option_c" label="Option C *" value={form.option_c} onChange={handleFormChange} fullWidth required />
+                <TextField
+                  name="option_c"
+                  label="Option C *"
+                  value={form.option_c}
+                  onChange={handleFormChange}
+                  fullWidth
+                  required
+                  error={formSubmitted && !form.option_c?.trim()}
+                  helperText={formSubmitted && !form.option_c?.trim() ? 'Option C is required' : undefined}
+                />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField name="option_d" label="Option D *" value={form.option_d} onChange={handleFormChange} fullWidth required />
+                <TextField
+                  name="option_d"
+                  label="Option D *"
+                  value={form.option_d}
+                  onChange={handleFormChange}
+                  fullWidth
+                  required
+                  error={formSubmitted && !form.option_d?.trim()}
+                  helperText={formSubmitted && !form.option_d?.trim() ? 'Option D is required' : undefined}
+                />
               </Grid>
             </Grid>
 
