@@ -28,6 +28,10 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
   const isOwner = Boolean(isInstituteOwner || profile?.is_owner);
   const router = useRouter();
   const pathname = usePathname();
+  const isInstitutePortal = Boolean(
+    (pathname?.startsWith('/institute/') && !pathname?.startsWith('/institutes')) ||
+    (pathname?.endsWith('/dashboard') && pathname !== '/dashboard')
+  );
   const [notifAnchor, setNotifAnchor] = useState<HTMLButtonElement | null>(null);
   const [profileAnchor, setProfileAnchor] = useState<HTMLButtonElement | null>(null);
   const [visitorDrawerOpen, setVisitorDrawerOpen] = useState(false);
@@ -72,14 +76,16 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
         <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64, px: { xs: 1.5, sm: 3 } }}>
           {/* Left: Mobile Menu Toggle & Brand/Logo */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, sm: 1 }, minWidth: 0 }}>
-            <IconButton
-              onClick={() => setVisitorDrawerOpen(true)}
-              edge="start"
-              aria-label="Open mobile menu"
-              sx={{ display: { lg: 'none' }, color: themeMode === 'dark' ? '#8892A4' : '#64748B' }}
-            >
-              <MenuIcon />
-            </IconButton>
+            {!isInstitutePortal && (
+              <IconButton
+                onClick={() => setVisitorDrawerOpen(true)}
+                edge="start"
+                aria-label="Open mobile menu"
+                sx={{ display: { lg: 'none' }, color: themeMode === 'dark' ? '#8892A4' : '#64748B' }}
+              >
+                <MenuIcon />
+              </IconButton>
+            )}
             <Box 
               onClick={() => router.push('/')}
               sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer', minWidth: 0 }}
@@ -114,34 +120,36 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
           </Box>
 
           {/* Center: Scroll links (desktop only) */}
-          <Stack 
-            direction="row" 
-            spacing={3} 
-            sx={{ 
-              display: { xs: 'none', lg: 'flex' },
-              alignItems: 'center'
-            }}
-          >
-            {visitorLinks.map((link) => {
-              const isActive = pathname === link.path;
-              return (
-                <Typography
-                  key={link.path}
-                  onClick={() => router.push(link.path)}
-                  sx={{
-                    fontSize: '0.875rem',
-                    fontWeight: 600,
-                    color: isActive ? 'primary.main' : 'text.secondary',
-                    cursor: 'pointer',
-                    '&:hover': { color: 'primary.main' },
-                    transition: 'color 0.2s',
-                  }}
-                >
-                  {link.label}
-                </Typography>
-              );
-            })}
-          </Stack>
+          {!isInstitutePortal && (
+            <Stack 
+              direction="row" 
+              spacing={3} 
+              sx={{ 
+                display: { xs: 'none', lg: 'flex' },
+                alignItems: 'center'
+              }}
+            >
+              {visitorLinks.map((link) => {
+                const isActive = pathname === link.path;
+                return (
+                  <Typography
+                    key={link.path}
+                    onClick={() => router.push(link.path)}
+                    sx={{
+                      fontSize: '0.875rem',
+                      fontWeight: 600,
+                      color: isActive ? 'primary.main' : 'text.secondary',
+                      cursor: 'pointer',
+                      '&:hover': { color: 'primary.main' },
+                      transition: 'color 0.2s',
+                    }}
+                  >
+                    {link.label}
+                  </Typography>
+                );
+              })}
+            </Stack>
+          )}
 
           {/* Right: Actions */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.75, sm: 1.5 }, flexShrink: 0 }}>
@@ -302,8 +310,8 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
     <AppBar
       position="fixed"
       sx={{
-        width: user ? { lg: `calc(100% - ${drawerWidth}px)` } : '100%',
-        ml: user ? { lg: `${drawerWidth}px` } : 0,
+        width: (user && !isInstitutePortal && !isOwner) ? { lg: `calc(100% - ${drawerWidth}px)` } : '100%',
+        ml: (user && !isInstitutePortal && !isOwner) ? { lg: `${drawerWidth}px` } : 0,
         background: themeMode === 'dark' ? 'rgba(15,17,23,0.85)' : 'rgba(255,255,255,0.85)',
         backdropFilter: 'blur(16px)',
         borderBottom: themeMode === 'dark' ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(0,0,0,0.06)',
@@ -315,14 +323,16 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
       <Toolbar sx={{ justifyContent: 'space-between', minHeight: 64, px: { xs: 2, sm: 3 } }}>
         {/* Left: Menu toggle (mobile) + Brand on mobile */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <IconButton
-            onClick={onDrawerToggle}
-            edge="start"
-            aria-label="Open sidebar menu"
-            sx={{ display: { lg: 'none' }, color: themeMode === 'dark' ? '#8892A4' : '#64748B' }}
-          >
-            <MenuIcon />
-          </IconButton>
+          {!isInstitutePortal && !isOwner && (
+            <IconButton
+              onClick={onDrawerToggle}
+              edge="start"
+              aria-label="Open sidebar menu"
+              sx={{ display: { lg: 'none' }, color: themeMode === 'dark' ? '#8892A4' : '#64748B' }}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
           <Box
             suppressHydrationWarning
             onClick={() => router.push(profile?.institute ? `/${profile.institute.slug}/dashboard` : '/home')}

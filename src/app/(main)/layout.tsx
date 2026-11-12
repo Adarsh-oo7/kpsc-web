@@ -15,6 +15,15 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
   const { user, profile } = useAppContext();
   const isAuthPage = pathname === '/login' || pathname === '/register';
 
+  // Identify institute portal pages (e.g. /institute/rankup, /rankup/dashboard)
+  // These pages should never display the standard KPSC sidebar
+  const isInstitutePortal = Boolean(
+    (pathname?.startsWith('/institute/') && !pathname?.startsWith('/institutes')) ||
+    (pathname?.endsWith('/dashboard') && pathname !== '/dashboard')
+  );
+
+  const showSidebar = Boolean(user && !isInstitutePortal && !profile?.is_owner);
+
   useEffect(() => {
     // If the student is enrolled in an academy/institute (e.g. RankUp) and is not an owner,
     // restrict them exclusively to their institute portal and profile
@@ -37,7 +46,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     }}>
       <MainHeader onDrawerToggle={() => setDrawerOpen(!drawerOpen)} />
 
-      {user && (
+      {showSidebar && (
         <Sidebar
           open={drawerOpen}
           onClose={() => setDrawerOpen(false)}
@@ -62,14 +71,14 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {/* Page content */}
         <Box sx={{
           flex: 1,
-          px: isAuthPage ? 0 : { xs: 2, sm: 3 },
-          pt: isAuthPage ? 0 : { xs: 1.5, sm: 2 },
-          pb: isAuthPage ? 0 : { xs: 2, sm: 3 },
+          px: (isAuthPage || isInstitutePortal) ? 0 : { xs: 2, sm: 3 },
+          pt: (isAuthPage || isInstitutePortal) ? 0 : { xs: 1.5, sm: 2 },
+          pb: (isAuthPage || isInstitutePortal) ? 0 : { xs: 2, sm: 3 },
           maxWidth: '100%',
         }}>
           {children}
         </Box>
-        {!user && !isAuthPage && <SiteFooter />}
+        {!user && !isAuthPage && !isInstitutePortal && <SiteFooter />}
       </Box>
     </Box>
   );
