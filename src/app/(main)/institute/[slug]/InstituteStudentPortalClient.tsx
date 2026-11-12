@@ -62,7 +62,6 @@ import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
 import { apiErrorMessage, suggestUsername } from '@/lib/auth';
 import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
 
 interface PortalProps {
   slug: string;
@@ -72,8 +71,6 @@ interface PortalProps {
 
 export default function InstituteStudentPortalClient({ slug, initialInstitute, initialPortalData }: PortalProps) {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isMdDown = useMediaQuery(theme.breakpoints.down('md'));
 
   const { user, profile, login, refreshProfile, isLoading: authLoading } = useAppContext();
   const [mounted, setMounted] = useState(false);
@@ -875,14 +872,14 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
             </Stack>
 
             {(membershipStatus === 'none' || membershipStatus === 'pending') && (
-              <Box sx={{ flexShrink: 0 }}>
+              <Box sx={{ flexShrink: 0, width: { xs: '100%', sm: 'auto' } }}>
                 {membershipStatus === 'none' && (
                   <Button
                     variant="contained"
-                    fullWidth={isMobile}
                     onClick={() => handleRequestJoin()}
                     disabled={joinSubmitting}
                     sx={{
+                      width: { xs: '100%', sm: 'auto' },
                       textTransform: 'none',
                       fontWeight: 800,
                       borderRadius: '10px',
@@ -896,10 +893,9 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                   <Button
                     variant="outlined"
                     size="small"
-                    fullWidth={isMobile}
                     startIcon={<RefreshIcon />}
                     onClick={() => fetchPortal(true)}
-                    sx={{ textTransform: 'none', fontWeight: 700, borderRadius: '10px' }}
+                    sx={{ width: { xs: '100%', sm: 'auto' }, textTransform: 'none', fontWeight: 700, borderRadius: '10px' }}
                   >
                     Check Approval Status
                   </Button>
@@ -916,15 +912,16 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
           <Tabs
             value={portalTab}
             onChange={(_, v) => setPortalTab(v)}
-            variant={isMobile ? 'fullWidth' : 'scrollable'}
+            variant="scrollable"
             scrollButtons="auto"
+            allowScrollButtonsMobile
             sx={{
               minHeight: { xs: 48, sm: 56 },
               '& .MuiTab-root': {
                 minHeight: { xs: 48, sm: 56 },
                 py: 1.25,
-                px: { xs: 1, sm: 2.5 },
-                fontSize: { xs: '0.78rem', sm: '0.88rem' },
+                px: { xs: 1.5, sm: 2.5 },
+                fontSize: { xs: '0.8rem', sm: '0.88rem' },
                 textTransform: 'none',
                 fontWeight: 800,
               },
@@ -933,7 +930,7 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
             <Tab
               icon={<QuizIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />}
               iconPosition="start"
-              label={isMobile ? `Tests (${(mockTests.length || 0) + (inst?.question_count ?? questions.length)})` : `Tests & Questions (${inst?.question_count ?? questions.length})`}
+              label={`Tests (${(mockTests.length || 0) + (inst?.question_count ?? questions.length)})`}
             />
             <Tab
               icon={<EmojiEventsIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />}
@@ -943,7 +940,7 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
             <Tab
               icon={<DescriptionIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />}
               iconPosition="start"
-              label={isMobile ? 'Notes' : 'Notes & Info'}
+              label="Notes"
             />
           </Tabs>
         </Box>
@@ -1436,9 +1433,11 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                     <Alert severity="info" sx={{ borderRadius: '14px' }}>
                       No students on the leaderboard yet. Join {inst?.name} and complete a test to claim Rank #1!
                     </Alert>
-                  ) : isMdDown ? (
-                    /* Mobile Sleek Cards View */
-                    <Stack spacing={1.5}>
+                  ) : (
+                    <>
+                      {/* Mobile Sleek Cards View (CSS Responsive) */}
+                      <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+                        <Stack spacing={1.5}>
                       {leaderboard.map((row: any) => (
                         <Paper
                           key={row.username}
@@ -1513,9 +1512,11 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                         </Paper>
                       ))}
                     </Stack>
-                  ) : (
-                    /* Desktop Clean Table View */
-                    <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '16px' }}>
+                      </Box>
+
+                      {/* Desktop Clean Table View (CSS Responsive) */}
+                      <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                        <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '16px' }}>
                       <Table>
                         <TableHead>
                           <TableRow>
@@ -1589,7 +1590,9 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                           ))}
                         </TableBody>
                       </Table>
-                    </TableContainer>
+                        </TableContainer>
+                      </Box>
+                    </>
                   )}
                 </Box>
               )}

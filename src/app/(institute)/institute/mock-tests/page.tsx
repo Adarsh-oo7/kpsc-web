@@ -23,6 +23,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
+import { apiErrorMessage } from '@/lib/auth';
 import { InstitutePageHeader, greenCtaSx, asList } from '@/components/institute/pageChrome';
 
 const initialTestForm = {
@@ -207,6 +208,10 @@ export default function InstituteMockTestsPage() {
     setQuestionsTab(0);
     setQuestionError('');
     setSelectedBankIds([]);
+    setNewQuestionForm({
+      ...initialQuestionForm,
+      topic: topics.length > 0 ? topics[0].id.toString() : '',
+    });
     try {
       const res = await apiClient.get(`/institute/mock-tests/${test.id}/`);
       setActiveTestDetail(res.data);
@@ -224,30 +229,38 @@ export default function InstituteMockTestsPage() {
   };
 
   const handleCreateQuestionForTest = async () => {
-    if (!newQuestionForm.question_text || !newQuestionForm.option_a || !newQuestionForm.option_b || !newQuestionForm.option_c || !newQuestionForm.option_d) {
-      setQuestionError('Question text and all 4 options are required.');
-      return;
-    }
-    if (!newQuestionForm.topic) {
-      setQuestionError('Please select a topic.');
+    if (!newQuestionForm.question_text?.trim() || !newQuestionForm.option_a?.trim() || !newQuestionForm.option_b?.trim() || !newQuestionForm.option_c?.trim() || !newQuestionForm.option_d?.trim()) {
+      setQuestionError('Question text and all 4 options (A, B, C, D) are required.');
       return;
     }
     setIsSavingQuestion(true);
     setQuestionError('');
     try {
-      const payload = {
-        ...newQuestionForm,
-        topic: Number(newQuestionForm.topic),
+      const payload: any = {
+        question_text: newQuestionForm.question_text.trim(),
+        option_a: newQuestionForm.option_a.trim(),
+        option_b: newQuestionForm.option_b.trim(),
+        option_c: newQuestionForm.option_c.trim(),
+        option_d: newQuestionForm.option_d.trim(),
+        correct_answer: newQuestionForm.correct_answer || 'A',
+        difficulty: newQuestionForm.difficulty || 'medium',
+        explanation: newQuestionForm.explanation?.trim() || '',
       };
+      if (newQuestionForm.topic) {
+        payload.topic = Number(newQuestionForm.topic);
+      }
       await apiClient.post(`/institute/mock-tests/${activeTest.id}/add-question/`, payload);
       // Reload active test detail
       const res = await apiClient.get(`/institute/mock-tests/${activeTest.id}/`);
       setActiveTestDetail(res.data);
-      setNewQuestionForm(initialQuestionForm);
+      setNewQuestionForm({
+        ...initialQuestionForm,
+        topic: topics.length > 0 ? topics[0].id.toString() : '',
+      });
       setQuestionsTab(0);
       mutate();
     } catch (err: any) {
-      setQuestionError(err.response?.data?.detail || 'Failed to add question to test.');
+      setQuestionError(apiErrorMessage(err, 'Failed to add question to test.'));
     } finally {
       setIsSavingQuestion(false);
     }
@@ -271,7 +284,7 @@ export default function InstituteMockTestsPage() {
       setQuestionsTab(0);
       mutate();
     } catch (err: any) {
-      setQuestionError(err.response?.data?.detail || 'Failed to attach questions.');
+      setQuestionError(apiErrorMessage(err, 'Failed to attach questions.'));
     } finally {
       setIsSavingQuestion(false);
     }
@@ -286,8 +299,8 @@ export default function InstituteMockTestsPage() {
       const res = await apiClient.get(`/institute/mock-tests/${activeTest.id}/`);
       setActiveTestDetail(res.data);
       mutate();
-    } catch {
-      alert('Failed to remove question.');
+    } catch (err: any) {
+      alert(apiErrorMessage(err, 'Failed to remove question.'));
     }
   };
 
@@ -875,6 +888,7 @@ export default function InstituteMockTestsPage() {
                     label="Topic"
                     onChange={(e) => setNewQuestionForm({ ...newQuestionForm, topic: e.target.value })}
                   >
+                    <MenuItem value=""><em>Academy Practice (Auto)</em></MenuItem>
                     {topics.map((t: any) => (
                       <MenuItem key={t.id} value={t.id.toString()}>
                         {t.name}

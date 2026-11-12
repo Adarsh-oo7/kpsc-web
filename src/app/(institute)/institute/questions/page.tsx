@@ -16,6 +16,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import SearchIcon from '@mui/icons-material/Search';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
+import { apiErrorMessage } from '@/lib/auth';
 import { InstitutePageHeader, greenCtaSx, asList } from '@/components/institute/pageChrome';
 
 const DIFFICULTY_COLORS: Record<string, 'success' | 'warning' | 'error'> = {
@@ -75,11 +76,14 @@ export default function ManageQuestionsPage() {
         correct_answer: question.correct_answer || 'A',
         explanation: question.explanation || '',
         difficulty: question.difficulty || 'medium',
-        topic: question.topic?.id?.toString() || question.topic?.toString() || '',
+        topic: question.topic?.id?.toString() || question.topic?.toString() || (topics.length > 0 ? topics[0].id.toString() : ''),
       });
     } else {
       setEditingQuestion(null);
-      setForm(initialFormState);
+      setForm({
+        ...initialFormState,
+        topic: topics.length > 0 ? topics[0].id.toString() : '',
+      });
     }
     setFormError('');
     setDialogOpen(true);
@@ -97,21 +101,26 @@ export default function ManageQuestionsPage() {
   };
 
   const handleSubmit = async () => {
-    if (!form.question_text || !form.option_a || !form.option_b || !form.option_c || !form.option_d) {
-      setFormError('Question text and all 4 options are required.');
-      return;
-    }
-    if (!form.topic) {
-      setFormError('Pick a topic. Create one under Topics first.');
+    if (!form.question_text?.trim() || !form.option_a?.trim() || !form.option_b?.trim() || !form.option_c?.trim() || !form.option_d?.trim()) {
+      setFormError('Question text and all 4 options (A, B, C, D) are required.');
       return;
     }
     setIsSubmitting(true);
     setFormError('');
     try {
-      const payload = {
-        ...form,
-        topic: form.topic ? Number(form.topic) : null,
+      const payload: any = {
+        question_text: form.question_text.trim(),
+        option_a: form.option_a.trim(),
+        option_b: form.option_b.trim(),
+        option_c: form.option_c.trim(),
+        option_d: form.option_d.trim(),
+        correct_answer: form.correct_answer || 'A',
+        difficulty: form.difficulty || 'medium',
+        explanation: form.explanation?.trim() || '',
       };
+      if (form.topic) {
+        payload.topic = Number(form.topic);
+      }
       if (editingQuestion) {
         await apiClient.patch(`/institute/questions/${editingQuestion.id}/`, payload);
       } else {
@@ -120,7 +129,7 @@ export default function ManageQuestionsPage() {
       mutate();
       handleCloseDialog();
     } catch (err: any) {
-      setFormError(err.response?.data?.detail || err.response?.data?.question_text?.[0] || 'Failed to save question.');
+      setFormError(apiErrorMessage(err, 'Failed to save question.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -151,14 +160,9 @@ export default function ManageQuestionsPage() {
       {/* Header */}
       <InstitutePageHeader
         title="Question bank"
-        subtitle="Academy MCQs for your students. Create a topic first, then add questions."
+        subtitle="Manage academy MCQs for your students and mock examinations."
         action={<Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()} sx={greenCtaSx}>Add question</Button>}
       />
-      {topics.length === 0 && (
-        <Alert severity="info" sx={{ mb: 3, borderRadius: '14px' }}>
-          No topics yet. Add one under Topics, then come back here to save questions.
-        </Alert>
-      )}
 
       {/* Search */}
       <Paper sx={{ p: 2, mb: 3, borderRadius: 4, bgcolor: 'background.paper' }}>
@@ -177,8 +181,8 @@ export default function ManageQuestionsPage() {
       {/* Questions Table */}
       {!isLoading && (
         <Paper sx={{ borderRadius: 4, bgcolor: 'background.paper', overflow: 'hidden' }}>
-          <TableContainer>
-            <Table>
+          <TableContainer sx={{ overflowX: 'auto' }}>
+            <Table sx={{ minWidth: 650 }}>
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ fontWeight: 'bold' }}>#</TableCell>
@@ -306,9 +310,9 @@ export default function ManageQuestionsPage() {
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <FormControl fullWidth>
-                  <InputLabel>Topic *</InputLabel>
-                  <Select name="topic" value={form.topic} label="Topic *" onChange={handleFormChange}>
-                    <MenuItem value="">Select a topic</MenuItem>
+                  <InputLabel>Topic</InputLabel>
+                  <Select name="topic" value={form.topic} label="Topic" onChange={handleFormChange}>
+                    <MenuItem value=""><em>Academy Practice (Auto)</em></MenuItem>
                     {topics?.map((t: any) => (
                       <MenuItem key={t.id} value={t.id.toString()}>{t.name}</MenuItem>
                     ))}
