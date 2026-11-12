@@ -1252,6 +1252,21 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                           </Box>
 
                           <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                            {activeMockTest?.time_limit_per_question > 0 && (
+                              <Chip
+                                label={`⚡ ${activeMockTest.time_limit_per_question}s/Q`}
+                                size="small"
+                                sx={{
+                                  display: { xs: 'none', sm: 'inline-flex' },
+                                  fontWeight: 800,
+                                  height: { xs: 26, sm: 30 },
+                                  fontSize: '0.72rem',
+                                  bgcolor: 'rgba(245, 158, 11, 0.12)',
+                                  color: '#F59E0B',
+                                  border: '1px solid rgba(245, 158, 11, 0.35)',
+                                }}
+                              />
+                            )}
                             {timerSeconds !== null && (
                               <Chip
                                 icon={<AccessTimeIcon sx={{ fontSize: '14px !important', color: timerSeconds < 300 ? '#EF4444' : '#F59E0B' }} />}
@@ -1307,7 +1322,23 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                               }}
                             >
                               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1.25 }}>
-                                <Chip label={`Q${idx + 1}`} size="small" sx={{ fontWeight: 900, height: 22, fontSize: '0.72rem' }} />
+                                <Stack direction="row" spacing={0.75} alignItems="center">
+                                  <Chip label={`Q${idx + 1}`} size="small" sx={{ fontWeight: 900, height: 22, fontSize: '0.72rem' }} />
+                                  {activeMockTest?.time_limit_per_question > 0 && (
+                                    <Chip
+                                      label={`⏱️ ${activeMockTest.time_limit_per_question}s`}
+                                      size="small"
+                                      sx={{
+                                        height: 22,
+                                        fontSize: '0.68rem',
+                                        fontWeight: 800,
+                                        bgcolor: 'rgba(245, 158, 11, 0.1)',
+                                        color: '#F59E0B',
+                                        border: '1px solid rgba(245, 158, 11, 0.25)',
+                                      }}
+                                    />
+                                  )}
+                                </Stack>
                                 {q.topic_name && (
                                   <Chip label={q.topic_name} size="small" variant="outlined" sx={{ height: 22, fontSize: '0.7rem' }} />
                                 )}

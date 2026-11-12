@@ -594,16 +594,53 @@ export default function InstituteMockTestsPage() {
               </Typography>
             </Divider>
 
+            <Box sx={{ mb: 1 }}>
+              <Typography variant="body2" sx={{ fontWeight: 700, mb: 1, color: 'text.secondary', fontSize: '0.82rem' }}>
+                ⚡ Time per Question Presets (Set by Admin):
+              </Typography>
+              <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
+                {[
+                  { label: 'Off (Total Timer Only)', val: 0 },
+                  { label: '15s / Q', val: 15 },
+                  { label: '20s / Q', val: 20 },
+                  { label: '25s / Q (PSC Standard)', val: 25 },
+                  { label: '30s / Q', val: 30 },
+                  { label: '45s / Q', val: 45 },
+                  { label: '60s / Q', val: 60 },
+                  { label: '90s / Q', val: 90 },
+                ].map((preset) => {
+                  const isSelected = Number(testForm.time_limit_per_question) === preset.val;
+                  return (
+                    <Chip
+                      key={preset.val}
+                      label={preset.label}
+                      clickable
+                      color={isSelected ? 'primary' : 'default'}
+                      variant={isSelected ? 'filled' : 'outlined'}
+                      onClick={() => {
+                        const val = preset.val;
+                        setTestForm((prev) => {
+                          const updated = { ...prev, time_limit_per_question: val };
+                          if (val > 0) {
+                            const estMins = Math.max(1, Math.ceil((20 * val) / 60));
+                            if (prev.duration_minutes === 60 || prev.duration_minutes === 0) {
+                              updated.duration_minutes = estMins;
+                            }
+                          }
+                          return updated;
+                        });
+                      }}
+                      sx={{
+                        fontWeight: isSelected ? 800 : 500,
+                        fontSize: '0.78rem',
+                      }}
+                    />
+                  );
+                })}
+              </Stack>
+            </Box>
+
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <TextField
-                label="Total Test Duration (Minutes)"
-                name="duration_minutes"
-                type="number"
-                value={testForm.duration_minutes}
-                onChange={handleFormChange}
-                fullWidth
-                helperText="Whole test timer (e.g. 60 or 75 minutes)"
-              />
               <TextField
                 label="Per-Question Timer (Seconds)"
                 name="time_limit_per_question"
@@ -611,9 +648,24 @@ export default function InstituteMockTestsPage() {
                 value={testForm.time_limit_per_question}
                 onChange={handleFormChange}
                 fullWidth
-                helperText="Optional (e.g. 45s per Q). Set 0 to use total test timer."
+                helperText="Custom seconds for each question (e.g. 25). Set 0 to disable."
+              />
+              <TextField
+                label="Total Test Duration (Minutes)"
+                name="duration_minutes"
+                type="number"
+                value={testForm.duration_minutes}
+                onChange={handleFormChange}
+                fullWidth
+                helperText="Overall test window (e.g. 9 mins for 20 Qs × 25s, or 60 mins)."
               />
             </Stack>
+
+            {Number(testForm.time_limit_per_question) > 0 && (
+              <Alert severity="info" sx={{ py: 0.5, px: 1.5, borderRadius: '10px', fontSize: '0.8rem' }}>
+                ⏱️ <strong>{testForm.time_limit_per_question}s per question mode active.</strong> Students get {testForm.time_limit_per_question} seconds per question (e.g. 20 Qs × {testForm.time_limit_per_question}s = {20 * Number(testForm.time_limit_per_question)}s / ~{Math.ceil((20 * Number(testForm.time_limit_per_question)) / 60)} mins total).
+              </Alert>
+            )}
 
             <Divider>
               <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
