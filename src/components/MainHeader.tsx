@@ -12,6 +12,7 @@ import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import BoltIcon from '@mui/icons-material/Bolt';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAppContext } from '@/context/AppContext';
@@ -23,7 +24,8 @@ interface MainHeaderProps {
 }
 
 export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
-  const { user, profile, logout, unreadCount, messages, markAsRead, isLoading, themeMode, toggleThemeMode } = useAppContext();
+  const { user, profile, logout, unreadCount, messages, markAsRead, isLoading, themeMode, toggleThemeMode, isInstituteOwner } = useAppContext();
+  const isOwner = Boolean(isInstituteOwner || profile?.is_owner);
   const router = useRouter();
   const pathname = usePathname();
   const [notifAnchor, setNotifAnchor] = useState<HTMLButtonElement | null>(null);
@@ -451,6 +453,33 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
             </IconButton>
           </Tooltip>
 
+          {/* Institute Admin Dashboard Button */}
+          {isOwner && (
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<AdminPanelSettingsIcon sx={{ fontSize: '16px !important' }} />}
+              onClick={() => router.push('/institute/dashboard')}
+              sx={{
+                background: 'linear-gradient(135deg, #1B6B3A, #2E8B57)',
+                color: '#fff',
+                fontWeight: 800,
+                fontSize: { xs: '0.72rem', sm: '0.82rem' },
+                textTransform: 'none',
+                borderRadius: '8px',
+                px: { xs: 1.25, sm: 1.75 },
+                py: 0.55,
+                whiteSpace: 'nowrap',
+                boxShadow: '0 2px 8px rgba(27, 107, 58, 0.35)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #15803d, #1B6B3A)',
+                },
+              }}
+            >
+              Admin Dashboard
+            </Button>
+          )}
+
           {/* User Avatar */}
           {user ? (
             <Tooltip title={profile?.user?.username || user.username}>
@@ -567,6 +596,7 @@ export default function MainHeader({ onDrawerToggle }: MainHeaderProps) {
         </Box>
         <List disablePadding sx={{ p: 1 }}>
           {[
+            ...(isOwner ? [{ label: '🏫 Admin Dashboard', path: '/institute/dashboard' }] : []),
             { label: '👤 Profile', path: '/profile' },
             { label: '📊 Analytics', path: '/analytics' },
             { label: '⚙️ Settings', path: '/settings' },

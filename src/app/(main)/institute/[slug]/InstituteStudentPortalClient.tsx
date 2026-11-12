@@ -223,6 +223,10 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
       });
       const { access, refresh } = res.data;
       const prof = await login(access, refresh);
+      if (prof?.is_owner === true) {
+        router.replace('/institute/dashboard');
+        return;
+      }
       if (prof && !prof.institute && !prof.is_owner && inst?.id) {
         try {
           await apiClient.post('/institute-join-request/', { institute: inst.id });
@@ -294,6 +298,10 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
       const response = await apiClient.post('/auth/google/', { credential });
       const { access, refresh } = response.data;
       const prof = await login(access, refresh);
+      if (prof?.is_owner === true) {
+        router.replace('/institute/dashboard');
+        return;
+      }
       if (prof && !prof.institute && !prof.is_owner && inst?.id) {
         try {
           await apiClient.post('/institute-join-request/', { institute: inst.id });
@@ -870,6 +878,31 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                 </Typography>
               </Box>
             </Stack>
+
+            {membershipStatus === 'owner' && (
+              <Box sx={{ flexShrink: 0, width: { xs: '100%', sm: 'auto' } }}>
+                <Button
+                  variant="contained"
+                  startIcon={<AdminPanelSettingsIcon />}
+                  onClick={() => router.push('/institute/dashboard')}
+                  sx={{
+                    width: { xs: '100%', sm: 'auto' },
+                    textTransform: 'none',
+                    fontWeight: 800,
+                    borderRadius: '10px',
+                    bgcolor: 'success.main',
+                    color: '#fff',
+                    px: { xs: 2, sm: 2.75 },
+                    py: 1,
+                    fontSize: { xs: '0.85rem', sm: '0.92rem' },
+                    boxShadow: '0 4px 14px rgba(22, 163, 74, 0.35)',
+                    '&:hover': { bgcolor: 'success.dark' },
+                  }}
+                >
+                  Go to Admin Dashboard
+                </Button>
+              </Box>
+            )}
 
             {(membershipStatus === 'none' || membershipStatus === 'pending') && (
               <Box sx={{ flexShrink: 0, width: { xs: '100%', sm: 'auto' } }}>

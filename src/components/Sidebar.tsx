@@ -28,6 +28,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import BoltIcon from '@mui/icons-material/Bolt';
 import SchoolIcon from '@mui/icons-material/School';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 
 export const drawerWidth = 272;
 
@@ -65,7 +66,8 @@ const LEVEL_NAMES = [
 
 function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
   const pathname = usePathname();
-  const { profile, themeMode } = useAppContext();
+  const { profile, themeMode, isInstituteOwner } = useAppContext();
+  const isOwner = Boolean(isInstituteOwner || profile?.is_owner);
 
   const xp = profile?.total_xp || 0;
   const level = profile?.level || 1;
@@ -174,27 +176,33 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
         {/* Academy badge for enrolled institute students (replaces generic XP bar) */}
         {profile && profile.institute && (
           <Box sx={{
-            background: themeMode === 'dark' ? 'rgba(245, 158, 11, 0.08)' : 'rgba(245, 158, 11, 0.06)',
-            border: '1px solid rgba(245, 158, 11, 0.25)',
+            background: isOwner 
+              ? (themeMode === 'dark' ? 'rgba(34, 197, 94, 0.08)' : 'rgba(34, 197, 94, 0.06)') 
+              : (themeMode === 'dark' ? 'rgba(245, 158, 11, 0.08)' : 'rgba(245, 158, 11, 0.06)'),
+            border: isOwner ? '1px solid rgba(34, 197, 94, 0.3)' : '1px solid rgba(245, 158, 11, 0.25)',
             borderRadius: '12px',
             p: 1.5,
           }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                <SchoolIcon sx={{ fontSize: 16, color: '#F59E0B' }} />
-                <Typography sx={{ fontSize: '0.75rem', color: '#F59E0B', fontWeight: 800 }}>
-                  Enrolled Student
+                {isOwner ? (
+                  <AdminPanelSettingsIcon sx={{ fontSize: 16, color: '#22C55E' }} />
+                ) : (
+                  <SchoolIcon sx={{ fontSize: 16, color: '#F59E0B' }} />
+                )}
+                <Typography sx={{ fontSize: '0.75rem', color: isOwner ? '#22C55E' : '#F59E0B', fontWeight: 800 }}>
+                  {isOwner ? 'Academy Admin' : 'Enrolled Student'}
                 </Typography>
               </Box>
               <Chip
-                label="Active"
+                label={isOwner ? 'Owner' : 'Active'}
                 size="small"
                 sx={{
                   height: 20,
                   fontSize: '0.65rem',
                   fontWeight: 800,
-                  bgcolor: 'rgba(245, 158, 11, 0.18)',
-                  color: '#F59E0B',
+                  bgcolor: isOwner ? 'rgba(34, 197, 94, 0.18)' : 'rgba(245, 158, 11, 0.18)',
+                  color: isOwner ? '#22C55E' : '#F59E0B',
                 }}
               />
             </Box>
@@ -244,6 +252,9 @@ function DrawerContent({ onNavigate }: { onNavigate: (path: string) => void }) {
         <List disablePadding>
           {(profile?.institute
             ? [
+                ...(isOwner
+                  ? [{ text: 'Admin Dashboard', icon: <AdminPanelSettingsIcon sx={{ color: '#22C55E' }} />, path: '/institute/dashboard' }]
+                  : []),
                 { text: 'Academy Portal', icon: <SchoolIcon sx={{ color: '#F59E0B' }} />, path: `/${profile.institute.slug}/dashboard` },
                 { text: 'Mock Tests & MCQs', icon: <QuizIcon sx={{ color: '#F59E0B' }} />, path: `/${profile.institute.slug}/dashboard` },
                 { text: 'Batch Leaderboard', icon: <LeaderboardIcon sx={{ color: '#F59E0B' }} />, path: `/${profile.institute.slug}/dashboard` },
