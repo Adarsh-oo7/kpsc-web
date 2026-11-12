@@ -517,7 +517,7 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: { xs: '1fr 1fr', md: '1fr' },
+              gridTemplateColumns: { xs: membershipStatus === 'owner' ? '1fr 1fr' : '1fr', md: '1fr' },
               gap: 1,
               width: { xs: '100%', md: 'auto' },
               minWidth: { md: 185 },
@@ -543,7 +543,7 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
             >
               {copiedLink ? 'Link Copied!' : 'Share Portal'}
             </Button>
-            {membershipStatus === 'owner' ? (
+            {membershipStatus === 'owner' && (
               <Link href="/institute/dashboard" style={{ textDecoration: 'none', display: 'block', width: '100%' }}>
                 <Button
                   variant="contained"
@@ -563,27 +563,6 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                   }}
                 >
                   Admin Dashboard
-                </Button>
-              </Link>
-            ) : (
-              <Link href="/login?tab=1" style={{ textDecoration: 'none', display: 'block', width: '100%' }}>
-                <Button
-                  variant="outlined"
-                  size="small"
-                  fullWidth
-                  startIcon={<AdminPanelSettingsIcon sx={{ fontSize: '16px !important' }} />}
-                  sx={{
-                    color: 'rgba(255,255,255,0.9)',
-                    borderColor: 'rgba(255,255,255,0.22)',
-                    textTransform: 'none',
-                    fontWeight: 700,
-                    borderRadius: '10px',
-                    height: 38,
-                    fontSize: { xs: '0.78rem', sm: '0.85rem' },
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  Admin Login
                 </Button>
               </Link>
             )}
