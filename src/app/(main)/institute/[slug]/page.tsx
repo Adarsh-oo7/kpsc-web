@@ -8,7 +8,7 @@ const GREEN = '#1B6B3A';
 const GREEN_LIGHT = '#2E8B57';
 
 async function getPortalData(slug: string) {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.kpscmaster.in';
   try {
     const res = await fetch(`${apiUrl}/api/institute/public/portal/${slug}/`, {
       next: { revalidate: 30 },

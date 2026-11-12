@@ -21,7 +21,7 @@ function capitalizeDistrict(district: string): string {
 
 async function getInstitutesForDistrict(district: string) {
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.kpscmaster.in';
     const res = await fetch(`${apiUrl}/api/institute/public/list/?district=${district}`, {
       next: { revalidate: 3600 }
     });
