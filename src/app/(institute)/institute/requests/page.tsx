@@ -2,6 +2,7 @@
 
 import useSWR from 'swr';
 import { Box, Typography, Button, Paper, List, ListItem, ListItemText, ListItemAvatar, Avatar, Stack, CircularProgress, Alert } from '@mui/material';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { motion } from 'framer-motion';
 import { useAppContext } from '@/context/AppContext'; // Import the global context
 import apiClient from '@/lib/apiClient';
@@ -50,8 +51,52 @@ export default function ManageRequestsPage() {
                                 <Avatar src={req.profile_photo || ''} />
                             </ListItemAvatar>
                             <ListItemText
-                                primary={req.user?.username || 'Unknown User'}
-                                secondary={req.user?.email || ''}
+                                primary={
+                                    <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
+                                        <Typography sx={{ fontWeight: 800 }}>{req.full_name || req.user?.username || 'Unknown User'}</Typography>
+                                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>@{req.user?.username}</Typography>
+                                    </Stack>
+                                }
+                                secondary={
+                                    <Stack direction="column" spacing={0.3} sx={{ mt: 0.5 }}>
+                                        {req.user?.email && (
+                                            <Typography variant="caption" color="text.secondary">{req.user.email}</Typography>
+                                        )}
+                                        {req.phone_number ? (
+                                            <Stack direction="row" spacing={1} alignItems="center">
+                                                <Typography variant="caption" sx={{ color: '#16a34a', fontWeight: 800 }}>
+                                                    📱 WhatsApp: +91 {req.phone_number}
+                                                </Typography>
+                                                <Button
+                                                    size="small"
+                                                    component="a"
+                                                    href={`https://wa.me/91${req.phone_number}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    startIcon={<WhatsAppIcon sx={{ fontSize: '14px !important' }} />}
+                                                    sx={{
+                                                        color: '#16a34a',
+                                                        fontSize: '0.72rem',
+                                                        fontWeight: 800,
+                                                        py: 0,
+                                                        px: 0.75,
+                                                        minWidth: 0,
+                                                        textTransform: 'none',
+                                                        borderRadius: '6px',
+                                                        bgcolor: 'rgba(22, 163, 74, 0.08)',
+                                                        '&:hover': { bgcolor: 'rgba(22, 163, 74, 0.16)' }
+                                                    }}
+                                                >
+                                                    WhatsApp
+                                                </Button>
+                                            </Stack>
+                                        ) : (
+                                            <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic' }}>
+                                                No WhatsApp number provided
+                                            </Typography>
+                                        )}
+                                    </Stack>
+                                }
                             />
                             <Stack direction="row" spacing={1}>
                                 <Button variant="contained" onClick={() => handleProcessRequest(req.id, 'approve')} sx={{ textTransform: 'none', fontWeight: 800, background: `linear-gradient(135deg, ${GREEN}, ${GREEN_LIGHT})` }}>

@@ -6,7 +6,7 @@ import useSWR from 'swr';
 import {
   Box, Typography, TextField, Button, Alert, Card, CardContent,
   Select, MenuItem, InputLabel, FormControl, CircularProgress,
-  Avatar, Input, Grid, Chip, Stack, Divider, Tab, Tabs, Tooltip,
+  Avatar, Input, InputAdornment, Grid, Chip, Stack, Divider, Tab, Tabs, Tooltip,
   Dialog, DialogContent, DialogTitle, DialogActions, IconButton, LinearProgress, useTheme
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
@@ -96,6 +96,7 @@ export default function ProfilePage() {
     preferred_language: '',
     practice_mode: 'full',
     bio: '',
+    phone_number: '',
   });
 
   
@@ -148,6 +149,7 @@ export default function ProfilePage() {
         preferred_language: profileData.preferred_language || '',
         practice_mode: profileData.practice_mode === 'focus' ? 'focus' : 'full',
         bio: profileData.bio || '',
+        phone_number: profileData.phone_number || '',
       }));
 
       if (profileData.profile_photo) {
@@ -190,6 +192,7 @@ export default function ProfilePage() {
     if (formData.preferred_language) data.append('preferred_language', formData.preferred_language);
     if (formData.practice_mode) data.append('practice_mode', formData.practice_mode);
     if (formData.bio) data.append('bio', formData.bio);
+    if (formData.phone_number) data.append('phone_number', formData.phone_number.trim());
 
     formData.preferred_topics_ids.forEach(id => data.append('preferred_topics_ids', id.toString()));
     formData.preferred_exams_ids.forEach(id => data.append('preferred_exams_ids', id.toString()));
@@ -638,6 +641,41 @@ export default function ProfilePage() {
                         value={formData.date_of_birth}
                         onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
                         InputLabelProps={{ shrink: true }}
+                        sx={{
+                          '& input': { color: 'text.primary' },
+                          '& .MuiInputLabel-root': { color: 'text.secondary' },
+                          '& .MuiOutlinedInput-root': {
+                            '& fieldset': { borderColor: 'divider' },
+                            '&:hover fieldset': { borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)' },
+                            '&.Mui-focused fieldset': { borderColor: '#2E8B57' },
+                          },
+                          bgcolor: isDark ? 'rgba(255,255,255,0.01)' : 'rgba(0,0,0,0.01)',
+                          borderRadius: '12px'
+                        }}
+                      />
+                    </Grid>
+
+                    {/* WhatsApp Mobile Number */}
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <TextField
+                        label="WhatsApp Mobile Number"
+                        placeholder="9876543210"
+                        type="tel"
+                        fullWidth
+                        value={formData.phone_number}
+                        onChange={(e) => setFormData({ ...formData, phone_number: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                        slotProps={{
+                          input: {
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <Typography sx={{ fontWeight: 800, color: 'text.primary', fontSize: '0.88rem' }}>
+                                  🇮🇳 +91
+                                </Typography>
+                              </InputAdornment>
+                            ),
+                          },
+                        }}
+                        helperText="Used for academy test schedules and batch updates"
                         sx={{
                           '& input': { color: 'text.primary' },
                           '& .MuiInputLabel-root': { color: 'text.secondary' },

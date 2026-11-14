@@ -58,6 +58,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import ReplayIcon from '@mui/icons-material/Replay';
 import AssessmentIcon from '@mui/icons-material/Assessment';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import GoogleSignInButton from '@/components/GoogleSignInButton';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
@@ -114,6 +115,12 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
   const [exitModalOpen, setExitModalOpen] = useState(false);
   const [exitingInstitute, setExitingInstitute] = useState(false);
 
+  // Compulsory WhatsApp collection for institute students
+  const [whatsappModalOpen, setWhatsappModalOpen] = useState(false);
+  const [whatsappInput, setWhatsappInput] = useState('');
+  const [whatsappError, setWhatsappError] = useState('');
+  const [savingWhatsapp, setSavingWhatsapp] = useState(false);
+
   // Practice / Test mode state
   const [selectedTopicId, setSelectedTopicId] = useState<number | 'all'>('all');
   const [testActive, setTestActive] = useState(false);
@@ -150,6 +157,18 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
       fetchPortal(false);
     }
   }, [authLoading, user, fetchPortal]);
+
+  // Compulsory WhatsApp popup for institute students missing a valid phone number
+  useEffect(() => {
+    if (!authLoading && user && !profile?.is_owner) {
+      const cleanPhone = String(profile?.phone_number || '').trim().replace(/\D/g, '');
+      if (cleanPhone.length !== 10) {
+        setWhatsappModalOpen(true);
+      } else {
+        setWhatsappModalOpen(false);
+      }
+    }
+  }, [authLoading, user, profile?.phone_number, profile?.is_owner]);
 
   const membershipStatus: string = portalData?.membership_status || 'anonymous';
   const topics: any[] = portalData?.topics || [];
@@ -241,6 +260,35 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
     }
   };
 
+  const handleSaveWhatsapp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const digits = whatsappInput.trim().replace(/\D/g, '');
+    if (digits.length !== 10) {
+      setWhatsappError('Please enter a valid 10-digit WhatsApp mobile number (e.g. 9876543210).');
+      return;
+    }
+    setSavingWhatsapp(true);
+    setWhatsappError('');
+    try {
+      await apiClient.patch('/auth/profile/', { phone_number: digits });
+      const updatedProfile = await refreshProfile();
+      if (inst?.id && !updatedProfile?.institute && !updatedProfile?.is_owner) {
+        try {
+          await apiClient.post('/institute-join-request/', { institute: inst.id });
+        } catch {
+          // ignore if already pending
+        }
+      }
+      setWhatsappModalOpen(false);
+      setJoinStatusMsg(`WhatsApp number (+91 ${digits}) verified and linked to ${inst?.name}!`);
+      await fetchPortal(true);
+    } catch (err: any) {
+      setWhatsappError(apiErrorMessage(err, 'Could not save WhatsApp number. Please check the digits and try again.'));
+    } finally {
+      setSavingWhatsapp(false);
+    }
+  };
+
   const handleStudentLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim() || !password) {
@@ -260,7 +308,10 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
         router.replace('/institute/dashboard');
         return;
       }
-      if (prof && !prof.institute && !prof.is_owner && inst?.id) {
+      const cleanPhone = String(prof?.phone_number || '').trim().replace(/\D/g, '');
+      if (cleanPhone.length !== 10) {
+        setWhatsappModalOpen(true);
+      } else if (prof && !prof.institute && !prof.is_owner && inst?.id) {
         try {
           await apiClient.post('/institute-join-request/', { institute: inst.id });
           setJoinStatusMsg(`Logged in and sent a request to join ${inst.name}!`);
@@ -335,7 +386,10 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
         router.replace('/institute/dashboard');
         return;
       }
-      if (prof && !prof.institute && !prof.is_owner && inst?.id) {
+      const cleanPhone = String(prof?.phone_number || '').trim().replace(/\D/g, '');
+      if (cleanPhone.length !== 10) {
+        setWhatsappModalOpen(true);
+      } else if (prof && !prof.institute && !prof.is_owner && inst?.id) {
         try {
           await apiClient.post('/institute-join-request/', { institute: inst.id });
           setJoinStatusMsg(`Signed in with Google! Your request to join ${inst.name} has been sent.`);
@@ -1998,6 +2052,157 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
             {exitingInstitute ? 'Exiting...' : 'Yes, Exit Academy'}
           </Button>
         </DialogActions>
+      </Dialog>
+
+      {/* Compulsory WhatsApp Collection Dialog */}
+      <Dialog
+        open={whatsappModalOpen}
+        disableEscapeKeyDown
+        PaperProps={{
+          sx: {
+            borderRadius: { xs: '20px', sm: '24px' },
+            p: { xs: 2.5, sm: 3.5 },
+            maxWidth: 440,
+            width: '100%',
+            bgcolor: 'background.paper',
+            boxShadow: '0 24px 60px rgba(0,0,0,0.3)',
+            border: '2px solid',
+            borderColor: '#22c55e',
+          },
+        }}
+        slotProps={{
+          backdrop: {
+            sx: {
+              bgcolor: 'rgba(0, 0, 0, 0.82)',
+              backdropFilter: 'blur(8px)',
+            },
+          },
+        }}
+      >
+        <Box sx={{ textAlign: 'center', mb: 2.5 }}>
+          <Box
+            sx={{
+              width: 58,
+              height: 58,
+              borderRadius: '50%',
+              bgcolor: 'rgba(34, 197, 94, 0.12)',
+              color: '#22c55e',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mx: 'auto',
+              mb: 1.5,
+              border: '2px solid rgba(34, 197, 94, 0.3)',
+            }}
+          >
+            <WhatsAppIcon sx={{ fontSize: 34 }} />
+          </Box>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 900,
+              fontFamily: "'Cabinet Grotesk', sans-serif",
+              letterSpacing: '-0.02em',
+              lineHeight: 1.2,
+            }}
+          >
+            WhatsApp Number Required
+          </Typography>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mt: 1, fontSize: '0.86rem', lineHeight: 1.5 }}
+          >
+            Welcome to <strong>{inst?.name}</strong>! To join official batches, attend scheduled tests, and receive answer keys, please provide your 10-digit WhatsApp number.
+          </Typography>
+          <Chip
+            label="Required to unlock tests & attend batches"
+            size="small"
+            color="warning"
+            sx={{ mt: 1.5, fontWeight: 800, fontSize: '0.7rem', height: 23 }}
+          />
+        </Box>
+
+        {whatsappError && (
+          <Alert severity="error" sx={{ mb: 2, borderRadius: '12px', fontSize: '0.82rem', fontWeight: 600 }}>
+            {whatsappError}
+          </Alert>
+        )}
+
+        <form onSubmit={handleSaveWhatsapp}>
+          <TextField
+            autoFocus
+            fullWidth
+            label="WhatsApp Mobile Number"
+            placeholder="9876543210"
+            type="tel"
+            value={whatsappInput}
+            onChange={(e) => {
+              const onlyNums = e.target.value.replace(/\D/g, '').slice(0, 10);
+              setWhatsappInput(onlyNums);
+              if (whatsappError) setWhatsappError('');
+            }}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Typography sx={{ fontWeight: 800, color: 'text.primary', mr: 0.5, fontSize: '0.92rem' }}>
+                      🇮🇳 +91
+                    </Typography>
+                  </InputAdornment>
+                ),
+                sx: {
+                  borderRadius: '14px',
+                  fontWeight: 700,
+                  fontSize: '1.05rem',
+                  letterSpacing: '0.05em',
+                },
+              },
+            }}
+            helperText={`${whatsappInput.length}/10 digits entered`}
+            sx={{ mb: 2.5 }}
+          />
+
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            disabled={savingWhatsapp || whatsappInput.length !== 10}
+            startIcon={savingWhatsapp ? <CircularProgress size={18} sx={{ color: '#fff' }} /> : <WhatsAppIcon />}
+            sx={{
+              py: 1.35,
+              borderRadius: '14px',
+              fontWeight: 800,
+              fontSize: '0.92rem',
+              textTransform: 'none',
+              bgcolor: '#16a34a',
+              color: '#fff',
+              boxShadow: '0 4px 14px rgba(22, 163, 74, 0.4)',
+              '&:hover': {
+                bgcolor: '#15803d',
+              },
+              '&:disabled': {
+                bgcolor: 'action.disabledBackground',
+                color: 'text.disabled',
+              },
+            }}
+          >
+            {savingWhatsapp ? 'Saving...' : 'Save & Unlock Portal'}
+          </Button>
+
+          <Typography
+            variant="caption"
+            sx={{
+              display: 'block',
+              textAlign: 'center',
+              color: 'text.secondary',
+              mt: 1.75,
+              fontSize: '0.72rem',
+            }}
+          >
+            🔒 Your phone number is kept confidential and only visible to {inst?.name} administration.
+          </Typography>
+        </form>
       </Dialog>
     </Box>
   );

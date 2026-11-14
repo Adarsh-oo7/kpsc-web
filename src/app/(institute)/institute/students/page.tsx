@@ -45,6 +45,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import FormatListNumberedIcon from '@mui/icons-material/FormatListNumbered';
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
 import { InstitutePageHeader, greenCtaSx } from '@/components/institute/pageChrome';
@@ -278,6 +279,24 @@ export default function ManageStudentsPage() {
                               <Typography variant="caption" color="text.secondary">
                                 @{profile.user.username} • {profile.user.email}
                               </Typography>
+                              {profile.phone_number && (
+                                <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mt: 0.35 }}>
+                                  <Typography variant="caption" sx={{ color: '#16a34a', fontWeight: 800 }}>
+                                    📱 +91 {profile.phone_number}
+                                  </Typography>
+                                  <IconButton
+                                    component="a"
+                                    href={`https://wa.me/91${profile.phone_number}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    size="small"
+                                    sx={{ p: 0.25, color: '#16a34a' }}
+                                    title="Open WhatsApp Chat"
+                                  >
+                                    <WhatsAppIcon sx={{ fontSize: '15px' }} />
+                                  </IconButton>
+                                </Stack>
+                              )}
                             </Box>
                           </Box>
                         </TableCell>
