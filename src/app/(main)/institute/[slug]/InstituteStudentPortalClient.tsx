@@ -143,8 +143,6 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
 
   // Anti-cheating & Proctoring state
   const [tabSwitchCount, setTabSwitchCount] = useState(0);
-  const [isWindowBlurred, setIsWindowBlurred] = useState(false);
-  const [showTabSwitchModal, setShowTabSwitchModal] = useState(false);
   const [securityToast, setSecurityToast] = useState<string | null>(null);
 
   const inst = portalData?.institute || initialInstitute;
@@ -223,24 +221,27 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
     return () => window.removeEventListener('keydown', handleKeyDown, { capture: true });
   }, [testActive, testResult]);
 
-  // Anti-Tab-Switching & Window Blur (ChatGPT / Snipping Tool prevention)
+  // Anti-Tab-Switching listener (shows warning and tracks count without blocking exam flow)
   useEffect(() => {
     if (!testActive || testResult) {
-      setIsWindowBlurred(false);
       return;
     }
 
     const handleBlur = () => {
-      setIsWindowBlurred(true);
-      setTabSwitchCount((prev) => prev + 1);
-      setShowTabSwitchModal(true);
+      setTabSwitchCount((prev) => {
+        const next = prev + 1;
+        setSecurityToast(`⚠️ Warning: Tab switch detected (Count: ${next})! Tab switches are recorded on your test attempt.`);
+        return next;
+      });
     };
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        setIsWindowBlurred(true);
-        setTabSwitchCount((prev) => prev + 1);
-        setShowTabSwitchModal(true);
+        setTabSwitchCount((prev) => {
+          const next = prev + 1;
+          setSecurityToast(`⚠️ Warning: Tab switch detected (Count: ${next})! Tab switches are recorded on your test attempt.`);
+          return next;
+        });
       }
     };
 
@@ -496,8 +497,6 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
     setAnswers({});
     setTestResult(null);
     setTabSwitchCount(0);
-    setIsWindowBlurred(false);
-    setShowTabSwitchModal(false);
     setTestActive(true);
   };
 
@@ -510,8 +509,6 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
       setAnswers({});
       setTestResult(null);
       setTabSwitchCount(0);
-      setIsWindowBlurred(false);
-      setShowTabSwitchModal(false);
       if (res.data.test.time_limit_per_question > 0 && (res.data.questions?.length || 0) > 0) {
         setTimerSeconds(res.data.test.time_limit_per_question * res.data.questions.length);
       } else if (res.data.test.duration_minutes > 0) {
@@ -535,8 +532,6 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
     setTestResult(null);
     setTimerSeconds(null);
     setTabSwitchCount(0);
-    setIsWindowBlurred(false);
-    setShowTabSwitchModal(false);
   };
 
   const handleSubmitTest = async () => {
@@ -567,8 +562,6 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
 
       const res = await apiClient.post(`/institute/public/submit-test/${slug}/`, payload);
       setTestResult(res.data);
-      setIsWindowBlurred(false);
-      setShowTabSwitchModal(false);
       setViewingScorecard(res.data);
       setScorecardModalOpen(true);
       await fetchPortal();
@@ -1263,6 +1256,22 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                                     <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
                                       📅 {formatSchedule(mt.start_time, mt.end_time)} • PSC Scheme (+1.0 / -0.33)
                                     </Typography>
+                                    {mt.has_attempted && (
+                                      <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" sx={{ mt: 0.75, gap: 0.5 }}>
+                                        <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary' }}>
+                                          Your Score: <strong style={{ color: '#16a34a' }}>{mt.latest_score > 0 ? `+${mt.latest_score}` : mt.latest_score} pts</strong> ({mt.latest_accuracy}%)
+                                        </Typography>
+                                        {Number(mt.latest_tab_switches) > 0 && (
+                                          <Chip
+                                            label={`⚠️ ${mt.latest_tab_switches} Tab ${mt.latest_tab_switches === 1 ? 'Switch' : 'Switches'}`}
+                                            size="small"
+                                            color="warning"
+                                            variant="outlined"
+                                            sx={{ fontWeight: 800, height: 20, fontSize: '0.68rem' }}
+                                          />
+                                        )}
+                                      </Stack>
+                                    )}
                                   </Box>
 
                                   <Box sx={{ alignSelf: { xs: 'stretch', sm: 'stretch', md: 'auto' }, flexShrink: 0 }}>
@@ -1278,6 +1287,11 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                                             score: mt.latest_score,
                                             total: mt.question_count,
                                             completed_at: mt.completed_at,
+                                            correct: mt.latest_correct,
+                                            wrong: mt.latest_wrong,
+                                            unanswered: mt.latest_unanswered,
+                                            accuracy: mt.latest_accuracy,
+                                            tab_switches: mt.latest_tab_switches ?? (mt.attempt_details?.tab_switches || 0),
                                             details: mt.attempt_details?.results || [],
                                           });
                                           setScorecardModalOpen(true);
@@ -1367,8 +1381,6 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                         MozUserSelect: !testResult ? 'none' : 'text',
                         msUserSelect: !testResult ? 'none' : 'text',
                         WebkitTouchCallout: !testResult ? 'none' : 'default',
-                        filter: isWindowBlurred && !testResult ? 'blur(25px)' : 'none',
-                        transition: 'filter 0.15s ease-in-out',
                       }}
                       onCopy={(e) => {
                         if (!testResult) {
@@ -2059,6 +2071,33 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                 </Box>
               </Paper>
 
+              {Number(viewingScorecard.tab_switches) > 0 ? (
+                <Alert
+                  severity="warning"
+                  icon={<WarningAmberIcon />}
+                  sx={{
+                    borderRadius: '14px',
+                    fontWeight: 700,
+                    fontSize: '0.82rem',
+                  }}
+                >
+                  ⚠️ <strong>{viewingScorecard.tab_switches} Tab Switch{viewingScorecard.tab_switches > 1 ? 'es' : ''}</strong> recorded during this exam. This proctoring violation is visible on your test attempt.
+                </Alert>
+              ) : (
+                <Alert
+                  severity="success"
+                  icon={<ShieldIcon />}
+                  sx={{
+                    borderRadius: '14px',
+                    fontWeight: 700,
+                    fontSize: '0.82rem',
+                    py: 0.5,
+                  }}
+                >
+                  🛡️ Clean Attempt: 0 Tab Switches recorded during this test.
+                </Alert>
+              )}
+
               <Typography variant="subtitle2" sx={{ fontWeight: 800, color: 'text.secondary', letterSpacing: '0.04em' }}>
                 DETAILED QUESTION & ANSWER REVIEW
               </Typography>
@@ -2320,69 +2359,18 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
         </form>
       </Dialog>
 
-      {/* Tab Switch / Focus Lost Modal */}
-      <Dialog
-        open={showTabSwitchModal && testActive && !testResult}
-        onClose={() => {
-          setShowTabSwitchModal(false);
-          setIsWindowBlurred(false);
-        }}
-        maxWidth="xs"
-        fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: '18px',
-            p: 1,
-            border: '2px solid #EF4444',
-            boxShadow: '0 8px 32px rgba(239, 68, 68, 0.25)',
-          },
-        }}
-      >
-        <DialogTitle sx={{ fontWeight: 900, color: '#EF4444', display: 'flex', alignItems: 'center', gap: 1 }}>
-          <WarningAmberIcon sx={{ fontSize: 26 }} />
-          Focus Lost / Tab Switch Detected
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 600 }}>
-            You switched away from the exam window or opened an external tool.
-          </Typography>
-          <Alert severity="warning" sx={{ borderRadius: '12px', mb: 1.5 }}>
-            <strong>Violation count: {tabSwitchCount}</strong>
-            <br />
-            Switching tabs or using ChatGPT / external search during the exam is monitored and recorded on your test attempt.
-          </Alert>
-          <Typography variant="caption" color="text.secondary">
-            Please return to your exam and do not navigate away until you submit.
-          </Typography>
-        </DialogContent>
-        <DialogActions sx={{ p: 2, pt: 0 }}>
-          <Button
-            variant="contained"
-            color="error"
-            fullWidth
-            onClick={() => {
-              setShowTabSwitchModal(false);
-              setIsWindowBlurred(false);
-            }}
-            sx={{ fontWeight: 800, borderRadius: '10px', py: 1 }}
-          >
-            I Understand — Resume Exam
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Security Warning Toast */}
+      {/* Security & Tab-Switch Warning Toast */}
       <Snackbar
         open={Boolean(securityToast)}
-        autoHideDuration={3000}
+        autoHideDuration={4000}
         onClose={() => setSecurityToast(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
         <Alert
           onClose={() => setSecurityToast(null)}
-          severity="error"
+          severity="warning"
           variant="filled"
-          sx={{ fontWeight: 800, borderRadius: '10px' }}
+          sx={{ fontWeight: 800, borderRadius: '12px', boxShadow: '0 6px 20px rgba(0,0,0,0.3)', fontSize: '0.88rem' }}
         >
           {securityToast}
         </Alert>
