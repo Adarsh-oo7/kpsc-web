@@ -590,12 +590,7 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                   sx={{ bgcolor: 'rgba(255,255,255,0.14)', color: '#fff', fontWeight: 700, fontSize: '0.7rem', height: 23 }}
                 />
                 <Chip
-                  label={`${inst?.question_count ?? questions.length} Practice MCQs`}
-                  size="small"
-                  sx={{ bgcolor: 'rgba(255,255,255,0.14)', color: '#fff', fontWeight: 700, fontSize: '0.7rem', height: 23 }}
-                />
-                <Chip
-                  label={`${inst?.topic_count ?? topics.length} Test Topics`}
+                  label={`${mockTests.length} Official Mock Tests`}
                   size="small"
                   sx={{ bgcolor: 'rgba(255,255,255,0.14)', color: '#fff', fontWeight: 700, fontSize: '0.7rem', height: 23 }}
                 />
@@ -1244,97 +1239,30 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                           );
                         })}
                       </Stack>
-                      <Divider sx={{ my: 4 }} />
                     </Box>
                   )}
 
-                  {/* SECTION 2: TOPICS PRACTICE QUESTIONS */}
-                  {!testActive && topics.length > 0 && (
-                    <Box sx={{ mb: 3 }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 1.25, color: 'text.secondary' }}>
-                        PRACTICE QUESTION BANK BY TOPIC
-                      </Typography>
-                      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                        <Chip
-                          label={`All Questions (${questions.length})`}
-                          clickable
-                          onClick={() => {
-                            setSelectedTopicId('all');
-                            setTestActive(false);
-                            setTestResult(null);
-                          }}
-                          sx={{
-                            fontWeight: 800,
-                            bgcolor: selectedTopicId === 'all' ? primaryColor : undefined,
-                            color: selectedTopicId === 'all' ? '#fff' : undefined,
-                          }}
-                        />
-                        {topics.map((t: any) => (
-                          <Chip
-                            key={t.id}
-                            label={`${t.name} (${t.question_count || 0})`}
-                            clickable
-                            onClick={() => {
-                              setSelectedTopicId(t.id);
-                              setTestActive(false);
-                              setTestResult(null);
-                            }}
-                            sx={{
-                              fontWeight: 700,
-                              bgcolor: selectedTopicId === t.id ? primaryColor : undefined,
-                              color: selectedTopicId === t.id ? '#fff' : undefined,
-                            }}
-                          />
-                        ))}
-                      </Stack>
-                    </Box>
-                  )}
-
-                  {inst.allow_student_tests === false && membershipStatus !== 'owner' ? (
-                    <Alert severity="warning" sx={{ borderRadius: '14px' }}>
+                  {inst.allow_student_tests === false && membershipStatus !== 'owner' && (
+                    <Alert severity="warning" sx={{ borderRadius: '14px', mb: 2 }}>
                       Online mock tests are currently closed by the academy admin. Please check back when the next scheduled test goes live!
                     </Alert>
-                  ) : membershipStatus !== 'member' && membershipStatus !== 'owner' ? (
-                    <Alert severity="info" sx={{ borderRadius: '14px' }}>
+                  )}
+
+                  {membershipStatus !== 'member' && membershipStatus !== 'owner' && (
+                    <Alert severity="info" sx={{ borderRadius: '14px', mb: 2 }}>
                       {user
-                        ? `Once your membership in ${inst.name} is approved by the academy admin, you can attempt all ${inst.question_count || 0} academy test questions right here.`
+                        ? `Once your membership in ${inst.name} is approved by the academy admin, you can attempt all scheduled academy mock tests right here.`
                         : `Please log in or register above and join ${inst.name} to start attempting academy tests.`}
                     </Alert>
-                  ) : !testActive ? (
-                    filteredQuestions.length > 0 && (
-                      <Card variant="outlined" sx={{ borderRadius: '18px', p: 1 }}>
-                        <CardContent>
-                          <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', sm: 'center' }} spacing={2}>
-                            <Box>
-                              <Typography variant="h6" sx={{ fontWeight: 900 }}>
-                                {selectedTopicId === 'all'
-                                  ? `${inst.name} — Topic Practice Set`
-                                  : topics.find((t) => t.id === selectedTopicId)?.name || 'Topic Test'}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                                {filteredQuestions.length} Questions • PSC Marking (+1 for Correct, -0.33 for Wrong) • Results recorded on {inst.name} Leaderboard
-                              </Typography>
-                            </Box>
-                            <Button
-                              variant="contained"
-                              size="large"
-                              startIcon={<PlayArrowIcon />}
-                              onClick={handleStartTest}
-                              sx={{
-                                bgcolor: primaryColor,
-                                fontWeight: 800,
-                                textTransform: 'none',
-                                borderRadius: '12px',
-                                px: 3.5,
-                              }}
-                            >
-                              Start Practice
-                            </Button>
-                          </Stack>
-                        </CardContent>
-                      </Card>
-                    )
-                  ) : (
+                  )}
+
+                  {mockTests.length === 0 && !testActive && (
+                    <Alert severity="info" sx={{ borderRadius: '14px', mb: 2 }}>
+                      No scheduled mock tests are currently available. New exams will appear here as soon as scheduled by the academy admin.
+                    </Alert>
+                  )}
+
+                  {testActive && (
                     /* ACTIVE TEST VIEW */
                     <Box>
                       {/* Sticky Top Timer Bar for Mock Test */}
