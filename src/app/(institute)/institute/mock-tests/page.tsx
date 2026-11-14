@@ -23,6 +23,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import FilterListIcon from '@mui/icons-material/FilterList';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
 import { apiErrorMessage } from '@/lib/auth';
@@ -174,6 +175,74 @@ export default function InstituteMockTestsPage() {
 
     return result;
   }, [activeTestSubmissions, lbSearch, lbRankPreset, lbMinRank, lbMaxRank, lbMinScore, lbMaxScore, lbSortBy]);
+
+  const handleExportResults = () => {
+    if (!filteredAndSortedSubmissions || filteredAndSortedSubmissions.length === 0) return;
+
+    const headers = [
+      'Rank',
+      'Student Name',
+      'Username',
+      'Email',
+      'WhatsApp Number',
+      'Net Score (Marks)',
+      'Total Questions',
+      'Correct Answers',
+      'Wrong Answers',
+      'Unanswered',
+      'Accuracy (%)',
+      'Submitted At',
+    ];
+
+    const escapeCsv = (val: any) => {
+      if (val === null || val === undefined) return '""';
+      const str = String(val).replace(/"/g, '""');
+      return `"${str}"`;
+    };
+
+    const rows = filteredAndSortedSubmissions.map((sub: any) => {
+      const formattedDate = sub.completed_at
+        ? new Date(sub.completed_at).toLocaleString('en-IN', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+          })
+        : '';
+
+      return [
+        escapeCsv(sub.rank),
+        escapeCsv(sub.student_name),
+        escapeCsv(sub.username),
+        escapeCsv(sub.email || ''),
+        escapeCsv(sub.phone_number ? `+91${sub.phone_number}` : ''),
+        escapeCsv(sub.score),
+        escapeCsv(sub.total_questions),
+        escapeCsv(sub.correct ?? sub.correct_answers ?? 0),
+        escapeCsv(sub.wrong ?? 0),
+        escapeCsv(sub.unanswered ?? 0),
+        escapeCsv(`${sub.accuracy}%`),
+        escapeCsv(formattedDate),
+      ].join(',');
+    });
+
+    const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const cleanTestTitle = (activeTest?.title || 'Mock_Test')
+      .replace(/[^a-zA-Z0-9_\u0D00-\u0D7F]/g, '_')
+      .replace(/__+/g, '_');
+    const dateStr = new Date().toISOString().slice(0, 10);
+    link.href = url;
+    link.setAttribute('download', `${cleanTestTitle}_Results_${dateStr}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -1294,11 +1363,31 @@ export default function InstituteMockTestsPage() {
                 Detailed student submissions ranked by Net Score and Accuracy
               </Typography>
             </Box>
-            <Chip
-              label={`${activeTestSubmissions?.total_submissions ?? 0} Submissions`}
-              color="primary"
-              sx={{ fontWeight: 800 }}
-            />
+            <Stack direction="row" spacing={1.5} alignItems="center">
+              <Button
+                variant="outlined"
+                color="primary"
+                size="small"
+                startIcon={<FileDownloadIcon />}
+                onClick={handleExportResults}
+                disabled={!filteredAndSortedSubmissions || filteredAndSortedSubmissions.length === 0}
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 800,
+                  fontSize: '0.8rem',
+                  borderRadius: '9px',
+                  px: 1.5,
+                  py: 0.6,
+                }}
+              >
+                Export CSV ({filteredAndSortedSubmissions.length})
+              </Button>
+              <Chip
+                label={`${activeTestSubmissions?.total_submissions ?? 0} Submissions`}
+                color="primary"
+                sx={{ fontWeight: 800 }}
+              />
+            </Stack>
           </Stack>
         </DialogTitle>
         <DialogContent dividers sx={{ p: { xs: 1.5, sm: 3 } }}>
@@ -1457,24 +1546,45 @@ export default function InstituteMockTestsPage() {
                         Showing {filteredAndSortedSubmissions.length} of {activeTestSubmissions.submissions.length} students
                       </Typography>
 
-                      {(lbSearch || lbRankPreset !== 'all' || lbMinRank || lbMaxRank || lbMinScore || lbMaxScore || lbSortBy !== 'rank_asc') && (
+                      <Stack direction="row" spacing={1} alignItems="center">
                         <Button
                           size="small"
-                          variant="text"
-                          onClick={() => {
-                            setLbSearch('');
-                            setLbRankPreset('all');
-                            setLbMinRank('');
-                            setLbMaxRank('');
-                            setLbMinScore('');
-                            setLbMaxScore('');
-                            setLbSortBy('rank_asc');
+                          variant="contained"
+                          color="primary"
+                          startIcon={<FileDownloadIcon sx={{ fontSize: '16px !important' }} />}
+                          onClick={handleExportResults}
+                          disabled={!filteredAndSortedSubmissions || filteredAndSortedSubmissions.length === 0}
+                          sx={{
+                            textTransform: 'none',
+                            fontWeight: 800,
+                            fontSize: '0.75rem',
+                            borderRadius: '8px',
+                            px: 1.25,
+                            py: 0.4,
                           }}
-                          sx={{ textTransform: 'none', fontWeight: 800, fontSize: '0.78rem', color: 'error.main', p: 0 }}
                         >
-                          Clear Filters
+                          Export ({filteredAndSortedSubmissions.length})
                         </Button>
-                      )}
+
+                        {(lbSearch || lbRankPreset !== 'all' || lbMinRank || lbMaxRank || lbMinScore || lbMaxScore || lbSortBy !== 'rank_asc') && (
+                          <Button
+                            size="small"
+                            variant="text"
+                            onClick={() => {
+                              setLbSearch('');
+                              setLbRankPreset('all');
+                              setLbMinRank('');
+                              setLbMaxRank('');
+                              setLbMinScore('');
+                              setLbMaxScore('');
+                              setLbSortBy('rank_asc');
+                            }}
+                            sx={{ textTransform: 'none', fontWeight: 800, fontSize: '0.78rem', color: 'error.main', p: 0 }}
+                          >
+                            Clear Filters
+                          </Button>
+                        )}
+                      </Stack>
                     </Stack>
                   </Stack>
                 </Stack>
@@ -1633,7 +1743,23 @@ export default function InstituteMockTestsPage() {
             </>
           )}
         </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
+        <DialogActions sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<FileDownloadIcon />}
+            onClick={handleExportResults}
+            disabled={!filteredAndSortedSubmissions || filteredAndSortedSubmissions.length === 0}
+            sx={{
+              textTransform: 'none',
+              fontWeight: 800,
+              borderRadius: '9px',
+              px: 2,
+              py: 0.8,
+            }}
+          >
+            Export Filtered Results ({filteredAndSortedSubmissions.length} Students)
+          </Button>
           <Button onClick={() => setSubmissionsModalOpen(false)} variant="contained" sx={greenCtaSx}>
             Close
           </Button>
