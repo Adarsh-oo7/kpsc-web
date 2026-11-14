@@ -6,9 +6,10 @@ import {
   Box, Typography, Button, CircularProgress, Alert, Paper,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Dialog, DialogTitle, DialogContent, DialogActions, TextField, Stack,
-  Chip, IconButton, Tooltip, InputAdornment, FormControl, InputLabel, Select, MenuItem,
+  Chip, IconButton, Tooltip, InputAdornment, FormControl, InputLabel, Select, MenuItem, Menu,
   RadioGroup, Radio, FormControlLabel, Switch, Tabs, Tab, Checkbox, ListItemText, Divider
 } from '@mui/material';
+import * as XLSX from 'xlsx';
 import { motion } from 'framer-motion';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -24,6 +25,8 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import TableChartIcon from '@mui/icons-material/TableChart';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
 import { apiErrorMessage } from '@/lib/auth';
@@ -177,7 +180,81 @@ export default function InstituteMockTestsPage() {
     return result;
   }, [activeTestSubmissions, lbSearch, lbRankPreset, lbMinRank, lbMaxRank, lbMinScore, lbMaxScore, lbSortBy]);
 
-  const handleExportResults = () => {
+  const [exportAnchorEl, setExportAnchorEl] = useState<null | HTMLElement>(null);
+  const exportMenuOpen = Boolean(exportAnchorEl);
+
+  const handleOpenExportMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setExportAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseExportMenu = () => {
+    setExportAnchorEl(null);
+  };
+
+  const handleExportExcel = () => {
+    handleCloseExportMenu();
+    if (!filteredAndSortedSubmissions || filteredAndSortedSubmissions.length === 0) return;
+
+    const data = filteredAndSortedSubmissions.map((sub: any) => {
+      const formattedDate = sub.completed_at
+        ? new Date(sub.completed_at).toLocaleString('en-IN', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+          })
+        : '';
+
+      return {
+        'Rank': sub.rank,
+        'Student Name': sub.student_name,
+        'Username': sub.username,
+        'Email': sub.email || '',
+        'WhatsApp Number': sub.phone_number ? `+91 ${sub.phone_number}` : '',
+        'Net Score (Marks)': sub.score,
+        'Total Questions': sub.total_questions,
+        'Correct Answers': sub.correct ?? sub.correct_answers ?? 0,
+        'Wrong Answers': sub.wrong ?? 0,
+        'Unanswered': sub.unanswered ?? 0,
+        'Accuracy (%)': `${sub.accuracy}%`,
+        'Tab Switches': sub.tab_switches ?? 0,
+        'Submitted At': formattedDate,
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+
+    // Auto-fit column widths
+    worksheet['!cols'] = [
+      { wch: 8 },  // Rank
+      { wch: 25 }, // Student Name
+      { wch: 20 }, // Username
+      { wch: 28 }, // Email
+      { wch: 18 }, // WhatsApp Number
+      { wch: 18 }, // Net Score
+      { wch: 15 }, // Total Questions
+      { wch: 16 }, // Correct Answers
+      { wch: 15 }, // Wrong Answers
+      { wch: 14 }, // Unanswered
+      { wch: 14 }, // Accuracy
+      { wch: 14 }, // Tab Switches
+      { wch: 24 }, // Submitted At
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Results');
+
+    const cleanTestTitle = (activeTest?.title || 'Mock_Test')
+      .replace(/[^a-zA-Z0-9_\u0D00-\u0D7F]/g, '_')
+      .replace(/__+/g, '_');
+    const dateStr = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(workbook, `${cleanTestTitle}_Results_${dateStr}.xlsx`);
+  };
+
+  const handleExportCsv = () => {
+    handleCloseExportMenu();
     if (!filteredAndSortedSubmissions || filteredAndSortedSubmissions.length === 0) return;
 
     const headers = [
@@ -1372,7 +1449,8 @@ export default function InstituteMockTestsPage() {
                 color="primary"
                 size="small"
                 startIcon={<FileDownloadIcon />}
-                onClick={handleExportResults}
+                endIcon={<KeyboardArrowDownIcon />}
+                onClick={handleOpenExportMenu}
                 disabled={!filteredAndSortedSubmissions || filteredAndSortedSubmissions.length === 0}
                 sx={{
                   textTransform: 'none',
@@ -1383,7 +1461,7 @@ export default function InstituteMockTestsPage() {
                   py: 0.6,
                 }}
               >
-                Export CSV ({filteredAndSortedSubmissions.length})
+                Export ({filteredAndSortedSubmissions.length})
               </Button>
               <Chip
                 label={`${activeTestSubmissions?.test?.total_submissions ?? activeTestSubmissions?.total_submissions ?? activeTestSubmissions?.submissions?.length ?? 0} Submissions`}
@@ -1555,7 +1633,8 @@ export default function InstituteMockTestsPage() {
                           variant="contained"
                           color="primary"
                           startIcon={<FileDownloadIcon sx={{ fontSize: '16px !important' }} />}
-                          onClick={handleExportResults}
+                          endIcon={<KeyboardArrowDownIcon sx={{ fontSize: '14px !important' }} />}
+                          onClick={handleOpenExportMenu}
                           disabled={!filteredAndSortedSubmissions || filteredAndSortedSubmissions.length === 0}
                           sx={{
                             textTransform: 'none',
@@ -1751,27 +1830,83 @@ export default function InstituteMockTestsPage() {
             </>
           )}
         </DialogContent>
-        <DialogActions sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<FileDownloadIcon />}
-            onClick={handleExportResults}
-            disabled={!filteredAndSortedSubmissions || filteredAndSortedSubmissions.length === 0}
-            sx={{
-              textTransform: 'none',
-              fontWeight: 800,
-              borderRadius: '9px',
-              px: 2,
-              py: 0.8,
-            }}
-          >
-            Export Filtered Results ({filteredAndSortedSubmissions.length} Students)
-          </Button>
+        <DialogActions sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
+          <Stack direction="row" spacing={1.5} alignItems="center" flexWrap="wrap" useFlexGap>
+            <Button
+              variant="contained"
+              color="success"
+              startIcon={<TableChartIcon />}
+              onClick={handleExportExcel}
+              disabled={!filteredAndSortedSubmissions || filteredAndSortedSubmissions.length === 0}
+              sx={{
+                textTransform: 'none',
+                fontWeight: 800,
+                borderRadius: '9px',
+                px: 2,
+                py: 0.8,
+              }}
+            >
+              Export Excel (.xlsx)
+            </Button>
+            <Button
+              variant="outlined"
+              color="primary"
+              startIcon={<FileDownloadIcon />}
+              onClick={handleExportCsv}
+              disabled={!filteredAndSortedSubmissions || filteredAndSortedSubmissions.length === 0}
+              sx={{
+                textTransform: 'none',
+                fontWeight: 800,
+                borderRadius: '9px',
+                px: 2,
+                py: 0.8,
+              }}
+            >
+              Export CSV (.csv)
+            </Button>
+          </Stack>
           <Button onClick={() => setSubmissionsModalOpen(false)} variant="contained" sx={greenCtaSx}>
             Close
           </Button>
         </DialogActions>
+
+        {/* Export Format Dropdown Menu */}
+        <Menu
+          anchorEl={exportAnchorEl}
+          open={exportMenuOpen}
+          onClose={handleCloseExportMenu}
+          PaperProps={{
+            sx: {
+              borderRadius: '12px',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+              minWidth: 230,
+            },
+          }}
+        >
+          <MenuItem onClick={handleExportExcel} sx={{ py: 1.25, gap: 1.5 }}>
+            <TableChartIcon sx={{ color: '#16a34a', fontSize: 22 }} />
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 800 }}>
+                Export as Excel (.xlsx)
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Formatted spreadsheet for Excel & Sheets
+              </Typography>
+            </Box>
+          </MenuItem>
+          <Divider sx={{ my: 0.5 }} />
+          <MenuItem onClick={handleExportCsv} sx={{ py: 1.25, gap: 1.5 }}>
+            <FileDownloadIcon sx={{ color: 'primary.main', fontSize: 22 }} />
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 800 }}>
+                Export as CSV (.csv)
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                Standard comma-separated file
+              </Typography>
+            </Box>
+          </MenuItem>
+        </Menu>
       </Dialog>
 
       {/* Answer Sheet Inspection Dialog */}
