@@ -21,6 +21,8 @@ import ReplayIcon from '@mui/icons-material/Replay';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import AssessmentIcon from '@mui/icons-material/Assessment';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import FilterListIcon from '@mui/icons-material/FilterList';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
 import { apiErrorMessage } from '@/lib/auth';
@@ -92,6 +94,86 @@ export default function InstituteMockTestsPage() {
   const [activeTestSubmissions, setActiveTestSubmissions] = useState<any>(null);
   const [activeStudentAnswerSheet, setActiveStudentAnswerSheet] = useState<any>(null);
   const [studentAnswerSheetOpen, setStudentAnswerSheetOpen] = useState(false);
+
+  // Leaderboard modal filtering and sorting state
+  const [lbSearch, setLbSearch] = useState('');
+  const [lbRankPreset, setLbRankPreset] = useState<'all' | 'top3' | 'top10' | 'top25' | 'custom'>('all');
+  const [lbMinRank, setLbMinRank] = useState('');
+  const [lbMaxRank, setLbMaxRank] = useState('');
+  const [lbMinScore, setLbMinScore] = useState('');
+  const [lbMaxScore, setLbMaxScore] = useState('');
+  const [lbSortBy, setLbSortBy] = useState('rank_asc');
+
+  const filteredAndSortedSubmissions = useMemo(() => {
+    const list = activeTestSubmissions?.submissions || [];
+    if (!list.length) return [];
+
+    let result = [...list];
+
+    // Search query filter (name, username, email)
+    if (lbSearch.trim()) {
+      const q = lbSearch.toLowerCase();
+      result = result.filter((s: any) =>
+        (s.student_name || '').toLowerCase().includes(q) ||
+        (s.username || '').toLowerCase().includes(q) ||
+        (s.email || '').toLowerCase().includes(q)
+      );
+    }
+
+    // Rank Filter: Presets or Custom
+    if (lbRankPreset === 'top3') {
+      result = result.filter((s: any) => s.rank <= 3);
+    } else if (lbRankPreset === 'top10') {
+      result = result.filter((s: any) => s.rank <= 10);
+    } else if (lbRankPreset === 'top25') {
+      result = result.filter((s: any) => s.rank <= 25);
+    } else if (lbRankPreset === 'custom') {
+      if (lbMinRank.trim() !== '') {
+        const minR = Number(lbMinRank);
+        if (!isNaN(minR)) result = result.filter((s: any) => s.rank >= minR);
+      }
+      if (lbMaxRank.trim() !== '') {
+        const maxR = Number(lbMaxRank);
+        if (!isNaN(maxR)) result = result.filter((s: any) => s.rank <= maxR);
+      }
+    }
+
+    // Marks / Score between filter
+    if (lbMinScore.trim() !== '') {
+      const minS = Number(lbMinScore);
+      if (!isNaN(minS)) result = result.filter((s: any) => Number(s.score) >= minS);
+    }
+    if (lbMaxScore.trim() !== '') {
+      const maxS = Number(lbMaxScore);
+      if (!isNaN(maxS)) result = result.filter((s: any) => Number(s.score) <= maxS);
+    }
+
+    // Sorting
+    result.sort((a: any, b: any) => {
+      switch (lbSortBy) {
+        case 'rank_asc':
+          return (a.rank ?? 999999) - (b.rank ?? 999999);
+        case 'rank_desc':
+          return (b.rank ?? 0) - (a.rank ?? 0);
+        case 'score_desc':
+          return (b.score ?? 0) - (a.score ?? 0);
+        case 'score_asc':
+          return (a.score ?? 0) - (b.score ?? 0);
+        case 'accuracy_desc':
+          return (b.accuracy ?? 0) - (a.accuracy ?? 0);
+        case 'name_asc':
+          return (a.student_name || a.username || '').localeCompare(b.student_name || b.username || '');
+        case 'date_desc':
+          return new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime();
+        case 'date_asc':
+          return new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime();
+        default:
+          return (a.rank ?? 999999) - (b.rank ?? 999999);
+      }
+    });
+
+    return result;
+  }, [activeTestSubmissions, lbSearch, lbRankPreset, lbMinRank, lbMaxRank, lbMinScore, lbMaxScore, lbSortBy]);
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -1219,7 +1301,7 @@ export default function InstituteMockTestsPage() {
             />
           </Stack>
         </DialogTitle>
-        <DialogContent dividers sx={{ p: 3 }}>
+        <DialogContent dividers sx={{ p: { xs: 1.5, sm: 3 } }}>
           {submissionsLoading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', p: 6 }}>
               <CircularProgress />
@@ -1229,89 +1311,326 @@ export default function InstituteMockTestsPage() {
               No students have completed this mock test yet. As soon as enrolled students submit, their live scores and answer sheets will appear here.
             </Alert>
           ) : (
-            <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '14px', overflow: 'hidden' }}>
-              <Table>
-                <TableHead sx={{ bgcolor: 'action.hover' }}>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 800, width: 80 }}>Rank</TableCell>
-                    <TableCell sx={{ fontWeight: 800 }}>Student</TableCell>
-                    <TableCell sx={{ fontWeight: 800 }} align="center">Score (Net)</TableCell>
-                    <TableCell sx={{ fontWeight: 800 }} align="center">Correct / Total</TableCell>
-                    <TableCell sx={{ fontWeight: 800 }} align="center">Accuracy</TableCell>
-                    <TableCell sx={{ fontWeight: 800 }} align="center">Submitted At</TableCell>
-                    <TableCell sx={{ fontWeight: 800 }} align="right">Actions</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {activeTestSubmissions.submissions.map((sub: any) => {
-                    return (
-                      <TableRow key={sub.id} hover>
-                        <TableCell>
-                          <Chip
-                            label={`#${sub.rank}`}
+            <>
+              {/* Filter & Sort Controls */}
+              <Paper
+                elevation={0}
+                variant="outlined"
+                sx={{
+                  mb: 2.5,
+                  p: { xs: 1.5, sm: 2 },
+                  borderRadius: '16px',
+                  bgcolor: 'action.hover',
+                }}
+              >
+                <Stack spacing={1.75}>
+                  {/* Top Bar: Search + Quick Rank Presets + Sort Dropdown */}
+                  <Stack
+                    direction={{ xs: 'column', lg: 'row' }}
+                    spacing={1.5}
+                    alignItems={{ xs: 'stretch', lg: 'center' }}
+                    justifyContent="space-between"
+                  >
+                    <TextField
+                      size="small"
+                      placeholder="Search student by name, username, email..."
+                      value={lbSearch}
+                      onChange={(e) => setLbSearch(e.target.value)}
+                      slotProps={{
+                        input: {
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <SearchIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
+                            </InputAdornment>
+                          ),
+                          sx: { borderRadius: '10px', bgcolor: 'background.paper', fontSize: '0.85rem' },
+                        },
+                      }}
+                      sx={{ minWidth: { md: 280 } }}
+                    />
+
+                    {/* Quick Rank Chips */}
+                    <Stack direction="row" spacing={0.75} alignItems="center" flexWrap="wrap" useFlexGap>
+                      <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase', mr: 0.5 }}>
+                        Rank:
+                      </Typography>
+                      {[
+                        { id: 'all', label: 'All Ranks' },
+                        { id: 'top3', label: 'Top 3 🏆' },
+                        { id: 'top10', label: 'Top 10' },
+                        { id: 'top25', label: 'Top 25' },
+                        { id: 'custom', label: 'Custom Range' },
+                      ].map((chip) => (
+                        <Chip
+                          key={chip.id}
+                          label={chip.label}
+                          size="small"
+                          clickable
+                          color={lbRankPreset === chip.id ? 'primary' : 'default'}
+                          variant={lbRankPreset === chip.id ? 'filled' : 'outlined'}
+                          onClick={() => setLbRankPreset(chip.id as any)}
+                          sx={{ fontWeight: 800, fontSize: '0.72rem', height: 26 }}
+                        />
+                      ))}
+                    </Stack>
+
+                    {/* Sort Dropdown */}
+                    <FormControl size="small" sx={{ minWidth: 180 }}>
+                      <InputLabel sx={{ fontSize: '0.85rem' }}>Sort By</InputLabel>
+                      <Select
+                        value={lbSortBy}
+                        label="Sort By"
+                        onChange={(e) => setLbSortBy(e.target.value)}
+                        sx={{ borderRadius: '10px', bgcolor: 'background.paper', fontSize: '0.85rem' }}
+                      >
+                        <MenuItem value="rank_asc">Rank (1st to Last)</MenuItem>
+                        <MenuItem value="rank_desc">Rank (Last to 1st)</MenuItem>
+                        <MenuItem value="score_desc">Score (Highest First)</MenuItem>
+                        <MenuItem value="score_asc">Score (Lowest First)</MenuItem>
+                        <MenuItem value="accuracy_desc">Accuracy (High to Low)</MenuItem>
+                        <MenuItem value="date_desc">Submitted (Newest First)</MenuItem>
+                        <MenuItem value="date_asc">Submitted (Oldest First)</MenuItem>
+                        <MenuItem value="name_asc">Student Name (A–Z)</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </Stack>
+
+                  {/* Bottom Bar: Range Filters (Rank Between & Marks Between) + Active Count & Reset */}
+                  <Stack
+                    direction={{ xs: 'column', md: 'row' }}
+                    spacing={2}
+                    alignItems={{ xs: 'flex-start', md: 'center' }}
+                    justifyContent="space-between"
+                  >
+                    <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" useFlexGap>
+                      {lbRankPreset === 'custom' && (
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', whiteSpace: 'nowrap' }}>
+                            Rank Between:
+                          </Typography>
+                          <TextField
                             size="small"
-                            sx={{
-                              fontWeight: 900,
-                              bgcolor: sub.rank === 1 ? '#F59E0B' : sub.rank === 2 ? '#94A3B8' : sub.rank === 3 ? '#B45309' : 'action.selected',
-                              color: sub.rank <= 3 ? '#fff' : 'inherit',
-                            }}
+                            placeholder="Min"
+                            type="number"
+                            value={lbMinRank}
+                            onChange={(e) => setLbMinRank(e.target.value)}
+                            sx={{ width: 80, '& input': { py: 0.5, fontSize: '0.82rem' }, bgcolor: 'background.paper', borderRadius: '8px' }}
                           />
-                        </TableCell>
-                        <TableCell>
-                          <Typography variant="body2" sx={{ fontWeight: 800 }}>
-                            {sub.student_name}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            @{sub.username} {sub.email ? `• ${sub.email}` : ''}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Chip
-                            label={`${sub.score > 0 ? `+${sub.score}` : sub.score} pts`}
+                          <Typography variant="caption" color="text.secondary">to</Typography>
+                          <TextField
                             size="small"
-                            color={sub.score > 0 ? 'success' : 'default'}
-                            sx={{ fontWeight: 800 }}
+                            placeholder="Max"
+                            type="number"
+                            value={lbMaxRank}
+                            onChange={(e) => setLbMaxRank(e.target.value)}
+                            sx={{ width: 80, '& input': { py: 0.5, fontSize: '0.82rem' }, bgcolor: 'background.paper', borderRadius: '8px' }}
                           />
-                        </TableCell>
-                        <TableCell align="center">
-                          <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                            {sub.correct ?? sub.correct_answers ?? 0} / {sub.total_questions}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Chip
-                            label={`${sub.accuracy}%`}
-                            size="small"
-                            variant="outlined"
-                            color={sub.accuracy >= 70 ? 'success' : sub.accuracy >= 40 ? 'warning' : 'error'}
-                            sx={{ fontWeight: 800 }}
-                          />
-                        </TableCell>
-                        <TableCell align="center">
-                          <Typography variant="caption" color="text.secondary">
-                            {sub.completed_at ? new Date(sub.completed_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—'}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="right">
-                          <Button
-                            size="small"
-                            variant="contained"
-                            color="success"
-                            onClick={() => {
-                              setActiveStudentAnswerSheet(sub);
-                              setStudentAnswerSheetOpen(true);
-                            }}
-                            sx={{ textTransform: 'none', fontWeight: 800, borderRadius: '8px' }}
-                          >
-                            Inspect Answer Sheet
-                          </Button>
-                        </TableCell>
+                        </Stack>
+                      )}
+
+                      <Stack direction="row" spacing={1} alignItems="center">
+                        <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', whiteSpace: 'nowrap' }}>
+                          Marks Between:
+                        </Typography>
+                        <TextField
+                          size="small"
+                          placeholder="Min Score"
+                          type="number"
+                          value={lbMinScore}
+                          onChange={(e) => setLbMinScore(e.target.value)}
+                          sx={{ width: 95, '& input': { py: 0.5, fontSize: '0.82rem' }, bgcolor: 'background.paper', borderRadius: '8px' }}
+                        />
+                        <Typography variant="caption" color="text.secondary">to</Typography>
+                        <TextField
+                          size="small"
+                          placeholder="Max Score"
+                          type="number"
+                          value={lbMaxScore}
+                          onChange={(e) => setLbMaxScore(e.target.value)}
+                          sx={{ width: 95, '& input': { py: 0.5, fontSize: '0.82rem' }, bgcolor: 'background.paper', borderRadius: '8px' }}
+                        />
+                      </Stack>
+                    </Stack>
+
+                    <Stack direction="row" spacing={1.5} alignItems="center" sx={{ width: { xs: '100%', md: 'auto' }, justifyContent: 'space-between' }}>
+                      <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.secondary' }}>
+                        Showing {filteredAndSortedSubmissions.length} of {activeTestSubmissions.submissions.length} students
+                      </Typography>
+
+                      {(lbSearch || lbRankPreset !== 'all' || lbMinRank || lbMaxRank || lbMinScore || lbMaxScore || lbSortBy !== 'rank_asc') && (
+                        <Button
+                          size="small"
+                          variant="text"
+                          onClick={() => {
+                            setLbSearch('');
+                            setLbRankPreset('all');
+                            setLbMinRank('');
+                            setLbMaxRank('');
+                            setLbMinScore('');
+                            setLbMaxScore('');
+                            setLbSortBy('rank_asc');
+                          }}
+                          sx={{ textTransform: 'none', fontWeight: 800, fontSize: '0.78rem', color: 'error.main', p: 0 }}
+                        >
+                          Clear Filters
+                        </Button>
+                      )}
+                    </Stack>
+                  </Stack>
+                </Stack>
+              </Paper>
+
+              {filteredAndSortedSubmissions.length === 0 ? (
+                <Alert severity="warning" sx={{ borderRadius: '12px' }}>
+                  No student submissions match your current rank, score, or search filters.
+                </Alert>
+              ) : (
+                <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: '14px', overflow: 'hidden' }}>
+                  <Table>
+                    <TableHead sx={{ bgcolor: 'action.hover' }}>
+                      <TableRow>
+                        <TableCell sx={{ fontWeight: 800, width: 80 }}>Rank</TableCell>
+                        <TableCell sx={{ fontWeight: 800 }}>Student</TableCell>
+                        <TableCell sx={{ fontWeight: 800 }} align="center">Score (Net)</TableCell>
+                        <TableCell sx={{ fontWeight: 800 }} align="center">Correct / Total</TableCell>
+                        <TableCell sx={{ fontWeight: 800 }} align="center">Accuracy</TableCell>
+                        <TableCell sx={{ fontWeight: 800 }} align="center">Submitted At</TableCell>
+                        <TableCell sx={{ fontWeight: 800 }} align="right">Actions</TableCell>
                       </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
+                    </TableHead>
+                    <TableBody>
+                      {filteredAndSortedSubmissions.map((sub: any) => {
+                        const whatsappMsg = `Hello ${sub.student_name}! Regarding your result in "${activeTest?.title}":\nYour Score: ${sub.score} pts (Rank #${sub.rank}, Accuracy: ${sub.accuracy}%).\nGreat job from your academy admin!`;
+                        const whatsappUrl = sub.phone_number
+                          ? `https://wa.me/91${sub.phone_number}?text=${encodeURIComponent(whatsappMsg)}`
+                          : null;
+
+                        return (
+                          <TableRow key={sub.id} hover>
+                            <TableCell>
+                              <Chip
+                                label={`#${sub.rank}`}
+                                size="small"
+                                sx={{
+                                  fontWeight: 900,
+                                  bgcolor: sub.rank === 1 ? '#F59E0B' : sub.rank === 2 ? '#94A3B8' : sub.rank === 3 ? '#B45309' : 'action.selected',
+                                  color: sub.rank <= 3 ? '#fff' : 'inherit',
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2" sx={{ fontWeight: 800 }}>
+                                {sub.student_name}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                @{sub.username} {sub.email ? `• ${sub.email}` : ''}
+                              </Typography>
+                              {sub.phone_number && (
+                                <Typography variant="caption" sx={{ display: 'block', color: '#16a34a', fontWeight: 800, mt: 0.25 }}>
+                                  📱 +91 {sub.phone_number}
+                                </Typography>
+                              )}
+                            </TableCell>
+                            <TableCell align="center">
+                              <Chip
+                                label={`${sub.score > 0 ? `+${sub.score}` : sub.score} pts`}
+                                size="small"
+                                color={sub.score > 0 ? 'success' : 'default'}
+                                sx={{ fontWeight: 800 }}
+                              />
+                            </TableCell>
+                            <TableCell align="center">
+                              <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                                {sub.correct ?? sub.correct_answers ?? 0} / {sub.total_questions}
+                              </Typography>
+                            </TableCell>
+                            <TableCell align="center">
+                              <Chip
+                                label={`${sub.accuracy}%`}
+                                size="small"
+                                variant="outlined"
+                                color={sub.accuracy >= 70 ? 'success' : sub.accuracy >= 40 ? 'warning' : 'error'}
+                                sx={{ fontWeight: 800 }}
+                              />
+                            </TableCell>
+                            <TableCell align="center">
+                              <Typography variant="caption" color="text.secondary">
+                                {sub.completed_at ? new Date(sub.completed_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : '—'}
+                              </Typography>
+                            </TableCell>
+                            <TableCell align="right">
+                              <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center">
+                                {whatsappUrl ? (
+                                  <Tooltip title={`Chat with ${sub.student_name} on WhatsApp (+91 ${sub.phone_number})`}>
+                                    <Button
+                                      size="small"
+                                      variant="contained"
+                                      component="a"
+                                      href={whatsappUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      startIcon={<WhatsAppIcon sx={{ fontSize: '15px !important' }} />}
+                                      sx={{
+                                        bgcolor: '#25D366',
+                                        color: '#fff',
+                                        fontWeight: 800,
+                                        fontSize: '0.75rem',
+                                        textTransform: 'none',
+                                        borderRadius: '8px',
+                                        px: 1.25,
+                                        py: 0.5,
+                                        boxShadow: '0 2px 8px rgba(37, 211, 102, 0.35)',
+                                        '&:hover': { bgcolor: '#128C7E' },
+                                      }}
+                                    >
+                                      WhatsApp
+                                    </Button>
+                                  </Tooltip>
+                                ) : (
+                                  <Tooltip title="Student has not linked WhatsApp number yet">
+                                    <span>
+                                      <Button
+                                        size="small"
+                                        variant="outlined"
+                                        disabled
+                                        startIcon={<WhatsAppIcon sx={{ fontSize: '15px !important' }} />}
+                                        sx={{
+                                          textTransform: 'none',
+                                          fontSize: '0.72rem',
+                                          fontWeight: 700,
+                                          borderRadius: '8px',
+                                          px: 1,
+                                          py: 0.45,
+                                        }}
+                                      >
+                                        No Phone
+                                      </Button>
+                                    </span>
+                                  </Tooltip>
+                                )}
+
+                                <Button
+                                  size="small"
+                                  variant="contained"
+                                  color="success"
+                                  onClick={() => {
+                                    setActiveStudentAnswerSheet(sub);
+                                    setStudentAnswerSheetOpen(true);
+                                  }}
+                                  sx={{ textTransform: 'none', fontWeight: 800, borderRadius: '8px', whiteSpace: 'nowrap' }}
+                                >
+                                  Inspect Answer Sheet
+                                </Button>
+                              </Stack>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
+            </>
           )}
         </DialogContent>
         <DialogActions sx={{ p: 2 }}>
