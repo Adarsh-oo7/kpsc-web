@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Box,
   Typography,
@@ -33,6 +34,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Snackbar,
 } from '@mui/material';
 import ContactMailIcon from '@mui/icons-material/ContactMail';
 import PhoneIcon from '@mui/icons-material/Phone';
@@ -59,6 +61,8 @@ import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import ReplayIcon from '@mui/icons-material/Replay';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import ShieldIcon from '@mui/icons-material/Shield';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import GoogleSignInButton from '@/components/GoogleSignInButton';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
@@ -73,6 +77,7 @@ interface PortalProps {
 
 export default function InstituteStudentPortalClient({ slug, initialInstitute, initialPortalData }: PortalProps) {
   const theme = useTheme();
+  const router = useRouter();
 
   const { user, profile, login, refreshProfile, isLoading: authLoading } = useAppContext();
   const [mounted, setMounted] = useState(false);
@@ -136,6 +141,12 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
   const [scorecardModalOpen, setScorecardModalOpen] = useState(false);
   const [viewingScorecard, setViewingScorecard] = useState<any>(null);
 
+  // Anti-cheating & Proctoring state
+  const [tabSwitchCount, setTabSwitchCount] = useState(0);
+  const [isWindowBlurred, setIsWindowBlurred] = useState(false);
+  const [showTabSwitchModal, setShowTabSwitchModal] = useState(false);
+  const [securityToast, setSecurityToast] = useState<string | null>(null);
+
   const inst = portalData?.institute || initialInstitute;
   const primaryColor = inst?.primary_color || '#0D47A1';
   const accentColor = inst?.accent_color || '#F59E0B';
@@ -169,6 +180,78 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
       }
     }
   }, [authLoading, user, profile?.phone_number, profile?.is_owner]);
+
+  // Anti-Copy, Anti-DevTools & Anti-Print Screen listener
+  useEffect(() => {
+    if (!testActive || testResult) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+      const cmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+      const key = (e.key || '').toLowerCase();
+
+      // Block Copy (Ctrl+C / Cmd+C), Cut (Ctrl+X), Select All (Ctrl+A), Save (Ctrl+S), Print (Ctrl+P), View Source (Ctrl+U)
+      if (cmdOrCtrl && ['c', 'x', 'a', 's', 'p', 'u'].includes(key)) {
+        e.preventDefault();
+        e.stopPropagation();
+        setSecurityToast('⚠️ Copying, selecting, or printing test questions is disabled.');
+        return false;
+      }
+
+      // Block DevTools: F12, Ctrl+Shift+I, Cmd+Option+I, Ctrl+Shift+J, Ctrl+Shift+C
+      if (
+        e.key === 'F12' ||
+        (cmdOrCtrl && e.shiftKey && ['i', 'j', 'c'].includes(key)) ||
+        (isMac && e.metaKey && e.altKey && ['i', 'j', 'c'].includes(key))
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        setSecurityToast('⚠️ Developer inspection tools are disabled.');
+        return false;
+      }
+
+      // Block PrintScreen key
+      if (e.key === 'PrintScreen') {
+        if (typeof navigator !== 'undefined' && navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText('');
+        }
+        setSecurityToast('⚠️ Screenshotting exam questions is strictly prohibited.');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown, { capture: true });
+    return () => window.removeEventListener('keydown', handleKeyDown, { capture: true });
+  }, [testActive, testResult]);
+
+  // Anti-Tab-Switching & Window Blur (ChatGPT / Snipping Tool prevention)
+  useEffect(() => {
+    if (!testActive || testResult) {
+      setIsWindowBlurred(false);
+      return;
+    }
+
+    const handleBlur = () => {
+      setIsWindowBlurred(true);
+      setTabSwitchCount((prev) => prev + 1);
+      setShowTabSwitchModal(true);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setIsWindowBlurred(true);
+        setTabSwitchCount((prev) => prev + 1);
+        setShowTabSwitchModal(true);
+      }
+    };
+
+    window.addEventListener('blur', handleBlur);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('blur', handleBlur);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [testActive, testResult]);
 
   const membershipStatus: string = portalData?.membership_status || 'anonymous';
   const topics: any[] = portalData?.topics || [];
@@ -412,6 +495,9 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
     setTimerSeconds(null);
     setAnswers({});
     setTestResult(null);
+    setTabSwitchCount(0);
+    setIsWindowBlurred(false);
+    setShowTabSwitchModal(false);
     setTestActive(true);
   };
 
@@ -423,6 +509,9 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
       setMockTestQuestions(res.data.questions);
       setAnswers({});
       setTestResult(null);
+      setTabSwitchCount(0);
+      setIsWindowBlurred(false);
+      setShowTabSwitchModal(false);
       if (res.data.test.time_limit_per_question > 0 && (res.data.questions?.length || 0) > 0) {
         setTimerSeconds(res.data.test.time_limit_per_question * res.data.questions.length);
       } else if (res.data.test.duration_minutes > 0) {
@@ -445,6 +534,9 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
     setAnswers({});
     setTestResult(null);
     setTimerSeconds(null);
+    setTabSwitchCount(0);
+    setIsWindowBlurred(false);
+    setShowTabSwitchModal(false);
   };
 
   const handleSubmitTest = async () => {
@@ -467,6 +559,7 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
         question_ids: questionIds,
         answers: formattedAnswers,
         test_title: currentTopicName,
+        tab_switches: tabSwitchCount,
       };
       if (activeMockTest) {
         payload.mock_test_id = activeMockTest.id;
@@ -474,6 +567,8 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
 
       const res = await apiClient.post(`/institute/public/submit-test/${slug}/`, payload);
       setTestResult(res.data);
+      setIsWindowBlurred(false);
+      setShowTabSwitchModal(false);
       setViewingScorecard(res.data);
       setScorecardModalOpen(true);
       await fetchPortal();
@@ -1264,7 +1359,39 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
 
                   {testActive && (
                     /* ACTIVE TEST VIEW */
-                    <Box>
+                    <Box
+                      sx={{
+                        position: 'relative',
+                        userSelect: !testResult ? 'none' : 'text',
+                        WebkitUserSelect: !testResult ? 'none' : 'text',
+                        MozUserSelect: !testResult ? 'none' : 'text',
+                        msUserSelect: !testResult ? 'none' : 'text',
+                        WebkitTouchCallout: !testResult ? 'none' : 'default',
+                        filter: isWindowBlurred && !testResult ? 'blur(25px)' : 'none',
+                        transition: 'filter 0.15s ease-in-out',
+                      }}
+                      onCopy={(e) => {
+                        if (!testResult) {
+                          e.preventDefault();
+                          setSecurityToast('⚠️ Copying exam questions is strictly prohibited.');
+                        }
+                      }}
+                      onCut={(e) => {
+                        if (!testResult) e.preventDefault();
+                      }}
+                      onPaste={(e) => {
+                        if (!testResult) e.preventDefault();
+                      }}
+                      onContextMenu={(e) => {
+                        if (!testResult) {
+                          e.preventDefault();
+                          setSecurityToast('⚠️ Right-click context menu is disabled during the exam.');
+                        }
+                      }}
+                      onDragStart={(e) => {
+                        if (!testResult) e.preventDefault();
+                      }}
+                    >
                       {/* Sticky Top Timer Bar for Mock Test */}
                       <Paper
                         elevation={4}
@@ -1302,6 +1429,34 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                           </Box>
 
                           <Stack direction="row" spacing={1} alignItems="center" sx={{ flexShrink: 0 }}>
+                            <Chip
+                              icon={<ShieldIcon sx={{ fontSize: '13px !important', color: '#16a34a' }} />}
+                              label="Anti-Copy Active"
+                              size="small"
+                              sx={{
+                                display: { xs: 'none', md: 'inline-flex' },
+                                fontWeight: 800,
+                                height: { xs: 26, sm: 30 },
+                                fontSize: '0.7rem',
+                                bgcolor: 'rgba(22, 163, 74, 0.1)',
+                                color: '#16a34a',
+                                border: '1px solid rgba(22, 163, 74, 0.3)',
+                              }}
+                            />
+                            {tabSwitchCount > 0 && (
+                              <Chip
+                                label={`⚠️ ${tabSwitchCount} Tab ${tabSwitchCount === 1 ? 'Switch' : 'Switches'}`}
+                                size="small"
+                                sx={{
+                                  fontWeight: 800,
+                                  height: { xs: 26, sm: 30 },
+                                  fontSize: '0.72rem',
+                                  bgcolor: 'rgba(239, 68, 68, 0.12)',
+                                  color: '#EF4444',
+                                  border: '1px solid #EF4444',
+                                }}
+                              />
+                            )}
                             {activeMockTest?.time_limit_per_question > 0 && (
                               <Chip
                                 label={`⚡ ${activeMockTest.time_limit_per_question}s/Q`}
@@ -1354,6 +1509,38 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                           </Stack>
                         </Stack>
                       </Paper>
+
+                      {/* Subtle Anti-Leak Watermark Layer */}
+                      {!testResult && (
+                        <Box
+                          aria-hidden="true"
+                          sx={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            pointerEvents: 'none',
+                            zIndex: 0,
+                            opacity: 0.04,
+                            overflow: 'hidden',
+                            display: 'flex',
+                            flexWrap: 'wrap',
+                            alignContent: 'space-around',
+                            justifyContent: 'space-around',
+                            fontSize: { xs: '0.85rem', sm: '1rem' },
+                            fontWeight: 900,
+                            transform: 'rotate(-25deg)',
+                            userSelect: 'none',
+                          }}
+                        >
+                          {Array.from({ length: 24 }).map((_, i) => (
+                            <Box key={i} sx={{ p: 4, whiteSpace: 'nowrap' }}>
+                              {inst?.name || 'EXAM'} • @{user?.username || profile?.user?.username || 'STUDENT'} • CONFIDENTIAL EXAM
+                            </Box>
+                          ))}
+                        </Box>
+                      )}
 
                       {/* Question List */}
                       <Stack spacing={2}>
@@ -2132,6 +2319,83 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
           </Typography>
         </form>
       </Dialog>
+
+      {/* Tab Switch / Focus Lost Modal */}
+      <Dialog
+        open={showTabSwitchModal && testActive && !testResult}
+        onClose={() => {
+          setShowTabSwitchModal(false);
+          setIsWindowBlurred(false);
+        }}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '18px',
+            p: 1,
+            border: '2px solid #EF4444',
+            boxShadow: '0 8px 32px rgba(239, 68, 68, 0.25)',
+          },
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 900, color: '#EF4444', display: 'flex', alignItems: 'center', gap: 1 }}>
+          <WarningAmberIcon sx={{ fontSize: 26 }} />
+          Focus Lost / Tab Switch Detected
+        </DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 600 }}>
+            You switched away from the exam window or opened an external tool.
+          </Typography>
+          <Alert severity="warning" sx={{ borderRadius: '12px', mb: 1.5 }}>
+            <strong>Violation count: {tabSwitchCount}</strong>
+            <br />
+            Switching tabs or using ChatGPT / external search during the exam is monitored and recorded on your test attempt.
+          </Alert>
+          <Typography variant="caption" color="text.secondary">
+            Please return to your exam and do not navigate away until you submit.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 2, pt: 0 }}>
+          <Button
+            variant="contained"
+            color="error"
+            fullWidth
+            onClick={() => {
+              setShowTabSwitchModal(false);
+              setIsWindowBlurred(false);
+            }}
+            sx={{ fontWeight: 800, borderRadius: '10px', py: 1 }}
+          >
+            I Understand — Resume Exam
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Security Warning Toast */}
+      <Snackbar
+        open={Boolean(securityToast)}
+        autoHideDuration={3000}
+        onClose={() => setSecurityToast(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setSecurityToast(null)}
+          severity="error"
+          variant="filled"
+          sx={{ fontWeight: 800, borderRadius: '10px' }}
+        >
+          {securityToast}
+        </Alert>
+      </Snackbar>
+
+      {/* Anti-Print Media Query */}
+      <style jsx global>{`
+        @media print {
+          body {
+            display: none !important;
+          }
+        }
+      `}</style>
     </Box>
   );
 }

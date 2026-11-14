@@ -111,13 +111,14 @@ export default function InstituteMockTestsPage() {
 
     let result = [...list];
 
-    // Search query filter (name, username, email)
+    // Search query filter (name, username, email, phone_number)
     if (lbSearch.trim()) {
       const q = lbSearch.toLowerCase();
       result = result.filter((s: any) =>
         (s.student_name || '').toLowerCase().includes(q) ||
         (s.username || '').toLowerCase().includes(q) ||
-        (s.email || '').toLowerCase().includes(q)
+        (s.email || '').toLowerCase().includes(q) ||
+        (s.phone_number || '').toLowerCase().includes(q)
       );
     }
 
@@ -191,6 +192,7 @@ export default function InstituteMockTestsPage() {
       'Wrong Answers',
       'Unanswered',
       'Accuracy (%)',
+      'Tab Switches',
       'Submitted At',
     ];
 
@@ -224,6 +226,7 @@ export default function InstituteMockTestsPage() {
         escapeCsv(sub.wrong ?? 0),
         escapeCsv(sub.unanswered ?? 0),
         escapeCsv(`${sub.accuracy}%`),
+        escapeCsv(sub.tab_switches ?? 0),
         escapeCsv(formattedDate),
       ].join(',');
     });
@@ -1383,7 +1386,7 @@ export default function InstituteMockTestsPage() {
                 Export CSV ({filteredAndSortedSubmissions.length})
               </Button>
               <Chip
-                label={`${activeTestSubmissions?.total_submissions ?? 0} Submissions`}
+                label={`${activeTestSubmissions?.test?.total_submissions ?? activeTestSubmissions?.total_submissions ?? activeTestSubmissions?.submissions?.length ?? 0} Submissions`}
                 color="primary"
                 sx={{ fontWeight: 800 }}
               />
@@ -1638,6 +1641,11 @@ export default function InstituteMockTestsPage() {
                               {sub.phone_number && (
                                 <Typography variant="caption" sx={{ display: 'block', color: '#16a34a', fontWeight: 800, mt: 0.25 }}>
                                   📱 +91 {sub.phone_number}
+                                </Typography>
+                              )}
+                              {Number(sub.tab_switches) > 0 && (
+                                <Typography variant="caption" sx={{ display: 'block', color: '#EF4444', fontWeight: 800, mt: 0.25 }}>
+                                  ⚠️ {sub.tab_switches} Tab {sub.tab_switches === 1 ? 'Switch' : 'Switches'}
                                 </Typography>
                               )}
                             </TableCell>
