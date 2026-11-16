@@ -1692,7 +1692,7 @@ export default function InstituteMockTestsPage() {
                     </TableHead>
                     <TableBody>
                       {filteredAndSortedSubmissions.map((sub: any) => {
-                        const whatsappMsg = `Hello ${sub.student_name}! Regarding your result in "${activeTest?.title}":\nYour Score: ${sub.score} pts (Rank #${sub.rank}, Accuracy: ${sub.accuracy}%).\nGreat job from your academy admin!`;
+                        const whatsappMsg = `Dear Candidate,\n\nYour RANKUP PSC Special Model Exam result:\n\nScore: ${sub.score} | Accuracy: ${sub.accuracy}%\n\n🎉 Congratulations! You have been shortlisted for Quality PSC Coaching at an Affordable Fee.\n\nThe RANKUP Team will contact you shortly with further details.\n\nRANKUP – Your Success, Our Mission!`;
                         const whatsappUrl = sub.phone_number
                           ? `https://wa.me/91${sub.phone_number}?text=${encodeURIComponent(whatsappMsg)}`
                           : null;
