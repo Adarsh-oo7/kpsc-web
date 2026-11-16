@@ -324,6 +324,36 @@ export default function InstituteMockTestsPage() {
     URL.revokeObjectURL(url);
   };
 
+  const [whatsappAnchorEl, setWhatsappAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedWhatsappSub, setSelectedWhatsappSub] = useState<any>(null);
+  const whatsappMenuOpen = Boolean(whatsappAnchorEl);
+
+  const handleOpenWhatsappMenu = (event: React.MouseEvent<HTMLElement>, sub: any) => {
+    event.stopPropagation();
+    setWhatsappAnchorEl(event.currentTarget);
+    setSelectedWhatsappSub(sub);
+  };
+
+  const handleCloseWhatsappMenu = () => {
+    setWhatsappAnchorEl(null);
+    setSelectedWhatsappSub(null);
+  };
+
+  const handleSendWhatsappMessage = (type: 'shortlisted' | 'not_shortlisted') => {
+    if (!selectedWhatsappSub?.phone_number) return;
+    const sub = selectedWhatsappSub;
+    let msg = '';
+    if (type === 'shortlisted') {
+      msg = `Dear Candidate,\n\nYour RANKUP PSC Special Model Exam Result:\n\nScore: ${sub.score} | Accuracy: ${sub.accuracy}%\n\n🎉 Congratulations! You have been shortlisted for Quality PSC Coaching at an Affordable Fee.\n\nThe RANKUP Team will contact you shortly with further details.\n\nRANKUP – Your Success, Our Mission!`;
+    } else {
+      msg = `Dear Candidate,\n\nYour RANKUP PSC Special Model Exam Result:\n\nScore: ${sub.score} | Accuracy: ${sub.accuracy}%\n\n☹️ You are not shortlisted for the current batch. But don't be disappointed!\n\nRANKUP Team is preparing another opportunity for you. Stay tuned!\n\nRANKUP – Your Success, Our Mission!`;
+    }
+    const cleanPhone = String(sub.phone_number).replace(/[^0-9]/g, '').slice(-10);
+    const url = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+    handleCloseWhatsappMenu();
+  };
+
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredTests = useMemo(() => {
@@ -1692,11 +1722,6 @@ export default function InstituteMockTestsPage() {
                     </TableHead>
                     <TableBody>
                       {filteredAndSortedSubmissions.map((sub: any) => {
-                        const whatsappMsg = `Dear Candidate,\n\nYour RANKUP PSC Special Model Exam result:\n\nScore: ${sub.score} | Accuracy: ${sub.accuracy}%\n\n🎉 Congratulations! You have been shortlisted for Quality PSC Coaching at an Affordable Fee.\n\nThe RANKUP Team will contact you shortly with further details.\n\nRANKUP – Your Success, Our Mission!`;
-                        const whatsappUrl = sub.phone_number
-                          ? `https://wa.me/91${sub.phone_number}?text=${encodeURIComponent(whatsappMsg)}`
-                          : null;
-
                         return (
                           <TableRow key={sub.id} hover>
                             <TableCell>
@@ -1757,16 +1782,14 @@ export default function InstituteMockTestsPage() {
                             </TableCell>
                             <TableCell align="right">
                               <Stack direction="row" spacing={1} justifyContent="flex-end" alignItems="center">
-                                {whatsappUrl ? (
-                                  <Tooltip title={`Chat with ${sub.student_name} on WhatsApp (+91 ${sub.phone_number})`}>
+                                {sub.phone_number ? (
+                                  <Tooltip title={`Send WhatsApp result options to ${sub.student_name} (+91 ${sub.phone_number})`}>
                                     <Button
                                       size="small"
                                       variant="contained"
-                                      component="a"
-                                      href={whatsappUrl}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
+                                      onClick={(e) => handleOpenWhatsappMenu(e, sub)}
                                       startIcon={<WhatsAppIcon sx={{ fontSize: '15px !important' }} />}
+                                      endIcon={<KeyboardArrowDownIcon sx={{ fontSize: '14px !important', ml: -0.5 }} />}
                                       sx={{
                                         bgcolor: '#25D366',
                                         color: '#fff',
@@ -1903,6 +1926,108 @@ export default function InstituteMockTestsPage() {
               </Typography>
               <Typography variant="caption" color="text.secondary">
                 Standard comma-separated file
+              </Typography>
+            </Box>
+          </MenuItem>
+        </Menu>
+
+        {/* WhatsApp Message Template Selection Menu */}
+        <Menu
+          anchorEl={whatsappAnchorEl}
+          open={whatsappMenuOpen}
+          onClose={handleCloseWhatsappMenu}
+          PaperProps={{
+            sx: {
+              borderRadius: '14px',
+              boxShadow: '0 12px 32px rgba(0,0,0,0.25)',
+              minWidth: 320,
+              maxWidth: 360,
+              p: 0.5,
+            },
+          }}
+        >
+          <Box sx={{ px: 2, py: 1.25 }}>
+            <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Select WhatsApp Template
+            </Typography>
+            <Typography variant="body2" sx={{ fontWeight: 800, color: 'text.primary', mt: 0.25 }}>
+              {selectedWhatsappSub?.student_name}
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#16a34a', fontWeight: 700, display: 'block' }}>
+              📱 +91 {selectedWhatsappSub?.phone_number} • Score: {selectedWhatsappSub?.score} pts • Acc: {selectedWhatsappSub?.accuracy}%
+            </Typography>
+          </Box>
+          <Divider sx={{ my: 0.5 }} />
+
+          {/* Option 1: Shortlisted */}
+          <MenuItem
+            onClick={() => handleSendWhatsappMessage('shortlisted')}
+            sx={{
+              py: 1.25,
+              px: 1.5,
+              borderRadius: '8px',
+              gap: 1.5,
+              '&:hover': { bgcolor: 'rgba(37, 211, 102, 0.08)' },
+            }}
+          >
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: '50%',
+                bgcolor: 'rgba(34, 197, 94, 0.15)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 18,
+                flexShrink: 0,
+              }}
+            >
+              🎉
+            </Box>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography variant="body2" sx={{ fontWeight: 800, color: '#16a34a' }}>
+                Shortlisted for Batch
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1.3 }}>
+                🎉 Shortlisted for Quality PSC Coaching
+              </Typography>
+            </Box>
+          </MenuItem>
+
+          {/* Option 2: Not Shortlisted */}
+          <MenuItem
+            onClick={() => handleSendWhatsappMessage('not_shortlisted')}
+            sx={{
+              py: 1.25,
+              px: 1.5,
+              borderRadius: '8px',
+              gap: 1.5,
+              mt: 0.5,
+              '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.08)' },
+            }}
+          >
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: '50%',
+                bgcolor: 'rgba(239, 68, 68, 0.12)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 18,
+                flexShrink: 0,
+              }}
+            >
+              ☹️
+            </Box>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography variant="body2" sx={{ fontWeight: 800, color: '#dc2626' }}>
+                Not Shortlisted
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1.3 }}>
+                ☹️ Not shortlisted, preparing another opportunity
               </Typography>
             </Box>
           </MenuItem>
