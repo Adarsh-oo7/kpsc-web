@@ -6,7 +6,7 @@ import {
   Box, Typography, Button, CircularProgress, Alert, Paper,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Dialog, DialogTitle, DialogContent, DialogActions, TextField, Stack,
-  Chip, IconButton, Tooltip, InputAdornment, FormControl, InputLabel, Select, MenuItem, Menu,
+  Chip, IconButton, Tooltip, InputAdornment, FormControl, InputLabel, Select, MenuItem, Menu, Popover,
   RadioGroup, Radio, FormControlLabel, Switch, Tabs, Tab, Checkbox, ListItemText, Divider
 } from '@mui/material';
 import * as XLSX from 'xlsx';
@@ -353,9 +353,26 @@ export default function InstituteMockTestsPage() {
 
   const getWhatsappUrl = (sub: any, type: 'shortlisted' | 'not_shortlisted') => {
     if (!sub?.phone_number) return '#';
-    const cleanPhone = String(sub.phone_number).replace(/[^0-9]/g, '').slice(-10);
+    const cleanDigits = String(sub.phone_number).replace(/[^0-9]/g, '');
+    const cleanPhone = cleanDigits.length === 10
+      ? `91${cleanDigits}`
+      : (cleanDigits.startsWith('91') && cleanDigits.length === 12 ? cleanDigits : `91${cleanDigits.slice(-10)}`);
     const msg = getWhatsappMessage(sub, type);
-    return `https://api.whatsapp.com/send?phone=91${cleanPhone}&text=${encodeURIComponent(msg)}`;
+    return `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(msg)}`;
+  };
+
+  const handleDirectWhatsappSend = (e: React.MouseEvent, type: 'shortlisted' | 'not_shortlisted') => {
+    if (!selectedWhatsappSub) return;
+    const url = getWhatsappUrl(selectedWhatsappSub, type);
+    if (!url || url === '#') {
+      e.preventDefault();
+      alert('Candidate phone number is missing or invalid.');
+      return;
+    }
+    // Delay closing slightly so browser triggers native link navigation to WhatsApp
+    setTimeout(() => {
+      handleCloseWhatsappMenu();
+    }, 500);
   };
 
   const handleCopyMessage = (e: React.MouseEvent, type: 'shortlisted' | 'not_shortlisted') => {
@@ -2044,149 +2061,220 @@ export default function InstituteMockTestsPage() {
           </MenuItem>
         </Menu>
 
-        {/* WhatsApp Message Template Selection Menu */}
-        <Menu
+        {/* WhatsApp Message Template Selection Popover */}
+        <Popover
           anchorEl={whatsappAnchorEl}
           open={whatsappMenuOpen}
           onClose={handleCloseWhatsappMenu}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
           PaperProps={{
             sx: {
-              borderRadius: '14px',
-              boxShadow: '0 12px 32px rgba(0,0,0,0.25)',
-              minWidth: 320,
-              maxWidth: 360,
-              p: 0.5,
+              borderRadius: '16px',
+              boxShadow: '0 16px 40px rgba(0,0,0,0.3)',
+              width: { xs: 330, sm: 420 },
+              maxWidth: '95vw',
+              p: 2,
+              bgcolor: 'background.paper',
             },
           }}
         >
-          <Box sx={{ px: 2, py: 1.25 }}>
-            <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Select WhatsApp Template
-            </Typography>
-            <Typography variant="body2" sx={{ fontWeight: 800, color: 'text.primary', mt: 0.25 }}>
+          {/* Header */}
+          <Box sx={{ mb: 1.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+              <Typography variant="caption" sx={{ fontWeight: 800, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Direct WhatsApp Message
+              </Typography>
+              <IconButton size="small" onClick={handleCloseWhatsappMenu} sx={{ p: 0.25, color: 'text.secondary' }}>
+                <CancelIcon sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Box>
+            <Typography variant="subtitle1" sx={{ fontWeight: 800, color: 'text.primary', lineHeight: 1.2 }}>
               {selectedWhatsappSub?.student_name}
             </Typography>
-            <Typography variant="caption" sx={{ color: '#16a34a', fontWeight: 700, display: 'block' }}>
-              📱 +91 {selectedWhatsappSub?.phone_number} • Score: {selectedWhatsappSub?.score} pts • Acc: {selectedWhatsappSub?.accuracy}%
+            <Typography variant="caption" sx={{ color: '#16a34a', fontWeight: 700, display: 'block', mt: 0.25 }}>
+              📱 +91 {selectedWhatsappSub?.phone_number} • Score: {selectedWhatsappSub?.score} pts • Accuracy: {selectedWhatsappSub?.accuracy}%
             </Typography>
           </Box>
-          <Divider sx={{ my: 0.5 }} />
 
-          {/* Option 1: Shortlisted */}
-          <MenuItem
-            component="a"
-            href={getWhatsappUrl(selectedWhatsappSub, 'shortlisted')}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={handleCloseWhatsappMenu}
-            sx={{
-              py: 1.5,
-              px: 1.5,
-              borderRadius: '10px',
-              gap: 1.5,
-              textDecoration: 'none',
-              color: 'inherit',
-              display: 'flex',
-              alignItems: 'center',
-              '&:hover': { bgcolor: 'rgba(37, 211, 102, 0.1)' },
-            }}
-          >
+          <Divider sx={{ mb: 2 }} />
+
+          <Stack spacing={2}>
+            {/* OPTION 1: SHORTLISTED */}
             <Box
               sx={{
-                width: 38,
-                height: 38,
-                borderRadius: '50%',
-                bgcolor: 'rgba(34, 197, 94, 0.15)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 20,
-                flexShrink: 0,
+                p: 1.75,
+                borderRadius: '12px',
+                border: '1.5px solid rgba(34, 197, 94, 0.4)',
+                bgcolor: 'rgba(34, 197, 94, 0.05)',
+                transition: 'all 0.2s',
+                '&:hover': { borderColor: '#16a34a', bgcolor: 'rgba(34, 197, 94, 0.09)' },
               }}
             >
-              🎉
-            </Box>
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography variant="body2" sx={{ fontWeight: 800, color: '#16a34a' }}>
-                Shortlisted for Batch
-              </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1.3 }}>
-                🎉 Send congratulations & coaching shortlist
-              </Typography>
-            </Box>
-            <Tooltip title={copiedType === 'shortlisted' ? 'Copied!' : 'Copy message text'}>
-              <IconButton
-                size="small"
-                onClick={(e) => handleCopyMessage(e, 'shortlisted')}
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography sx={{ fontSize: 18 }}>🎉</Typography>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#16a34a' }}>
+                    Shortlisted for Batch
+                  </Typography>
+                </Box>
+                <Tooltip title={copiedType === 'shortlisted' ? 'Copied to clipboard!' : 'Copy message text'}>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={(e) => handleCopyMessage(e, 'shortlisted')}
+                    startIcon={<ContentCopyIcon sx={{ fontSize: '13px !important' }} />}
+                    sx={{
+                      fontSize: '0.7rem',
+                      py: 0.2,
+                      px: 0.9,
+                      textTransform: 'none',
+                      borderColor: copiedType === 'shortlisted' ? '#16a34a' : 'divider',
+                      color: copiedType === 'shortlisted' ? '#16a34a' : 'text.secondary',
+                      bgcolor: copiedType === 'shortlisted' ? 'rgba(22, 163, 74, 0.1)' : 'transparent',
+                    }}
+                  >
+                    {copiedType === 'shortlisted' ? 'Copied!' : 'Copy'}
+                  </Button>
+                </Tooltip>
+              </Box>
+
+              <Typography
+                variant="caption"
                 sx={{
-                  color: copiedType === 'shortlisted' ? '#16a34a' : 'text.secondary',
-                  bgcolor: copiedType === 'shortlisted' ? 'rgba(22, 163, 74, 0.1)' : 'action.hover',
-                  p: 0.75,
+                  display: 'block',
+                  color: 'text.secondary',
+                  mb: 1.5,
+                  fontSize: '0.72rem',
+                  lineHeight: 1.4,
+                  bgcolor: 'background.paper',
+                  p: 1,
+                  borderRadius: '6px',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  whiteSpace: 'pre-line',
                 }}
               >
-                <ContentCopyIcon sx={{ fontSize: 16 }} />
-              </IconButton>
-            </Tooltip>
-          </MenuItem>
+                {getWhatsappMessage(selectedWhatsappSub, 'shortlisted')}
+              </Typography>
 
-          {/* Option 2: Not Shortlisted */}
-          <MenuItem
-            component="a"
-            href={getWhatsappUrl(selectedWhatsappSub, 'not_shortlisted')}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={handleCloseWhatsappMenu}
-            sx={{
-              py: 1.5,
-              px: 1.5,
-              borderRadius: '10px',
-              gap: 1.5,
-              mt: 0.75,
-              textDecoration: 'none',
-              color: 'inherit',
-              display: 'flex',
-              alignItems: 'center',
-              '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.1)' },
-            }}
-          >
+              {/* Direct WhatsApp Send Button */}
+              <Button
+                fullWidth
+                variant="contained"
+                component="a"
+                href={getWhatsappUrl(selectedWhatsappSub, 'shortlisted')}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => handleDirectWhatsappSend(e, 'shortlisted')}
+                startIcon={<WhatsAppIcon sx={{ fontSize: '18px !important' }} />}
+                sx={{
+                  bgcolor: '#25D366',
+                  color: '#fff',
+                  fontWeight: 800,
+                  fontSize: '0.82rem',
+                  textTransform: 'none',
+                  py: 0.85,
+                  borderRadius: '8px',
+                  boxShadow: '0 3px 10px rgba(37, 211, 102, 0.35)',
+                  '&:hover': { bgcolor: '#128C7E' },
+                }}
+              >
+                Direct WhatsApp Send (Shortlisted)
+              </Button>
+            </Box>
+
+            {/* OPTION 2: NOT SHORTLISTED */}
             <Box
               sx={{
-                width: 38,
-                height: 38,
-                borderRadius: '50%',
-                bgcolor: 'rgba(239, 68, 68, 0.12)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 20,
-                flexShrink: 0,
+                p: 1.75,
+                borderRadius: '12px',
+                border: '1.5px solid rgba(239, 68, 68, 0.35)',
+                bgcolor: 'rgba(239, 68, 68, 0.05)',
+                transition: 'all 0.2s',
+                '&:hover': { borderColor: '#dc2626', bgcolor: 'rgba(239, 68, 68, 0.09)' },
               }}
             >
-              ☹️
-            </Box>
-            <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography variant="body2" sx={{ fontWeight: 800, color: '#dc2626' }}>
-                Not Shortlisted
-              </Typography>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1.3 }}>
-                ☹️ Send encouragement & next opportunity
-              </Typography>
-            </Box>
-            <Tooltip title={copiedType === 'not_shortlisted' ? 'Copied!' : 'Copy message text'}>
-              <IconButton
-                size="small"
-                onClick={(e) => handleCopyMessage(e, 'not_shortlisted')}
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography sx={{ fontSize: 18 }}>☹️</Typography>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#dc2626' }}>
+                    Not Shortlisted
+                  </Typography>
+                </Box>
+                <Tooltip title={copiedType === 'not_shortlisted' ? 'Copied to clipboard!' : 'Copy message text'}>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={(e) => handleCopyMessage(e, 'not_shortlisted')}
+                    startIcon={<ContentCopyIcon sx={{ fontSize: '13px !important' }} />}
+                    sx={{
+                      fontSize: '0.7rem',
+                      py: 0.2,
+                      px: 0.9,
+                      textTransform: 'none',
+                      borderColor: copiedType === 'not_shortlisted' ? '#dc2626' : 'divider',
+                      color: copiedType === 'not_shortlisted' ? '#dc2626' : 'text.secondary',
+                      bgcolor: copiedType === 'not_shortlisted' ? 'rgba(220, 38, 38, 0.1)' : 'transparent',
+                    }}
+                  >
+                    {copiedType === 'not_shortlisted' ? 'Copied!' : 'Copy'}
+                  </Button>
+                </Tooltip>
+              </Box>
+
+              <Typography
+                variant="caption"
                 sx={{
-                  color: copiedType === 'not_shortlisted' ? '#dc2626' : 'text.secondary',
-                  bgcolor: copiedType === 'not_shortlisted' ? 'rgba(239, 68, 68, 0.1)' : 'action.hover',
-                  p: 0.75,
+                  display: 'block',
+                  color: 'text.secondary',
+                  mb: 1.5,
+                  fontSize: '0.72rem',
+                  lineHeight: 1.4,
+                  bgcolor: 'background.paper',
+                  p: 1,
+                  borderRadius: '6px',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  whiteSpace: 'pre-line',
                 }}
               >
-                <ContentCopyIcon sx={{ fontSize: 16 }} />
-              </IconButton>
-            </Tooltip>
-          </MenuItem>
-        </Menu>
+                {getWhatsappMessage(selectedWhatsappSub, 'not_shortlisted')}
+              </Typography>
+
+              {/* Direct WhatsApp Send Button */}
+              <Button
+                fullWidth
+                variant="contained"
+                component="a"
+                href={getWhatsappUrl(selectedWhatsappSub, 'not_shortlisted')}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => handleDirectWhatsappSend(e, 'not_shortlisted')}
+                startIcon={<WhatsAppIcon sx={{ fontSize: '18px !important' }} />}
+                sx={{
+                  bgcolor: '#374151',
+                  color: '#fff',
+                  fontWeight: 800,
+                  fontSize: '0.82rem',
+                  textTransform: 'none',
+                  py: 0.85,
+                  borderRadius: '8px',
+                  boxShadow: '0 3px 10px rgba(55, 65, 81, 0.35)',
+                  '&:hover': { bgcolor: '#1f2937' },
+                }}
+              >
+                Direct WhatsApp Send (Not Shortlisted)
+              </Button>
+            </Box>
+          </Stack>
+        </Popover>
 
         {/* Quick Add WhatsApp Number Dialog for Admin */}
         <Dialog
