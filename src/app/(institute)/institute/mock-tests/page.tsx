@@ -354,6 +354,44 @@ export default function InstituteMockTestsPage() {
     handleCloseWhatsappMenu();
   };
 
+  const [addPhoneModalOpen, setAddPhoneModalOpen] = useState(false);
+  const [addPhoneStudent, setAddPhoneStudent] = useState<any>(null);
+  const [phoneInputVal, setPhoneInputVal] = useState('');
+  const [savingPhone, setSavingPhone] = useState(false);
+  const [phoneError, setPhoneError] = useState('');
+
+  const handleOpenAddPhone = (sub: any) => {
+    setAddPhoneStudent(sub);
+    setPhoneInputVal(sub.phone_number || '');
+    setPhoneError('');
+    setAddPhoneModalOpen(true);
+  };
+
+  const handleSaveStudentPhone = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const digits = phoneInputVal.trim().replace(/\D/g, '').slice(-10);
+    if (digits.length !== 10) {
+      setPhoneError('Please enter a valid 10-digit mobile number.');
+      return;
+    }
+    setSavingPhone(true);
+    setPhoneError('');
+    try {
+      await apiClient.post(`/institute/students/${addPhoneStudent.student_id}/phone/`, { phone_number: digits });
+      if (activeTestSubmissions?.submissions) {
+        activeTestSubmissions.submissions = activeTestSubmissions.submissions.map((s: any) =>
+          s.student_id === addPhoneStudent.student_id ? { ...s, phone_number: digits } : s
+        );
+      }
+      setAddPhoneModalOpen(false);
+      setAddPhoneStudent(null);
+    } catch (err: any) {
+      setPhoneError(err.response?.data?.error || 'Failed to update phone number.');
+    } finally {
+      setSavingPhone(false);
+    }
+  };
+
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredTests = useMemo(() => {
@@ -1807,25 +1845,30 @@ export default function InstituteMockTestsPage() {
                                     </Button>
                                   </Tooltip>
                                 ) : (
-                                  <Tooltip title="Student has not linked WhatsApp number yet">
-                                    <span>
-                                      <Button
-                                        size="small"
-                                        variant="outlined"
-                                        disabled
-                                        startIcon={<WhatsAppIcon sx={{ fontSize: '15px !important' }} />}
-                                        sx={{
-                                          textTransform: 'none',
-                                          fontSize: '0.72rem',
-                                          fontWeight: 700,
-                                          borderRadius: '8px',
-                                          px: 1,
-                                          py: 0.45,
-                                        }}
-                                      >
-                                        No Phone
-                                      </Button>
-                                    </span>
+                                  <Tooltip title={`Link WhatsApp number for ${sub.student_name}`}>
+                                    <Button
+                                      size="small"
+                                      variant="outlined"
+                                      onClick={() => handleOpenAddPhone(sub)}
+                                      startIcon={<WhatsAppIcon sx={{ fontSize: '15px !important' }} />}
+                                      sx={{
+                                        textTransform: 'none',
+                                        fontSize: '0.72rem',
+                                        fontWeight: 800,
+                                        borderRadius: '8px',
+                                        px: 1.15,
+                                        py: 0.45,
+                                        borderColor: '#16a34a',
+                                        color: '#16a34a',
+                                        bgcolor: 'rgba(22, 163, 74, 0.05)',
+                                        '&:hover': {
+                                          borderColor: '#15803d',
+                                          bgcolor: 'rgba(22, 163, 74, 0.12)',
+                                        },
+                                      }}
+                                    >
+                                      + Add Phone
+                                    </Button>
                                   </Tooltip>
                                 )}
 
@@ -2032,6 +2075,78 @@ export default function InstituteMockTestsPage() {
             </Box>
           </MenuItem>
         </Menu>
+
+        {/* Quick Add WhatsApp Number Dialog for Admin */}
+        <Dialog
+          open={addPhoneModalOpen}
+          onClose={() => setAddPhoneModalOpen(false)}
+          maxWidth="xs"
+          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: '16px',
+              p: 1,
+            },
+          }}
+        >
+          <DialogTitle sx={{ fontWeight: 900, pb: 1 }}>
+            Link WhatsApp Number
+          </DialogTitle>
+          <DialogContent>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Add or update WhatsApp mobile number for <strong>{addPhoneStudent?.student_name}</strong> (@{addPhoneStudent?.username}).
+            </Typography>
+
+            {phoneError && (
+              <Alert severity="error" sx={{ mb: 2, borderRadius: '10px' }}>
+                {phoneError}
+              </Alert>
+            )}
+
+            <form onSubmit={handleSaveStudentPhone}>
+              <TextField
+                autoFocus
+                fullWidth
+                label="WhatsApp Number"
+                placeholder="9876543210"
+                value={phoneInputVal}
+                onChange={(e) => {
+                  setPhoneInputVal(e.target.value.replace(/\D/g, '').slice(0, 10));
+                  if (phoneError) setPhoneError('');
+                }}
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Typography sx={{ fontWeight: 800, fontSize: '0.85rem' }}>+91</Typography>
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+                helperText={`${phoneInputVal.length}/10 digits`}
+                sx={{ mt: 1 }}
+              />
+            </form>
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 2 }}>
+            <Button onClick={() => setAddPhoneModalOpen(false)} sx={{ fontWeight: 700, textTransform: 'none' }}>
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleSaveStudentPhone}
+              disabled={savingPhone || phoneInputVal.length !== 10}
+              sx={{
+                fontWeight: 800,
+                textTransform: 'none',
+                bgcolor: '#16a34a',
+                '&:hover': { bgcolor: '#15803d' },
+              }}
+            >
+              {savingPhone ? 'Saving...' : 'Save & Enable WhatsApp'}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Dialog>
 
       {/* Answer Sheet Inspection Dialog */}

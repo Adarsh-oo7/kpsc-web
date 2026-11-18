@@ -169,7 +169,7 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
 
   // Compulsory WhatsApp popup for institute students missing a valid phone number
   useEffect(() => {
-    if (!authLoading && user && !profile?.is_owner) {
+    if (!authLoading && user) {
       const cleanPhone = String(profile?.phone_number || '').trim().replace(/\D/g, '');
       if (cleanPhone.length !== 10) {
         setWhatsappModalOpen(true);
@@ -177,7 +177,7 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
         setWhatsappModalOpen(false);
       }
     }
-  }, [authLoading, user, profile?.phone_number, profile?.is_owner]);
+  }, [authLoading, user, profile?.phone_number]);
 
   // Anti-Copy, Anti-DevTools & Anti-Print Screen listener
   useEffect(() => {
@@ -497,6 +497,11 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
   };
 
   const handleStartTest = () => {
+    const cleanPhone = String(profile?.phone_number || '').trim().replace(/\D/g, '');
+    if (cleanPhone.length !== 10) {
+      setWhatsappModalOpen(true);
+      return;
+    }
     setActiveMockTest(null);
     setMockTestQuestions([]);
     setTimerSeconds(null);
@@ -507,6 +512,11 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
   };
 
   const handleStartMockTest = async (testItem: any) => {
+    const cleanPhone = String(profile?.phone_number || '').trim().replace(/\D/g, '');
+    if (cleanPhone.length !== 10) {
+      setWhatsappModalOpen(true);
+      return;
+    }
     setMockTestLoading(true);
     try {
       const res = await apiClient.get(`/institute/public/mock-test/${slug}/${testItem.id}/questions/`);
@@ -541,6 +551,11 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
   };
 
   const handleSubmitTest = async () => {
+    const cleanPhone = String(profile?.phone_number || '').trim().replace(/\D/g, '');
+    if (cleanPhone.length !== 10) {
+      setWhatsappModalOpen(true);
+      return;
+    }
     const qList = activeMockTest ? mockTestQuestions : filteredQuestions;
     if (!qList.length) return;
     setTestSubmitting(true);
@@ -561,6 +576,7 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
         answers: formattedAnswers,
         test_title: currentTopicName,
         tab_switches: tabSwitchCount,
+        phone_number: cleanPhone,
       };
       if (activeMockTest) {
         payload.mock_test_id = activeMockTest.id;
