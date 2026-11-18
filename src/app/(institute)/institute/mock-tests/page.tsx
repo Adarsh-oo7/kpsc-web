@@ -28,6 +28,7 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
 import { apiErrorMessage } from '@/lib/auth';
@@ -340,19 +341,31 @@ export default function InstituteMockTestsPage() {
     setSelectedWhatsappSub(null);
   };
 
-  const handleSendWhatsappMessage = (type: 'shortlisted' | 'not_shortlisted') => {
-    if (!selectedWhatsappSub?.phone_number) return;
-    const sub = selectedWhatsappSub;
-    let msg = '';
+  const [copiedType, setCopiedType] = useState<string | null>(null);
+
+  const getWhatsappMessage = (sub: any, type: 'shortlisted' | 'not_shortlisted') => {
+    if (!sub) return '';
     if (type === 'shortlisted') {
-      msg = `Dear Candidate,\n\nYour RANKUP PSC Special Model Exam Result:\n\nScore: ${sub.score} | Accuracy: ${sub.accuracy}%\n\n🎉 Congratulations! You have been shortlisted for Quality PSC Coaching at an Affordable Fee.\n\nThe RANKUP Team will contact you shortly with further details.\n\nRANKUP – Your Success, Our Mission!`;
-    } else {
-      msg = `Dear Candidate,\n\nYour RANKUP PSC Special Model Exam Result:\n\nScore: ${sub.score} | Accuracy: ${sub.accuracy}%\n\n☹️ You are not shortlisted for the current batch. But don't be disappointed!\n\nRANKUP Team is preparing another opportunity for you. Stay tuned!\n\nRANKUP – Your Success, Our Mission!`;
+      return `Dear Candidate,\n\nYour RANKUP PSC Special Model Exam Result:\n\nScore: ${sub.score} | Accuracy: ${sub.accuracy}%\n\n🎉 Congratulations! You have been shortlisted for Quality PSC Coaching at an Affordable Fee.\n\nThe RANKUP Team will contact you shortly with further details.\n\nRANKUP – Your Success, Our Mission!`;
     }
+    return `Dear Candidate,\n\nYour RANKUP PSC Special Model Exam Result:\n\nScore: ${sub.score} | Accuracy: ${sub.accuracy}%\n\n☹️ You are not shortlisted for the current batch. But don't be disappointed!\n\nRANKUP Team is preparing another opportunity for you. Stay tuned!\n\nRANKUP – Your Success, Our Mission!`;
+  };
+
+  const getWhatsappUrl = (sub: any, type: 'shortlisted' | 'not_shortlisted') => {
+    if (!sub?.phone_number) return '#';
     const cleanPhone = String(sub.phone_number).replace(/[^0-9]/g, '').slice(-10);
-    const url = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
-    handleCloseWhatsappMenu();
+    const msg = getWhatsappMessage(sub, type);
+    return `https://api.whatsapp.com/send?phone=91${cleanPhone}&text=${encodeURIComponent(msg)}`;
+  };
+
+  const handleCopyMessage = (e: React.MouseEvent, type: 'shortlisted' | 'not_shortlisted') => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (!selectedWhatsappSub) return;
+    const msg = getWhatsappMessage(selectedWhatsappSub, type);
+    navigator.clipboard.writeText(msg);
+    setCopiedType(type);
+    setTimeout(() => setCopiedType(null), 2500);
   };
 
   const [addPhoneModalOpen, setAddPhoneModalOpen] = useState(false);
@@ -2061,25 +2074,33 @@ export default function InstituteMockTestsPage() {
 
           {/* Option 1: Shortlisted */}
           <MenuItem
-            onClick={() => handleSendWhatsappMessage('shortlisted')}
+            component="a"
+            href={getWhatsappUrl(selectedWhatsappSub, 'shortlisted')}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={handleCloseWhatsappMenu}
             sx={{
-              py: 1.25,
+              py: 1.5,
               px: 1.5,
-              borderRadius: '8px',
+              borderRadius: '10px',
               gap: 1.5,
-              '&:hover': { bgcolor: 'rgba(37, 211, 102, 0.08)' },
+              textDecoration: 'none',
+              color: 'inherit',
+              display: 'flex',
+              alignItems: 'center',
+              '&:hover': { bgcolor: 'rgba(37, 211, 102, 0.1)' },
             }}
           >
             <Box
               sx={{
-                width: 36,
-                height: 36,
+                width: 38,
+                height: 38,
                 borderRadius: '50%',
                 bgcolor: 'rgba(34, 197, 94, 0.15)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 18,
+                fontSize: 20,
                 flexShrink: 0,
               }}
             >
@@ -2090,33 +2111,54 @@ export default function InstituteMockTestsPage() {
                 Shortlisted for Batch
               </Typography>
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1.3 }}>
-                🎉 Shortlisted for Quality PSC Coaching
+                🎉 Send congratulations & coaching shortlist
               </Typography>
             </Box>
+            <Tooltip title={copiedType === 'shortlisted' ? 'Copied!' : 'Copy message text'}>
+              <IconButton
+                size="small"
+                onClick={(e) => handleCopyMessage(e, 'shortlisted')}
+                sx={{
+                  color: copiedType === 'shortlisted' ? '#16a34a' : 'text.secondary',
+                  bgcolor: copiedType === 'shortlisted' ? 'rgba(22, 163, 74, 0.1)' : 'action.hover',
+                  p: 0.75,
+                }}
+              >
+                <ContentCopyIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Tooltip>
           </MenuItem>
 
           {/* Option 2: Not Shortlisted */}
           <MenuItem
-            onClick={() => handleSendWhatsappMessage('not_shortlisted')}
+            component="a"
+            href={getWhatsappUrl(selectedWhatsappSub, 'not_shortlisted')}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={handleCloseWhatsappMenu}
             sx={{
-              py: 1.25,
+              py: 1.5,
               px: 1.5,
-              borderRadius: '8px',
+              borderRadius: '10px',
               gap: 1.5,
-              mt: 0.5,
-              '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.08)' },
+              mt: 0.75,
+              textDecoration: 'none',
+              color: 'inherit',
+              display: 'flex',
+              alignItems: 'center',
+              '&:hover': { bgcolor: 'rgba(239, 68, 68, 0.1)' },
             }}
           >
             <Box
               sx={{
-                width: 36,
-                height: 36,
+                width: 38,
+                height: 38,
                 borderRadius: '50%',
                 bgcolor: 'rgba(239, 68, 68, 0.12)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: 18,
+                fontSize: 20,
                 flexShrink: 0,
               }}
             >
@@ -2127,9 +2169,22 @@ export default function InstituteMockTestsPage() {
                 Not Shortlisted
               </Typography>
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', lineHeight: 1.3 }}>
-                ☹️ Not shortlisted, preparing another opportunity
+                ☹️ Send encouragement & next opportunity
               </Typography>
             </Box>
+            <Tooltip title={copiedType === 'not_shortlisted' ? 'Copied!' : 'Copy message text'}>
+              <IconButton
+                size="small"
+                onClick={(e) => handleCopyMessage(e, 'not_shortlisted')}
+                sx={{
+                  color: copiedType === 'not_shortlisted' ? '#dc2626' : 'text.secondary',
+                  bgcolor: copiedType === 'not_shortlisted' ? 'rgba(239, 68, 68, 0.1)' : 'action.hover',
+                  p: 0.75,
+                }}
+              >
+                <ContentCopyIcon sx={{ fontSize: 16 }} />
+              </IconButton>
+            </Tooltip>
           </MenuItem>
         </Menu>
 
