@@ -27,6 +27,7 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import TableChartIcon from '@mui/icons-material/TableChart';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import { useAppContext } from '@/context/AppContext';
 import apiClient from '@/lib/apiClient';
 import { apiErrorMessage } from '@/lib/auth';
@@ -389,6 +390,28 @@ export default function InstituteMockTestsPage() {
       setPhoneError(err.response?.data?.error || 'Failed to update phone number.');
     } finally {
       setSavingPhone(false);
+    }
+  };
+
+  const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
+  const [clearingSubmissions, setClearingSubmissions] = useState(false);
+
+  const handleClearSubmissions = async () => {
+    if (!activeTest?.id) return;
+    setClearingSubmissions(true);
+    try {
+      await apiClient.post(`/institute/mock-tests/${activeTest.id}/clear-submissions/`);
+      setActiveTestSubmissions({
+        test: activeTest,
+        submissions: [],
+        total_submissions: 0,
+      });
+      setClearConfirmOpen(false);
+      mutate();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to clear leaderboard submissions.');
+    } finally {
+      setClearingSubmissions(false);
     }
   };
 
@@ -1514,6 +1537,24 @@ export default function InstituteMockTestsPage() {
             <Stack direction="row" spacing={1.5} alignItems="center">
               <Button
                 variant="outlined"
+                color="error"
+                size="small"
+                startIcon={<DeleteSweepIcon sx={{ fontSize: '17px !important' }} />}
+                onClick={() => setClearConfirmOpen(true)}
+                disabled={!activeTestSubmissions?.submissions || activeTestSubmissions.submissions.length === 0}
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 800,
+                  fontSize: '0.8rem',
+                  borderRadius: '9px',
+                  px: 1.5,
+                  py: 0.6,
+                }}
+              >
+                Clear Leaderboard
+              </Button>
+              <Button
+                variant="outlined"
                 color="primary"
                 size="small"
                 startIcon={<FileDownloadIcon />}
@@ -1930,6 +1971,22 @@ export default function InstituteMockTestsPage() {
             >
               Export CSV (.csv)
             </Button>
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<DeleteSweepIcon />}
+              onClick={() => setClearConfirmOpen(true)}
+              disabled={!activeTestSubmissions?.submissions || activeTestSubmissions.submissions.length === 0}
+              sx={{
+                textTransform: 'none',
+                fontWeight: 800,
+                borderRadius: '9px',
+                px: 2,
+                py: 0.8,
+              }}
+            >
+              Clear Leaderboard
+            </Button>
           </Stack>
           <Button onClick={() => setSubmissionsModalOpen(false)} variant="contained" sx={greenCtaSx}>
             Close
@@ -2144,6 +2201,67 @@ export default function InstituteMockTestsPage() {
               }}
             >
               {savingPhone ? 'Saving...' : 'Save & Enable WhatsApp'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Clear Leaderboard Confirmation Dialog */}
+        <Dialog
+          open={clearConfirmOpen}
+          onClose={() => !clearingSubmissions && setClearConfirmOpen(false)}
+          maxWidth="xs"
+          fullWidth
+          PaperProps={{ sx: { borderRadius: '16px', p: 1 } }}
+        >
+          <DialogTitle sx={{ fontWeight: 900, pb: 1, display: 'flex', alignItems: 'center', gap: 1, color: 'error.main' }}>
+            <DeleteSweepIcon color="error" />
+            Clear Leaderboard?
+          </DialogTitle>
+          <DialogContent>
+            <Typography variant="body2" sx={{ mb: 1.5, color: 'text.primary', fontWeight: 600 }}>
+              Are you sure you want to clear and reset the leaderboard for:
+            </Typography>
+            <Paper variant="outlined" sx={{ p: 1.5, mb: 2, bgcolor: 'action.hover', borderRadius: '10px' }}>
+              <Typography variant="body2" sx={{ fontWeight: 800 }}>
+                {activeTest?.title}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {activeTestSubmissions?.submissions?.length ?? 0} candidate submission(s) will be deleted.
+              </Typography>
+            </Paper>
+
+            <Alert severity="warning" sx={{ borderRadius: '10px', fontSize: '0.8rem' }}>
+              <strong>How it works:</strong>
+              <ul style={{ margin: '4px 0 0 0', paddingLeft: '18px' }}>
+                <li>All candidate scores and answer sheets for this exam will be removed.</li>
+                <li>The leaderboard resets back to 0 submissions.</li>
+                <li><strong>All exam questions and answer keys remain fully intact.</strong></li>
+                <li>Candidates will be able to take the exam fresh.</li>
+              </ul>
+            </Alert>
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 2 }}>
+            <Button
+              onClick={() => setClearConfirmOpen(false)}
+              disabled={clearingSubmissions}
+              sx={{ fontWeight: 700, textTransform: 'none' }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleClearSubmissions}
+              disabled={clearingSubmissions}
+              startIcon={clearingSubmissions ? <CircularProgress size={16} sx={{ color: '#fff' }} /> : <DeleteSweepIcon />}
+              sx={{
+                fontWeight: 800,
+                textTransform: 'none',
+                borderRadius: '8px',
+                px: 2,
+              }}
+            >
+              {clearingSubmissions ? 'Clearing...' : 'Yes, Clear Leaderboard'}
             </Button>
           </DialogActions>
         </Dialog>
