@@ -262,6 +262,12 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
   const messages: any[] = portalData?.messages || [];
   const leaderboard: any[] = portalData?.leaderboard || [];
 
+  const displayedLeaderboard: any[] = useMemo(() => {
+    if (membershipStatus === 'owner') return leaderboard;
+    if (!user) return [];
+    return leaderboard.filter((row: any) => row.username === user.username);
+  }, [leaderboard, membershipStatus, user]);
+
   const formatSchedule = (start?: string, end?: string) => {
     if (!start && !end) return 'Always Active';
     const sDate = start ? new Date(start) : null;
@@ -1154,7 +1160,7 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
             <Tab
               icon={<EmojiEventsIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />}
               iconPosition="start"
-              label={`Leaderboard (${leaderboard.length})`}
+              label={membershipStatus === 'owner' ? `Leaderboard (${leaderboard.length})` : (displayedLeaderboard.length > 0 ? `My Rank (#${displayedLeaderboard[0].rank})` : 'My Performance')}
             />
             <Tab
               icon={<DescriptionIcon sx={{ fontSize: { xs: 16, sm: 20 } }} />}
@@ -1709,30 +1715,82 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                 </Box>
               )}
 
-              {/* TAB 1: ACADEMY LEADERBOARD */}
+              {/* TAB 1: ACADEMY LEADERBOARD / MY PERFORMANCE */}
               {portalTab === 1 && (
                 <Box>
                   <Typography variant="h6" sx={{ fontWeight: 900, mb: 0.5 }}>
-                    {inst.name} — Live Student Leaderboard
+                    {membershipStatus === 'owner'
+                      ? `${inst.name} — Live Student Leaderboard`
+                      : `${inst.name} — My Test Result & Rank`}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
-                    Ranked by Academy Test Score, Tests Attended, and Accuracy %.
+                    {membershipStatus === 'owner'
+                      ? 'Ranked by Academy Test Score, Tests Attended, and Accuracy %.'
+                      : 'Your official academy score, rank, questions solved, and accuracy recorded on the leaderboard.'}
                   </Typography>
 
                   {inst.show_leaderboard === false && membershipStatus !== 'owner' ? (
                     <Alert severity="info" sx={{ borderRadius: '14px' }}>
                       The academy admin has currently set the student leaderboard to private. Test scores are tracked directly by the academy.
                     </Alert>
-                  ) : leaderboard.length === 0 ? (
+                  ) : !user ? (
                     <Alert severity="info" sx={{ borderRadius: '14px' }}>
-                      No students on the leaderboard yet. Join {inst?.name} and complete a test to claim Rank #1!
+                      Please log in with your student account to view your test marks and academy rank.
+                    </Alert>
+                  ) : displayedLeaderboard.length === 0 ? (
+                    <Alert severity="info" sx={{ borderRadius: '14px' }}>
+                      {membershipStatus === 'owner'
+                        ? `No students on the leaderboard yet. Join ${inst?.name} and complete a test to claim Rank #1!`
+                        : `You have not recorded any test marks in ${inst?.name} yet. Complete a scheduled mock test to view your score and rank!`}
                     </Alert>
                   ) : (
                     <>
+                      {/* Student Current Standings Highlight Card */}
+                      {membershipStatus !== 'owner' && displayedLeaderboard[0] && (
+                        <Paper
+                          variant="outlined"
+                          sx={{
+                            p: 2,
+                            mb: 2.5,
+                            borderRadius: '14px',
+                            background: 'linear-gradient(135deg, rgba(27, 107, 58, 0.08) 0%, rgba(27, 107, 58, 0.02) 100%)',
+                            borderColor: 'rgba(27, 107, 58, 0.25)',
+                          }}
+                        >
+                          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems={{ xs: 'flex-start', sm: 'center' }} justifyContent="space-between">
+                            <Box>
+                              <Typography variant="caption" sx={{ fontWeight: 800, color: '#1B6B3A', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                Your Academy Standings
+                              </Typography>
+                              <Typography variant="h6" sx={{ fontWeight: 900, color: 'text.primary' }}>
+                                Rank #{displayedLeaderboard[0].rank} in {inst.name}
+                              </Typography>
+                            </Box>
+                            <Stack direction="row" spacing={1.5} alignItems="center">
+                              <Chip
+                                label={`${(displayedLeaderboard[0].academy_score ?? 0) > 0 ? `+${displayedLeaderboard[0].academy_score}` : (displayedLeaderboard[0].academy_score ?? 0)} pts`}
+                                sx={{ fontWeight: 900, bgcolor: '#1B6B3A', color: '#fff' }}
+                              />
+                              <Chip
+                                label={`${displayedLeaderboard[0].accuracy ?? 0}% Accuracy`}
+                                variant="outlined"
+                                color="success"
+                                sx={{ fontWeight: 800 }}
+                              />
+                              <Chip
+                                label={`${displayedLeaderboard[0].tests_attended ?? 0} Tests`}
+                                variant="outlined"
+                                sx={{ fontWeight: 800 }}
+                              />
+                            </Stack>
+                          </Stack>
+                        </Paper>
+                      )}
+
                       {/* Mobile Sleek Cards View (CSS Responsive) */}
                       <Box sx={{ display: { xs: 'block', md: 'none' } }}>
                         <Stack spacing={1.5}>
-                      {leaderboard.map((row: any) => (
+                      {displayedLeaderboard.map((row: any) => (
                         <Paper
                           key={row.username}
                           variant="outlined"
@@ -1823,7 +1881,7 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
                           </TableRow>
                         </TableHead>
                         <TableBody>
-                          {leaderboard.map((row: any) => (
+                          {displayedLeaderboard.map((row: any) => (
                             <TableRow key={row.username} hover>
                               <TableCell sx={{ fontWeight: 900 }}>
                                 <Chip
