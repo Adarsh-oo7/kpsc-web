@@ -272,18 +272,18 @@ export default function InstituteStudentPortalClient({ slug, initialInstitute, i
     if (!start && !end) return 'Always Active';
     const sDate = start ? new Date(start) : null;
     const eDate = end ? new Date(end) : null;
-    const timeOptions: Intl.DateTimeFormatOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
-    const dateOptions: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+    const timeOptions: Intl.DateTimeFormatOptions = { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' };
+    const dateOptions: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric', timeZone: 'Asia/Kolkata' };
 
     if (sDate && eDate) {
-      const sameDay = sDate.toDateString() === eDate.toDateString();
+      const sameDay = sDate.toLocaleDateString('en-IN', dateOptions) === eDate.toLocaleDateString('en-IN', dateOptions);
       if (sameDay) {
-        return `${sDate.toLocaleDateString(undefined, dateOptions)}, ${sDate.toLocaleTimeString(undefined, timeOptions)} – ${eDate.toLocaleTimeString(undefined, timeOptions)}`;
+        return `${sDate.toLocaleDateString('en-IN', dateOptions)}, ${sDate.toLocaleTimeString('en-IN', timeOptions)} – ${eDate.toLocaleTimeString('en-IN', timeOptions)}`;
       }
-      return `${sDate.toLocaleDateString(undefined, dateOptions)} ${sDate.toLocaleTimeString(undefined, timeOptions)} – ${eDate.toLocaleDateString(undefined, dateOptions)} ${eDate.toLocaleTimeString(undefined, timeOptions)}`;
+      return `${sDate.toLocaleDateString('en-IN', dateOptions)} ${sDate.toLocaleTimeString('en-IN', timeOptions)} – ${eDate.toLocaleDateString('en-IN', dateOptions)} ${eDate.toLocaleTimeString('en-IN', timeOptions)}`;
     }
-    if (sDate) return `Starts: ${sDate.toLocaleDateString(undefined, dateOptions)} ${sDate.toLocaleTimeString(undefined, timeOptions)}`;
-    if (eDate) return `Ends: ${eDate.toLocaleDateString(undefined, dateOptions)} ${eDate.toLocaleTimeString(undefined, timeOptions)}`;
+    if (sDate) return `Starts: ${sDate.toLocaleDateString('en-IN', dateOptions)} ${sDate.toLocaleTimeString('en-IN', timeOptions)}`;
+    if (eDate) return `Ends: ${eDate.toLocaleDateString('en-IN', dateOptions)} ${eDate.toLocaleTimeString('en-IN', timeOptions)}`;
     return 'Always Active';
   };
 
