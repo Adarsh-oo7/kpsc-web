@@ -4,6 +4,8 @@ import { Box, Typography, Button } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import InstituteStudentPortalClient from './InstituteStudentPortalClient';
 
+export const preferredRegion = 'bom1';
+
 const GREEN = '#1B6B3A';
 const GREEN_LIGHT = '#2E8B57';
 
@@ -12,6 +14,7 @@ async function getPortalData(slug: string) {
   try {
     const res = await fetch(`${apiUrl}/api/institute/public/portal/${slug}/`, {
       next: { revalidate: 30 },
+      signal: AbortSignal.timeout(4500),
     });
     if (res.ok) {
       return await res.json();
@@ -23,6 +26,7 @@ async function getPortalData(slug: string) {
   try {
     const res = await fetch(`${apiUrl}/api/institute/public/detail/${slug}/`, {
       next: { revalidate: 60 },
+      signal: AbortSignal.timeout(4500),
     });
     if (!res.ok) return null;
     const detail = await res.json();
